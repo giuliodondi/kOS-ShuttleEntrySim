@@ -1,0 +1,6 @@
+mode    time    alt    speed    hdot    range    lat    long    pitch    roll    tgt_range    range_err    az_err    roll_ref    
+1    0    0    0    0    0    0    0    0    0    0    0    0    0    
+1    0    0    0    0    0    0    0    0    0    0    0    0    0    
+1    0    0    0    0    0    0    0    0    0    0    0    0    0    
+1    0    0    0    0    0    0    0    0    0    0    0    0    0    
+1    0    0    0    0    0    0    0    0    0    0    0    0    0    
