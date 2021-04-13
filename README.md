@@ -5,6 +5,8 @@
 
 # Kerbal Space Program Shuttle Entry and Approach Guidance
 
+Read along with watching the demonatration video at https://www.youtube.com/watch?v=5VkAmHpXwn8
+
 
 ## Remarks
 
@@ -103,7 +105,7 @@ Bear in mind that you will be able to adjust the initial pitch value in flight, 
 
 ## How to (actually) use the thing
 
-Refer to this video I made for an actual demonstration : 
+Refer to this video I made for an actual demonstration :  https://www.youtube.com/watch?v=5VkAmHpXwn8
 
 You need to wait until your next orbit trajectory passes reasonably close to the landing site using surface-relative prediction. Use Principia or Trajectories to see that.
 The distance between the trajectory and the landing site at the point where they are closest is your _crossrange error_, which you can't really measure in flight.
