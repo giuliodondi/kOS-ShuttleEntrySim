@@ -11,14 +11,14 @@ Read along with watching the demonstration video at https://www.youtube.com/watc
 ## Remarks
 
 These scripts have been tested in Kerbal Space Program 1.8.1 and 1.9.1.
-They are designed to do one single thing: to provide deorbit and reentry gudance for the Space Shuttle System in RSS/Realism Overhaul
-They are not calibrated to work with any thing other than the Space Shuttle or stock KSP.
-I'm sure the scripts can be modified accordingly but it's not going to be trivial and I won't have time to get on it unfortunately.
+They are designed to do one single thing: to provide deorbit and reentry guidance for the Space Shuttle System in RSS/Realism Overhaul. Only DECQ's Shuttle is supported at the moment.
 
-This code is provided as is, please keep in mind I am not a professional programmer nor an experienced mod maker, the script has most 
-likely has several bugs within that I didn't discover with enough testing.
+The scripts are not calibrated to work in stock KSP or with anything other than the Space Shuttle.
+I'm sure they can be modified accordingly but it's not a trivial task. I do not play stock KSP and do not plan on ever releasing a version of these scripts for it.
 
-I will welcome bug reports or improvement suggestions, although I make no promise to act on it promptly or ever.
+This code is provided as is, please keep in mind I am not a professional programmer nor an experienced mod maker. The script has most likely has several bugs within that I didn't discover with enough testing, and is certainly not the most efficient way to implement this kind of functionality.
+
+I will welcome bug reports or improvement suggestions, although I make no promise to act on them promptly or ever.
 I will not be available around the clock to help you get it working, I do not have the time unfortunately.
 If you decide to modify the code yourself you do so 100% on your own.
 
