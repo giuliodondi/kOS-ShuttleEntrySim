@@ -24,13 +24,15 @@ If you decide to modify the code yourself you do so 100% on your own.
 
 ## Installation
 
-Required mods:
-- A complete install of RSS/Realism Overhaul with Ferran Aerospace Resarch
+**Required mods:**
+- A complete install of RSS/Realism Overhaul with Ferram Aerospace Resarch
 - Kerbal Operating System
-- Space Shuttle System mod : https://forum.kerbalspaceprogram.com/index.php?/topic/178381-xxx-space-shuttle-in-development/
+- DECQ's Space Shuttle System mod : https://forum.kerbalspaceprogram.com/index.php?/topic/178381-xxx-space-shuttle-in-development/
 - These RO configs https://github.com/DylanSemrau/Space-Shuttle-System
 
-Not required for the script but de-facto required to use it:
+**NOTE:** the RO configs linked have FAR definitions for aero surfaces. The script may still work with other configs that do not define explicitly the FAR parameters, but the aerodynamic behaviour is going to be different and thus the guidance scheme needs some adaptations.
+
+**Not required for the script but de-facto required to use it:**
 - Kerbal Konstructs to place runways to land on, they must be at least 2x longer than the stock KSC runway.
 - Some mod to display the surface-relative trajectory in the map view. As far as I know only Principia and Trajectories can do it.
 
