@@ -171,8 +171,12 @@ Below 80km, pitch and roll RCS controls should be disabled since the elevons and
 Double check that the Body Flap and Elevon trim is actually working, or adjust the values manually if it is not.
 Yaw RCS should be left on until 30km and below mach 5, at which point the Shuttle should have pitched down below 20° and the rudder gains enough authority.
 
-There is a button to switch to Approach guidance, do not press it until below 20km altitude and below mach 2/2.5.
-You must disengage Guidance and SAS prior to switching.
+There is a button to switch to Approach guidance, you must disengage Guidance and SAS prior to switching.
+
+Do not swithc to approach until you're below 25 km and ~30 km from the target, for three reasons:
+- by that time your pitch will be below 20° and thus the rudder is finally effective
+- if you disconnect far away from the site you will most likely not fly the pitch-roll profile exactly and thus the range calculatons are meaningless
+- when transitioning between entry and approach guidance, the script calculates which landing site you're closest to and locks it . If you transition far away you might be closest to a different landing site than the one you planned.
 
 
 Using the buttons, up at the top, choose a combination runway/HAC side based on your inbound heading and how far you are from the actual runway. 
@@ -184,7 +188,6 @@ Keep in mind that the approach path is completely dumb and oblivious to your ene
 Speedbrakes are controlled either manually using the throttle slider or automatically by the script. A button lets you switch between the modes.
 Leave them on manual and closed until you are stabilised on the descent profile and the pipper is mostly centered, you don't want to waste energy until you are sure 
 you have plenty to spare.
-
 
 Needless to say, to fly the shuttle manually it's best to use a flight stick or, at the very least, some kind of gaming controller. 
 Even so, following the pipper around the HAC is hard. It doesn't need to be very centered but it should not escape beyond the GUI window. It is especially important to be on profile 
