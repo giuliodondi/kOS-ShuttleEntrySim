@@ -52,7 +52,7 @@ In particular, you will run two scripts:
 
 
 
-# SETUP
+# Setup
 
 ## Setting up the Space Shuttle
 
