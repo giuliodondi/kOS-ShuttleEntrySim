@@ -8,31 +8,31 @@
 Read along with watching the demonstration video at https://www.youtube.com/watch?v=5VkAmHpXwn8
 
 
-## Remarks
+# Remarks
 
 These scripts have been tested in Kerbal Space Program 1.8.1 and 1.9.1.
-They are designed to do one single thing: to provide deorbit and reentry guidance for the Space Shuttle System in RSS/Realism Overhaul. Only DECQ's Shuttle is supported at the moment.
+They are designed to do one single thing: to provide deorbit and reentry guidance for the Space Shuttle System in RSS/Realism Overhaul. Only DECQ's Shuttle is supported at the moment. 
 
 The scripts are not calibrated to work in stock KSP or with anything other than the Space Shuttle.
-I'm sure they can be modified accordingly but it's not a trivial task. I do not play stock KSP and do not plan on ever releasing a version of these scripts for it.
+I'm sure they can be modified accordingly but it's not a trivial task. I do not play stock KSP and do not plan on ever releasing a version of these scripts for it. 
 
-This code is provided as is, please keep in mind I am not a professional programmer nor an experienced mod maker. The script has most likely has several bugs within that I didn't discover with enough testing, and is certainly not the most efficient way to implement this kind of functionality.
+This code is provided as is, please keep in mind I am not a professional programmer nor an experienced mod maker. The script has most likely has several bugs within that I didn't discover with enough testing, and is certainly not the most efficient way to implement this kind of functionality. 
 
 I will welcome bug reports or improvement suggestions, although I make no promise to act on them promptly or ever.
 I will not be available around the clock to help you get it working, I do not have the time unfortunately.
 If you decide to modify the code yourself you do so 100% on your own.
 
-## Installation
+# Installation
 
 **Required mods:**
 - A complete install of RSS/Realism Overhaul with Ferram Aerospace Resarch
 - Kerbal Operating System
 - DECQ's Space Shuttle System mod, this fork seems to be the most up-to-date : https://github.com/DylanSemrau/Space-Shuttle-System
-- RO configs that come with the Realism OVerhaul package
+- RO configs that come with the Realism Overhaul package
 
 **NOTE:** the RO configs should have FAR definitions for wing surfaces. The script may still work with other configs that do not define explicitly the FAR parameters, but the aerodynamic behaviour is going to be different and thus the guidance scheme needs some adaptations.
 
-**Not required for the script but de-facto required to use it:**
+**Mods not required for the script but de-facto needed to use it:**
 - Kerbal Konstructs to place runways to land on, they must be at least 2x longer than the stock KSC runway.
 - Some mod to display the surface-relative trajectory in the map view. As far as I know only Principia and Trajectories can do it.
 
@@ -52,12 +52,12 @@ In particular, you will run two scripts:
 
 
 
-# HOW TO USE
+# SETUP
 
 ## Setting up the Space Shuttle
 
 
-**IMPORTANT**
+**IMPORTANT**  
 These scripts are not magic and rely on the Shuttle being easy to control. I can give you hints on what to look out for but ultimately it will be
 up to you to ensure that your Shuttle is controllable.
 I strongly advise to test controllability by flying a manual reentry and seeing how easy/difficult it is for you to keep a high pitch angle
@@ -74,6 +74,25 @@ Still in the VAB, enable all actuation toggles on the Crew Cabin and both OMS po
 You need to place two Stock A.I.R.B.R.A.K.E.S. to control airspeed during landing. The split rudder is utterly useless.
 They must be Stock A.I.R.B.R.A.K.E.S. and nothing else, otherwise you will need to dig into the script and tell it to look for whatever part you want.
 Place them either on the sides of the OMS pods or on the sides of the Engine block. Place them on the surface, do not tuck them inside or KSP will prevent them from deploying. Do not put them on the tail or on the wings or you will introduce a pitching moment.
+Make sure to add these A.I.R.B.R.A.K.E.S. to the brakes Action Group.
+
+## Setting up the rest
+
+In the folder **Scripts/Shuttle_entrysim_parameters** you will see a file **landing_sites.ks**. This contains the definition of the Runways available for targeting by the scripts.
+
+You must create the runways wherever you like on Earth using Kerbal Konstructs. You must then write down the coordinates of its halfway point, its length, elevation and heading
+and fill in the details in the **landing_sites.ks** folloring the formatting inside. Don't forget the name of the landing site, also.
+I provide you with my own landing sites definitions for reference, but I strongly suggest you replace the details with your own measured data for better accuracy.
+
+The file **pitch_profile.ks** specifies the pitch versus surface velocity points that the Entry Guidance will follow. The profile I provide you with is taken directly from the Shuttle technical
+documents, remember the Real shuttle had to keep a 38° high angle of attack for thermal control. In KSP we don't _really_ need that, so if you want some extra range you can bring it down to 35°.
+Bear in mind that you will be able to adjust the initial pitch value in flight, more about that later.
+
+# How to use
+
+Refer to this video I made for an actual demonstration :  https://www.youtube.com/watch?v=5VkAmHpXwn8
+
+## Space Shuttle Aerodynamics 101  
 
 The Shuttle has two main aerodynamic quirks: 
 - It has a relatively narrow pitch stability region, meaning that proper CG position makes the difference between a Shuttle that can't hold the nose up and a Shuttle that spins like a boomerang.
@@ -91,23 +110,9 @@ Also do not mess with the engines on reentry. The script uses the Gimbal deflect
 If you did everything correctly you should be able to control the Shuttle below 90km altitude and hold a 40° angle of attack using only the flaps and no pitch RCS.
 I will repeat once again the most important thing: **without yaw RCS above 20° pitch you will lose control. Guaranteed.**
 
-## Setting up the rest
 
-In the folder **Scripts/Shuttle_entrysim_parameters** you will see a file **landing_sites.ks**. This contains the definition of the Runways available for targeting by the scripts.
+## Deorbit
 
-You must create the runways wherever you like on Earth using Kerbal Konstructs. You must then write down the coordinates of its halfway point, its length, elevation and heading
-and fill in the details in the **landing_sites.ks** folloring the formatting inside. Don't forget the name of the landing site, also.
-I provide you with my own landing sites definitions for reference, but I strongly suggest you replace the details with your own measured data for better accuracy.
-
-The file **pitch_profile.ks** specifies the pitch versus surface velocity points that the Entry Guidance will follow. The profile I provide you with is taken directly from the Shuttle technical
-documents, remember the Real shuttle had to keep a 38° high angle of attack for thermal control. In KSP we don't _really_ need that, so if you want some extra range you can bring it down to 35°.
-Bear in mind that you will be able to adjust the initial pitch value in flight, more about that later.
-
-
-
-## How to (actually) use the thing
-
-Refer to this video I made for an actual demonstration :  https://www.youtube.com/watch?v=5VkAmHpXwn8
 
 You need to wait until your next orbit trajectory passes reasonably close to the landing site using surface-relative prediction. Use Principia or Trajectories to see that.
 The distance between the trajectory and the landing site at the point where they are closest is your _crossrange error_, which you can't really measure in flight.
@@ -127,11 +132,12 @@ cross-range independently from range error and you will miss the target. A 50° 
 Once the deorbit burn is adjusted, close the deorbit planner and perform the burn manually. Remember that the Shuttle engines are angled upwards relative to the nose centreline. Take that into account for a more
 accurate burn.
 
+## Entry
 
 Warp until you enter the atmosphere. Immediately have the nose pointed forward and up about 38° and wings level. It's not important to be precise.
 Disable the nose cabin RCS jets to save RCS, you don't need them, but keep all the rear RCS jets on for now. Transfer all the RCS fuel in the nose to the OMS pods.
 
-Run **entry.ks*, this opens the main reentry guidance window.
+Run **entry.ks*, this opens the main reentry guidance window.  
 Select immediately the correct landing site. **DOUBLE CHECK!!**
 
 The script will not take over control immediately.
@@ -171,9 +177,11 @@ Below 80km, pitch and roll RCS controls should be disabled since the elevons and
 Double check that the Body Flap and Elevon trim is actually working, or adjust the values manually if it is not.
 Yaw RCS should be left on until 30km and below mach 5, at which point the Shuttle should have pitched down below 20° and the rudder gains enough authority.
 
+## Approach
+
 There is a button to switch to Approach guidance, you must disengage Guidance and SAS prior to switching.
 
-Do not swithc to approach until you're below 25 km and ~30 km from the target, for three reasons:
+Do not switch to approach until you're below 25 km and ~30 km from the target, for three reasons:
 - by that time your pitch will be below 20° and thus the rudder is finally effective
 - if you disconnect far away from the site you will most likely not fly the pitch-roll profile exactly and thus the range calculatons are meaningless
 - when transitioning between entry and approach guidance, the script calculates which landing site you're closest to and locks it . If you transition far away you might be closest to a different landing site than the one you planned.
