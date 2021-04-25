@@ -27,10 +27,10 @@ If you decide to modify the code yourself you do so 100% on your own.
 **Required mods:**
 - A complete install of RSS/Realism Overhaul with Ferram Aerospace Resarch
 - Kerbal Operating System
-- DECQ's Space Shuttle System mod : https://forum.kerbalspaceprogram.com/index.php?/topic/178381-xxx-space-shuttle-in-development/
-- These RO configs https://github.com/DylanSemrau/Space-Shuttle-System
+- DECQ's Space Shuttle System mod, this fork seems to be the most up-to-date : https://github.com/DylanSemrau/Space-Shuttle-System
+- RO configs that come with the Realism OVerhaul package
 
-**NOTE:** the RO configs linked have FAR definitions for aero surfaces. The script may still work with other configs that do not define explicitly the FAR parameters, but the aerodynamic behaviour is going to be different and thus the guidance scheme needs some adaptations.
+**NOTE:** the RO configs should have FAR definitions for wing surfaces. The script may still work with other configs that do not define explicitly the FAR parameters, but the aerodynamic behaviour is going to be different and thus the guidance scheme needs some adaptations.
 
 **Not required for the script but de-facto required to use it:**
 - Kerbal Konstructs to place runways to land on, they must be at least 2x longer than the stock KSC runway.
