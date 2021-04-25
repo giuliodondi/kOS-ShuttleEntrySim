@@ -73,7 +73,7 @@ Still in the VAB, enable all actuation toggles on the Crew Cabin and both OMS po
 
 You need to place two Stock A.I.R.B.R.A.K.E.S. to control airspeed during landing. The split rudder is utterly useless.
 They must be Stock A.I.R.B.R.A.K.E.S. and nothing else, otherwise you will need to dig into the script and tell it to look for whatever part you want.
-Place them either on the sides of the OMS pods or on the sides of the Engine block. Do not put them on the tail or on the wings or you will introduce a pitching moment.
+Place them either on the sides of the OMS pods or on the sides of the Engine block. Place them on the surface, do not tuck them inside or KSP will prevent them from deploying. Do not put them on the tail or on the wings or you will introduce a pitching moment.
 
 The Shuttle has two main aerodynamic quirks: 
 - It has a relatively narrow pitch stability region, meaning that proper CG position makes the difference between a Shuttle that can't hold the nose up and a Shuttle that spins like a boomerang.
