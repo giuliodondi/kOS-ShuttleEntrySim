@@ -5,7 +5,7 @@
 
 # Kerbal Space Program Shuttle Entry and Approach Guidance
 
-Read along with watching the demonstration video at https://www.youtube.com/watch?v=5VkAmHpXwn8
+Read along with watching the demonstration videos at https://www.youtube.com/watch?v=5VkAmHpXwn8 and https://youtu.be/oMyd0d86eV4
 
 
 # Remarks
@@ -34,7 +34,7 @@ If you decide to modify the code yourself you do so 100% on your own.
 
 **Mods not required for the script but de-facto needed to use it:**
 - Kerbal Konstructs to place runways to land on, they must be at least 2x longer than the stock KSC runway.
-- Some mod to display the surface-relative trajectory in the map view. As far as I know only Principia and Trajectories can do it.
+- Some mod to display the surface-relative trajectory in the map view. I recomment Trajectories or the (awesome but challenging) Principia mod
 
 You will find two folders: 
 - **GameData/kOS-Addons**
