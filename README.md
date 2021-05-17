@@ -5,7 +5,7 @@
 
 # Kerbal Space Program Shuttle Entry and Approach Guidance
 
-Read along with watching the demonstration videos at https://www.youtube.com/watch?v=5VkAmHpXwn8 and https://youtu.be/oMyd0d86eV4
+**PLEASE Read along with watching the demonstration videos at https://youtu.be/5VkAmHpXwn8 and https://youtu.be/oMyd0d86eV4**
 
 
 # Remarks
