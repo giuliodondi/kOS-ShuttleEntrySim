@@ -25,7 +25,7 @@ If you decide to modify the code yourself you do so 100% on your own.
 # Installation
 
 **Required mods:**
-- A complete install of RSS/Realism Overhaul with Ferram Aerospace Resarch
+- A complete install of RSS/Realism Overhaul with Ferram Aerospace Resarch. INCOMPATIBLE WITH FAR 0.16.0.2, use 0.16.0.1 or below.
 - Kerbal Operating System
 - DECQ's Space Shuttle System mod, this fork seems to be the most up-to-date : https://github.com/DylanSemrau/Space-Shuttle-System
 - RO configs that come with the Realism Overhaul package
