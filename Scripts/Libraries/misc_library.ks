@@ -98,7 +98,7 @@ FUNCTION log_data {
 
 
 
-//draw a vector  with label, bu default its centered on the ship and scaled to 10 times its length
+//draw a vector  with label, by default its centered on the ship and scaled to 10 times its length
 FUNCTION arrow {
 	PARAMETER v.
 	PARAMETER lab.
@@ -117,6 +117,30 @@ FUNCTION arrow {
     ).
 
 }
+
+//draw a vector  with label, by default its centered on the body and scaled to 2 times its length
+FUNCTION arrow_body {
+	PARAMETER v.
+	PARAMETER lab.
+	PARAMETER scl IS 2.
+	PARAMETER wdh IS 0.5.
+	
+	VECDRAW(
+      SHIP:ORBIT:BODY:POSITION,
+      v,
+      RGB(1,0,0),
+      lab,
+      scl,
+      TRUE,
+      wdh
+    ).
+
+}
+
+
+
+
+
 
 
 //converts a time value into a hours,minutes,seconds string

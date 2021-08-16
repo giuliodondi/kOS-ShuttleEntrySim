@@ -6,6 +6,18 @@
 FUNCTION entry_main_loop {
 
 
+STEERINGMANAGER:RESETPIDS().
+STEERINGMANAGER:RESETTODEFAULT().
+
+
+//SET STEERINGMANAGER:ROLLCONTROLANGLERANGE TO 4.0.
+SET STEERINGMANAGER:PITCHTS TO 10.0.
+SET STEERINGMANAGER:YAWTS TO 10.0.
+SET STEERINGMANAGER:ROLLTS TO 8.0.
+SET STEERINGMANAGER:PITCHPID:KD TO 0.01.
+SET STEERINGMANAGER:YAWPID:KD TO 0.01.
+SET STEERINGMANAGER:ROLLPID:KD TO 0.05.
+
 
 //unset the PIDs that may still be in memory 
 IF (DEFINED BRAKESPID) {UNSET BRAKESPID.}
@@ -47,7 +59,7 @@ GLOBAL loglex IS LEXICON(
 
 
 ).
-log_data(loglex,"0:/Shuttle_entrysim/LOGS/entry_log").
+
 
 
 //flag to reset entry guidance to initial values (e.g. when the target is switched)
@@ -55,9 +67,7 @@ log_data(loglex,"0:/Shuttle_entrysim/LOGS/entry_log").
 GLOBAL reset_entry_flag Is FALSE.
 
 
-// create global GUI 
 make_global_entry_GUI().
-
 
 
 //find the airbrakes parts
@@ -105,76 +115,17 @@ IF SHIP:ALTITUDE>constants["apchalt"] {
 	//gg:DOEVENT("Show actuation toggles").
 	gimbals:DOACTION("toggle gimbal roll", TRUE).
 	gimbals:DOACTION("toggle gimbal yaw", TRUE).
+	
+	RUNPATH("0:/Shuttle_entrysim/VESSELS/" + vessel_dir + "/flapcontrol").
 
+	
 
-	//initialise flaps parts, body flap + elevons
-	GLOBAL flaps IS LEXICON(
-					"elevons",LIST(
-						SHIP:PARTSDUBBED("ShuttleElevonL")[0]:getmodule("FARControllableSurface"),
-						SHIP:PARTSDUBBED("ShuttleElevonR")[0]:getmodule("FARControllableSurface")	
-					),
-					"bodyflap",LIST(
-						SHIP:PARTSDUBBED("ShuttleBodyFlap")[0]:getmodule("FARControllableSurface")
-					)
-	).
-
-	FOR f IN flaps:VALUES {
-		FOR pmod IN f {
-			IF NOT pmod:GETFIELD("Flp/Splr"). {pmod:SETFIELD("Flp/Splr",TRUE).}
-			wait 0.
-			pmod:SETFIELD("Flp/Splr Dflct",0). 
-			IF NOT pmod:GETFIELD("Flap"). {pmod:SETFIELD("Flap",TRUE).}
-			wait 0.
-			LOCAL flapset IS pmod:GETFIELD("Flap Setting").
-			FROM {local k is flapset.} UNTIL k>3  STEP {set k to k+1.} DO {
-				pmod:DOACTION("Increase Flap Deflection", TRUE).
-			}
-		}
-	}
-
-
-
-
-	//initialise the flap control params
-	//deflection is defined positive downwards
-	//the max limit is enfirced both ways for the elevon flaps
-	//while the body flap is limited to -14 degrees upwards deflection
-	//GLOBAL flap_control IS LEXICON(
-	//					"flaps_val",0,
-	//					"min_defl",-25,
-	//					"max_defl",14,
-	//					"pitch_control",LIST(0)
-	//	).
-	GLOBAL flap_control IS LEXICON(
-						"flaps_val",0,
-						"min_defl",-14,
-						"max_defl",25,
-						"pitch_control",LIST(0)
-		).
+	activate_flaps(flap_control["parts"]).
 
 
 	entry_loop().
-
-		
-	FOR f IN flaps:VALUES {
-		FOR pmod IN f {
-			pmod:SETFIELD("Flp/Splr dflct",0).
-			wait 0.
-			LOCAL flapset IS pmod:GETFIELD("Flap Setting").
-			FROM {local k is flapset.} UNTIL k=0  STEP {set k to k-1.} DO {
-				pmod:DOACTION("Decrease Flap Deflection", TRUE).
-			}
-		}
-	}
-
-
-	//set the flaps back to zero
-	FOR b IN flaps["bodyflap"] {
-		b:SETFIELD("Flp/Splr dflct",0).
-	}
-	FOR e IN flaps["elevons"] {
-		e:SETFIELD("Flp/Splr dflct",0).
-	}
+	
+	deactivate_flaps(flap_control["parts"]).
 
 
 	//remove entry GUI sections
@@ -217,7 +168,7 @@ FUNCTION entry_loop{
 
 IF quitflag {RETURN.}
 
-SET STEERINGMANAGER:MAXSTOPPINGTIME TO 8. 
+//SET STEERINGMANAGER:MAXSTOPPINGTIME TO 8. 
 
 //steer towards an initial direction before starting the whole thing
 //the direction is defined by the first profile pithch value and zero roll
@@ -229,12 +180,12 @@ LOCAL initial_dir IS create_steering_dir(
 					0
 					).
 
-SEt STEERING TO initial_dir.
-
-UNTIL FALSE {
-	IF (VANG(SHIP:FACING:FOREVECTOR , initial_dir:FOREVECTOR) < 5 ) { BREAK.}
-	WAIT 0.1.
-}
+//SEt STEERING TO initial_dir.
+//
+//UNTIL FALSE {
+//	IF (VANG(SHIP:FACING:FOREVECTOR , initial_dir:FOREVECTOR) < 5 ) { BREAK.}
+//	WAIT 0.1.
+//}
 
 UNLOCK STEERING.
 SAS  ON.
@@ -255,8 +206,6 @@ GLOBAL stop_entry_flag IS FALSE.
 
 
 //initialise pitch and roll values .
-//LOCAL rollv IS get_roll().
-//LOCAL pitchv IS get_pitch().
 
 LOCAL pitchv IS  pitchprof_segments[pitchprof_segments:LENGTH-1][1].
 LOCAL rollv IS 0.
@@ -266,22 +215,29 @@ SET pitchprof_segments[pitchprof_segments:LENGTH - 1][1] TO pitchv.
 
 
 //initialise gains for PID
-GLOBAL gains_log_path IS "0:/Shuttle_entrysim/parameters/gains.ks".
+GLOBAL gains_log_path IS "0:/Shuttle_entrysim/VESSELS/" + vessel_dir + "/gains.ks".
 IF EXISTS(gains_log_path) {RUNPATH(gains_log_path).}
-ELSE {GLOBAL gains IS LEXICON("Kp",0.006,"Kd",0,"Khdot",0,"Kalpha",0).}
+ELSE {GLOBAL gains IS LEXICON("Kp",0.008,"Kd",0.001,"Khdot",2,"Kalpha",0,"strmgr",8).}
  
  
-make_entry_GUI().
+make_entry_GUI(pitchv,rollv).
 
 
 
 //trajectory simulation variables
 LOCAL step_num IS 0.
-LOCAL sim_settings IS LEXICON(
-					"deltat",20,
-					"integrator","rk3",
-					"log",FALSE
-).
+
+//define the delegate to the integrator function, saves an if check per integration step
+IF sim_settings["integrator"]= "rk2" {
+	SET sim_settings["integrator"] TO rk2@.
+}
+ELSE IF sim_settings["integrator"]= "rk3" {
+	SET sim_settings["integrator"] TO rk3@.
+}
+ELSE IF sim_settings["integrator"]= "rk4" {
+	SET sim_settings["integrator"] TO rk4@.
+}
+
 
 
 //navigation variables
@@ -311,6 +267,8 @@ LOCAL roll_ref_p IS 0.
 //initialise the roll sign to the azimuth error sign
 LOCAL roll_sign IS SIGN(az_err).
 LOCAL pitch_ref IS pitchv.
+LOCAL update_reference IS true.
+
 
 //initialise the running average for the pitch control values
 GLOBAL count IS 1.
@@ -338,15 +296,8 @@ WHEN TIME:SECONDS>attitude_time_upd + 0.5 THEN {
 	SET flap_control["pitch_control"][0] TO average_list(flap_control["pitch_control"]).
 
 	//update the flaps trim setting 
-	SET flap_control["flaps_val"] TO flaptrim_incr(flap_control["pitch_control"][0], flap_control["flaps_val"] ).
-	
-	
-	FOR b IN flaps["bodyflap"] {
-		b:SETFIELD("Flp/Splr dflct",CLAMP(flap_control["flaps_val"],flap_control["min_defl"],flap_control["max_defl"])).
-	}
-	FOR e IN flaps["elevons"] {
-		e:SETFIELD("Flp/Splr dflct",CLAMP(flap_control["flaps_val"],-flap_control["max_defl"],flap_control["max_defl"])).
-	}
+	SET flap_control TO flaptrim_control( flap_control).
+		
 	
 	
 	SET airbrake_control["spdbk_val"] TO speed_control(arbkb:PRESSED,airbrake_control["spdbk_val"],mode).
@@ -354,7 +305,6 @@ WHEN TIME:SECONDS>attitude_time_upd + 0.5 THEN {
 	FOR b IN airbrakes {
 		b:SETFIELD("Deploy Angle",50*airbrake_control["spdbk_val"]). 
 	}
-	
 	
 	PRESERVE.
 }
@@ -366,12 +316,17 @@ UNTIL FALSE {
 		SET reset_entry_flag TO FALSE.
 		SET roll_ref TO constants["rollguess"]. 
 	}
+	
+	//wil not command any roll above this altitude
+	IF (SHIP:ALTITUDE < constants["firstrollalt"]) AND (SAS) {
+		SAS OFF.
+	}
 
 	//initialise roll and pitch values to the sliders
 	SET rollv TO get_roll_slider().
 	SEt pitchv TO get_pitch_slider().
 	//determine if reference pitch is to be updated
-	LOCAL update_reference IS update_ref_pitch(pitchv).
+	SET update_reference TO update_ref_pitch(pitchv).
 	IF update_reference {
 		SET pitch_ref TO pitchv.
 	}
@@ -504,7 +459,7 @@ UNTIL FALSE {
 			
 			
 
-		log_data(loglex).
+		log_data(loglex,"0:/Shuttle_entrysim/LOGS/entry_log").
 	}
 	IF quitflag OR stop_entry_flag {BREAK.}
 	wait 0.
@@ -537,7 +492,7 @@ define_flare_circle(apch_params).
 
 
 GLOBAL sim_settings IS LEXICON(
-					"deltat",2,
+					"deltat",1.2,//was 2, set to 1.2 to try and make the pipper less jumpy
 					"integrator","rk3",
 					"log",FALSE
 ).
@@ -578,6 +533,17 @@ WHEN mode=6 THEN {
 }
 		
 		
+//define the delegate to the integrator function, saves an if check per integration step
+LOCAL integrate IS 0.
+IF sim_settings["integrator"]= "rk2" {
+	SET integrate TO rk2@.
+}
+ELSE IF sim_settings["integrator"]= "rk3" {
+	SET integrate TO rk3@.
+}
+ELSE IF sim_settings["integrator"]= "rk4" {
+	SET integrate TO rk4@.
+}
 
 
 UNTIL FALSE{
@@ -596,7 +562,9 @@ UNTIL FALSE{
 	                 "velocity",SHIP:VELOCITY:ORBIT
 	).
 	LOCAL simstate IS blank_simstate(ICS).
-	SET simstate TO integrate(sim_settings,simstate,LIST(get_pitch(),get_roll())).
+	SET simstate TO rk3(sim_settings["deltat"],simstate,LIST(get_pitch(),get_roll())).
+	
+	
 	SET simstate["altitude"] TO bodyalt(simstate["position"]).
 	SET simstate["surfvel"] TO surfacevel(simstate["velocity"],simstate["position"]).
 	SET simstate["latlong"] TO shift_pos(simstate["position"],simstate["simtime"]).
@@ -655,7 +623,7 @@ UNTIL FALSE{
 			
 			
 
-		log_data(loglex).
+		log_data(loglex,"0:/Shuttle_entrysim/LOGS/entry_log").
 	}
 
 	IF quitflag {BREAK.}

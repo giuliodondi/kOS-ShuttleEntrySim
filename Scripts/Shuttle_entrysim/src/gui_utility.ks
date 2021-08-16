@@ -62,7 +62,7 @@ FUNCTION make_global_deorbit_GUI {
 
 	GLOBAL all_box IS main_gui:ADDVLAYOUT().
 	SET all_box:STYLE:WIDTH TO 400.
-	SET all_box:STYLE:HEIGHT TO 350.
+	SET all_box:STYLE:HEIGHT TO 380.
 	SET all_box:STYLE:ALIGN TO "center".
 	
 	GLOBAL entry_interface_textlabel IS all_box:ADDLABEL("Entry Interface Data").	
@@ -73,7 +73,7 @@ FUNCTION make_global_deorbit_GUI {
 	GLOBAL entry_interface_databox IS all_box:ADDVBOX().
 	SET entry_interface_databox:STYLE:ALIGN TO "center".
 	SET entry_interface_databox:STYLE:WIDTH TO 230.
-    SET entry_interface_databox:STYLE:HEIGHT TO 80.
+    SET entry_interface_databox:STYLE:HEIGHT TO 100.
 	set entry_interface_databox:style:margin:h to 80.
 	set entry_interface_databox:style:margin:v to 0.
 	
@@ -82,10 +82,12 @@ FUNCTION make_global_deorbit_GUI {
 	set text1:style:margin:v to -4.
 	GLOBAL text2 IS entry_interface_databox:ADDLABEL("Azimuth  error    : ").
 	set text2:style:margin:v to -4.
-	GLOBAL text3 IS entry_interface_databox:ADDLABEL("Flight-path angle : ").
+	GLOBAL text3 IS entry_interface_databox:ADDLABEL("Distance to TGT : ").
 	set text3:style:margin:v to -4.
 	GLOBAL text4 IS entry_interface_databox:ADDLABEL("Flight-path angle : ").
 	set text4:style:margin:v to -4.
+	GLOBAL text5 IS entry_interface_databox:ADDLABEL("Reference FPA     : ").
+	set text5:style:margin:v to -4.
 	
 	
 	
@@ -101,12 +103,12 @@ FUNCTION make_global_deorbit_GUI {
 	set entry_terminal_databox:style:margin:h to 80.
 	set entry_terminal_databox:style:margin:v to 0.	
 	
-	GLOBAL text5 IS entry_terminal_databox:ADDLABEL("Distance to TGT  : ").
-	set text5:style:margin:v to -4.
-	GLOBAL text6 IS entry_terminal_databox:ADDLABEL("Range error       : ").
-	set text5:style:margin:v to -4.
-	GLOBAL text7 IS entry_terminal_databox:ADDLABEL("Ref. bank angle   : ").
-	set text6:style:margin:v to -4.	
+	GLOBAL text6 IS entry_terminal_databox:ADDLABEL("Distance error  : ").
+	set text6:style:margin:v to -4.
+	GLOBAL text7 IS entry_terminal_databox:ADDLABEL("Downrange error       : ").
+	set text7:style:margin:v to -4.
+	GLOBAL text8 IS entry_terminal_databox:ADDLABEL("Ref. bank angle   : ").
+	set text8:style:margin:v to -4.	
 
 	
 
@@ -119,22 +121,23 @@ FUNCTION update_deorbit_GUI {
 	PARAMETER interf_t.
 	PARAMETER interf_azerr.
 	PARAMETER interf_dist.
-	
+	PARAMETER interf_vel.
 	PARAMETER fpa.
+	
 	PARAMETER term_dist.
 	PARAMETER range_err.
 	PARAMETER roll0.
-
-
 
 		//data output
 	SET text1:text TO "Time to interface : " + sectotime(interf_t).
 	SET text2:text TO "Azimuth  error    : " + ROUND(interf_azerr,1) + " °".
 	SET text3:text TO "Distance to TGT  : " + ROUND(interf_dist,1) + " km".
-	SET text4:text TO "Flight-path angle : " + ROUND(fpa,1) + " °".
-	SET text5:text TO "Distance to TGT  : " + ROUND(term_dist,1) + " km".
-	SET text6:text TO "Range error       : " + ROUND(range_err,1) + " km".
-	SET text7:text TO "Ref. bank angle   : " + ROUND(roll0,1) + " °".
+	SET text4:text TO "Flight-path angle : " + ROUND(fpa,2) + " °".
+	SET text5:text TO "Reference FPA    : " + ROUND(FPA_reference(interf_vel),2) + " °".
+	
+	SET text6:text TO "Distance error   : " + ROUND(term_dist,1) + " km".
+	SET text7:text TO "Downrange error  : " + ROUND(range_err,1) + " km".
+	SET text8:text TO "Ref. bank angle  : " + ROUND(roll0,1) + " °".
 
 }
 
@@ -297,6 +300,8 @@ FUNCTION is_log {
 
 
 FUNCTION make_entry_GUI {
+	PARAMETER initial_pitch.
+	PARAMETER initial_roll.
 
 					   
 	GLOBAL all_box IS main_gui:ADDHLAYOUT().
@@ -321,13 +326,15 @@ FUNCTION make_entry_GUI {
 	SET databox:STYLE:ALIGN TO "left".
 	set databox:style:padding:h to 10.
 	SET databox:STYLE:WIDTH TO 230.
-	SET databox:STYLE:HEIGHT TO 120.
+	SET databox:STYLE:HEIGHT TO 135.
 
-	GLOBAL text1 IS databox:ADDLABEL("Relative Bearing : ").
+	GLOBAL text0 IS databox:ADDLABEL("      Mach       : ").
+	GLOBAL text1 IS databox:ADDLABEL(" Azimuth Error   : ").
 	GLOBAL text2 IS databox:ADDLABEL("Distance to TGT  : ").
 	GLOBAL text3 IS databox:ADDLABEL("Downrange error  : ").
 	GLOBAL text4 IS databox:ADDLABEL("Reference Roll   : ").
 
+	SET text0:STYLE:ALIGN TO "left".
 	SET text1:STYLE:ALIGN TO "left".
 	SET text2:STYLE:ALIGN TO "left".
 	SET text3:STYLE:ALIGN TO "left".
@@ -379,12 +386,12 @@ FUNCTION make_entry_GUI {
 	SET sliderbox:STYLE:ALIGN TO "center".
 	GLOBAL rollslider IS sliderbox:ADDVLAYOUT().
 	SET rollslider:STYLE:ALIGN TO "center".
-	GLOBAL rolltext IS rollslider:ADDLABEL("Roll:" + ROUND(get_roll(),0)).
+	GLOBAL rolltext IS rollslider:ADDLABEL("Roll:" + ROUND(initial_roll,0)).
 	SET rolltext:STYLE:ALIGN TO "center".
 	GLOBAL roll_slider IS rollslider:ADDHLAYOUT().
 	SET roll_slider:STYLE:ALIGN TO "center".
 	GLOBAL rollmin IS roll_slider:ADDBUTTON("<size=18>-</size>").
-	GLOBAL slider1 is roll_slider:addhslider(get_roll(),-120,120).
+	GLOBAL slider1 is roll_slider:addhslider(initial_roll,-120,120).
 	GLOBAL rollplus IS roll_slider:ADDBUTTON("<size=18>+</size>").
 	SET slider1:STYLE:WIDTH TO 210.
 	SET slider1:STYLE:HEIGHT TO 13.
@@ -404,13 +411,13 @@ FUNCTION make_entry_GUI {
 
 	GLOBAL pchslider IS sliderbox:ADDVLAYOUT().
 	SET pchslider:STYLE:ALIGN TO "center".
-	GLOBAL pchtext IS pchslider:ADDLABEL("Pitch:" + ROUND(get_pitch(),0)).
+	GLOBAL pchtext IS pchslider:ADDLABEL("Pitch:" + ROUND(initial_pitch,0)).
 	SET pchtext:STYLE:ALIGN TO "center".
 
 	GLOBAL pch_slider IS pchslider:ADDHLAYOUT().
 	SET pch_slider:STYLE:ALIGN TO "center".
 	GLOBAL pchmin IS pch_slider:ADDBUTTON("<size=18>-</size>").
-	GLOBAL slider2 is pch_slider:addhslider(get_pitch(),0,90).
+	GLOBAL slider2 is pch_slider:addhslider(initial_pitch,0,90).
 	GLOBAL pchplus IS pch_slider:ADDBUTTON("<size=18>+</size>").
 	SET slider2:STYLE:WIDTH TO 210.
 	SET slider2:STYLE:HEIGHT TO 13.
@@ -452,8 +459,8 @@ FUNCTION make_entry_GUI {
 		GLOBAL gains_gui is gui(150,130).
 		SET gains_gui:X TO main_gui:X.
 		SET gains_gui:Y TO main_gui:Y + 500.
-		GLOBAL text0 IS gains_gui:ADDLABEL("<size=18>Controller Gains</size>").
-		SET text0:STYLE:ALIGN TO "center".
+		GLOBAL gainstext IS gains_gui:ADDLABEL("<size=18>Controller Gains</size>").
+		SET gainstext:STYLE:ALIGN TO "center".
 		
 		GLOBAL gainsbox IS gains_gui:ADDVLAYOUT().
 		SET gainsbox:STYLE:ALIGN TO "center".
@@ -582,10 +589,11 @@ FUNCTION update_entry_GUI {
 	}
 	
 	//data output
-	SET text1:text TO "<size=15>Relative Bearing :  " + ROUND(az_err,1) + " °</size>".
+	SET text0:text TO "<size=15>      Mach         :  " + ROUND(ADDONS:FAR:MACH,1) + "</size>".
+	SET text1:text TO "<size=15> Azimuth Error    :  " + ROUND(az_err,1) + " °</size>".
 	SET text2:text TO "<size=15>Distance to TGT  :  " + ROUND(tgt_range,1) + " km</size>".
 	SET text3:text TO "<size=15>Downrange error  :  " + ROUND(range_err,1) + " km</size>".
-	SET text4:text TO "<size=15>Reference roll   :  " + ROUND(roll_ref,1) + " °</size>".
+	SET text4:text TO "<size=15>Reference roll    :  " + ROUND(roll_ref,1) + " °</size>".
 
 }
 
@@ -619,12 +627,12 @@ FUNCTION make_apch_GUI {
 	}.
 
 
-	set main_gui:skin:horizontalslider:BG to "Shuttle_entrysim/gui_images/brakeslider.png".
-	set main_gui:skin:horizontalsliderthumb:BG to "Shuttle_entrysim/gui_images/hslider_thumb.png".
+	set main_gui:skin:horizontalslider:BG to "Shuttle_entrysim/src/gui_images/brakeslider.png".
+	set main_gui:skin:horizontalsliderthumb:BG to "Shuttle_entrysim/src/gui_images/hslider_thumb.png".
 	set main_gui:skin:horizontalsliderthumb:HEIGHT to 17.
 	set main_gui:skin:horizontalsliderthumb:WIDTH to 20.
-	set main_gui:skin:verticalslider:BG to "Shuttle_entrysim/gui_images/vspdslider2.png".
-	set main_gui:skin:verticalsliderthumb:BG to "Shuttle_entrysim/gui_images/vslider_thumb.png".
+	set main_gui:skin:verticalslider:BG to "Shuttle_entrysim/src/gui_images/vspdslider2.png".
+	set main_gui:skin:verticalsliderthumb:BG to "Shuttle_entrysim/src/gui_images/vslider_thumb.png".
 	set main_gui:skin:verticalsliderthumb:HEIGHT to 20.
 	set main_gui:skin:verticalsliderthumb:WIDTH to 17.
 
@@ -676,10 +684,10 @@ FUNCTION make_apch_GUI {
 	SET pointbox:STYLe:HEIGHT TO 240.
 	set pointbox:style:margin:top to 0.
 	set pointbox:style:margin:left to 0.
-	SET  pointbox:style:BG to "Shuttle_entrysim/gui_images/bg_marker_square.png".
+	SET  pointbox:style:BG to "Shuttle_entrysim/src/gui_images/bg_marker_square.png".
 
 	GLOBAL diamond IS pointbox:ADDLABEL().
-	SET diamond:IMAGE TO "Shuttle_entrysim/gui_images/diamond.png".
+	SET diamond:IMAGE TO "Shuttle_entrysim/src/gui_images/diamond.png".
 	SET diamond:STYLe:WIDTH TO 25.
 	SET diamond:STYLe:HEIGHT TO 25.
 
@@ -748,7 +756,7 @@ FUNCTION make_apch_GUI {
 		
 		WHEN mode=5 THEN {
 			SET sim_settings["delta_t"] TO 1.
-			SET  pointbox:style:BG to "Shuttle_entrysim/gui_images/bg_marker_round.png".
+			SET  pointbox:style:BG to "Shuttle_entrysim/src/gui_images/bg_marker_round.png".
 			SET mode_txt:text TO "<size=20> OGS</size>".
 		
 			

@@ -107,6 +107,18 @@ FUNCTION deorbit_main {
 	LOCAL range_err IS 0.
 	
 	LOCAL last_T Is TIME:SECONDS.
+	
+
+	//define the delegate to the integrator function, saves an if check per integration step
+	IF sim_settings["integrator"]= "rk2" {
+		SET sim_settings["integrator"] TO rk2@.
+	}
+	ELSE IF sim_settings["integrator"]= "rk3" {
+		SET sim_settings["integrator"] TO rk3@.
+	}
+	ELSE IF sim_settings["integrator"]= "rk4" {
+		SET sim_settings["integrator"] TO rk4@.
+	}
 
 
 	
@@ -139,7 +151,8 @@ FUNCTION deorbit_main {
 				LOCAL vecWidth IS 0.1.//200.
 				//IF MAPVIEW { SET vecWidth TO 0.2. }
 			
-				VECDRAW(adjold_pos,(adjustPos - adjold_pos),red,"",1,TRUE,vecWidth).
+				//changed trajectory colour from red to green to avoid confusion with the Trajectories mod
+				VECDRAW(adjold_pos,(adjustPos - adjold_pos),green,"",1,TRUE,vecWidth).
 
 				SET oldpos TO newpos.
 			
@@ -150,6 +163,8 @@ FUNCTION deorbit_main {
 		PRESERVE.
 
 	}
+	
+	
 	
 	
 	
@@ -245,15 +260,7 @@ FUNCTION deorbit_main {
 							 "position",interfpos,
 							 "velocity",interfvel
 			).
-			LOCAL end_conditions IS LEXICON(
-								"altitude",15000,
-								"surfvel",500
-			).
-			LOCAL sim_settings IS LEXICON(
-							"deltat",20,
-							"integrator","rk3",
-							"log",FALSE
-			).
+			
 			LOCAL simstate IS blank_simstate(ICS).
 
 			
@@ -301,6 +308,7 @@ FUNCTION deorbit_main {
 								t2entry,
 								az_error(interfpos,tgtrwy["position"],interfvel),
 								tgt_range,
+								interfvel:MAG,
 								phi,
 								downrangedist(tgtrwy["position"], simstate["latlong"]),
 								range_err,

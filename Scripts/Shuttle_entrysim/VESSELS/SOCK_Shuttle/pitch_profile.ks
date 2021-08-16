@@ -6,8 +6,6 @@
 IF NOT (DEFINEd pitchprof_segments) {
 	GLOBAL pitchprof_segments IS LIST(
 								LIST(250,3),
-								LIST(1800,28),
-								LIST(5300,28),
-								LIST(6700,38)
+								LIST(2600,40)
 								).
 }

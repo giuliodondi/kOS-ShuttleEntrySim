@@ -101,6 +101,20 @@ FUNCTION define_td_points {
 
 //navigation and measurement functions
 
+//reference velocity-fpa curve taken from descent guidance paper
+FUNCTION FPA_reference {
+	PARAMETER vel.
+	
+
+	//shallow
+	LOCAL p1 IS  -8.396.
+	LOCAL p2 IS 64340.
+	LOCAL q1 IS -6347.
+	
+	
+	RETURN (p1*vel + p2) / (vel + q1).
+}
+
 
 //determines if the conditions are right for the reference pitch value (pitch of highest velocity point in 
 //the pitch profile) to be set to the pitch slider value
@@ -123,7 +137,7 @@ FUNCTION az_error {
 
 
 	//use haversine formula to get the bearings to target and impact point
-	set tgt_bng to bearingg(tgt_pos, position).
+	LOCAL tgt_bng IS bearingg(tgt_pos, position).
 
 	local hdg is compass_for(surfv,position).
 	
@@ -248,7 +262,7 @@ FUNCTION roll_profile {
 	PARAMETER hddot.
 	
 	//wil not command any roll above this altitude
-	IF state["altitude"]>90000 {
+	IF state["altitude"]>constants["firstrollalt"] {
 		RETURN 0.
 	}
 	
@@ -395,10 +409,8 @@ FUNCTION update_attitude {
 
 
 //automatic body flap control
-FUNCTION  flaptrim_incr{
-	PARAMETER pitch_input.
-	PARAMETER flapval.
-	
+FUNCTION  flaptrim_control{
+	PARAMETER flap_control.
 	
 	
 	//initialise the flap control pid loop 
@@ -411,11 +423,58 @@ FUNCTION  flaptrim_incr{
 		SET FLAPPID:SETPOINT TO 0.
 	}
 
-	LOCAL flap_incr IS  FLAPPID:UPDATE(TIME:SECONDS,pitch_input).
+	LOCAL flap_incr IS  FLAPPID:UPDATE(TIME:SECONDS,flap_control["pitch_control"][0]).
+	SET flap_control["deflection"] TO  flap_control["deflection"] + flap_incr.
 	
-
-	RETURN flapval + flap_incr.
+	deflect_flaps(flap_control["parts"] , flap_control["deflection"]).
+	
+	
+	RETURN flap_control.
 }
 
+FUNCTION activate_flaps {
+	PARAMETER flap_parts.
+	
+	FOR f in flap_parts {
+		LOCAL fmod IS f["flapmod"].
+		IF NOT fmod:GETFIELD("Flp/Splr"). {fmod:SETFIELD("Flp/Splr",TRUE).}
+		wait 0.
+		fmod:SETFIELD("Flp/Splr Dflct",0). 
+		IF NOT fmod:GETFIELD("Flap"). {fmod:SETFIELD("Flap",TRUE).}
+		wait 0.
+		LOCAL flapset IS fmod:GETFIELD("Flap Setting").
+		FROM {local k is flapset.} UNTIL k>3  STEP {set k to k+1.} DO {
+			fmod:DOACTION("Increase Flap Deflection", TRUE).
+		}
+	}
+}
+
+
+FUNCTION deactivate_flaps {
+	PARAMETER flap_parts.
+	
+	deflect_flaps(flap_parts , 0).
+	
+	FOR f in flap_parts {
+		LOCAL fmod IS f["flapmod"].
+		fmod:SETFIELD("Flp/Splr dflct",0).
+		wait 0.
+		LOCAL flapset IS fmod:GETFIELD("Flap Setting").
+		FROM {local k is flapset.} UNTIL k=0  STEP {set k to k-1.} DO {
+			fmod:DOACTION("Decrease Flap Deflection", TRUE).
+		}
+	}
+}
+
+FUNCTION deflect_flaps{
+	PARAMETER flap_parts.
+	PARAMETER deflection.
+	
+	FOR f in flap_parts {
+		f["flapmod"]:SETFIELD("Flp/Splr dflct",CLAMP(deflection,f["min_defl"],f["max_defl"])).
+		
+	}
+
+}.
 
 

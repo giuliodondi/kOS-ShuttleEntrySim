@@ -122,92 +122,129 @@ declare function aeroforce {
 
 }
 
-DECLARE FUNCTION integrate {
-	PARAMETER simsets.
+DECLARE FUNCTION rk2 {
+	PARAMETER dt.
 	PARAMETER state.
 	PARAMETER attitude.
 	
-	LOCAL position IS state["position"].
-	LOCAL velocity IS state["velocity"].
-	LOCAL dt IS simsets["deltat"].
+	LOCAL pos IS state["position"].
+	LOCAL vel IS state["velocity"].
+	
+	set state["simtime"] to state["simtime"] + dt.
+	
+	LOCAL out IS LIST().
+
+	//RK2
+	LOCAL p1 IS pos.
+	LOCAL v1 IS vel.
+	SET out TO accel(p1, v1, refbody, attitude).
+	LOCAL a1 IS out[0].
+	SET state["aero"] TO out[1].
+	 
+	LOCAL  p2 IS  pos + 0.5 * v1 * dt.
+	LOCAL  v2 IS vel + 0.5 * a1 * dt.
+	SET out TO accel(p2, v2, refbody, attitude).
+	LOCAL  a2 IS out[0].
+
+	 
+	SET pos TO pos + (dt) * (v2  ).
+	SET vel TO vel + (dt) * (a2 ).
+	
+	SET state["position"] TO pos.
+	SET state["velocity"] TO vel.
+	
+	RETURN state.
+
+}
+
+
+DECLARE FUNCTION rk3 {
+	PARAMETER dt.
+	PARAMETER state.
+	PARAMETER attitude.
+	
+	LOCAL pos IS state["position"].
+	LOCAL vel IS state["velocity"].
 	
 	set state["simtime"] to state["simtime"] + dt.
 	
 	LOCAL out IS LIST().
 	
-	IF simsets["integrator"]= "rk2" {
-		//RK2
-		LOCAL p1 IS position.
-		LOCAL v1 IS velocity.
-		SET out TO accel(p1, v1, refbody, attitude).
-		LOCAL a1 IS out[0].
-		SET state["aero"] TO out[1].
-		 
-		LOCAL  p2 IS  position + 0.5 * v1 * dt.
-		LOCAL  v2 IS velocity + 0.5 * a1 * dt.
-		SET out TO accel(p2, v2, refbody, attitude).
-		LOCAL  a2 IS out[0].
-
-		 
-		SET position TO position + (dt) * (v2  ).
-		SET velocity TO velocity + (dt) * (a2 ).
-	}
-	ELSE IF simsets["integrator"]= "rk3" {
-		//RK3
-		LOCAL p1 IS position.
-		LOCAL v1 IS velocity.
-		SET out TO accel(p1, v1, attitude).
-		LOCAL a1 IS out[0].
-		SET state["aero"] TO out[1].
-		 
-		LOCAL  p2 IS  position + 0.5 * v1 * dt.
-		LOCAL  v2 IS velocity + 0.5 * a1 * dt.
-		SET out TO accel(p2, v2, attitude).
-		LOCAL a2 IS out[0].
-		 
-		LOCAL  p3 IS position + (2*v2 - v1) * dt.
-		LOCAL  v3 IS velocity + (2*a2 - a1) * dt.
-		SET out TO accel(p3, v3, attitude).
-		LOCAL a3 IS out[0].
-		 
-		 
-		SET position TO position + (dt / 6) * (v1 + 4 * v2 + v3 ).
-		SET velocity TO velocity + (dt / 6) * (a1 + 4 * a2 + a3).
-	}
-	ELSE IF simsets["integrator"]= "rk4" {
-		//RK4
-		LOCAL p1 IS position.
-		LOCAL v1 IS velocity.
-		SET out TO accel(p1, v1, attitude).
-		LOCAL a1 IS out[0].
-		SET state["aero"] TO out[1].
-		 
-		LOCAL  p2 IS  position + 0.5 * v1 * dt.
-		LOCAL  v2 IS velocity + 0.5 * a1 * dt.
-		SET out TO accel(p2, v2, attitude).
-		LOCAL a2 IS out[0].
-		 
-		LOCAL  p3 IS position + 0.5 * v2 * dt.
-		LOCAL  v3 IS velocity + 0.5 * a2 * dt.
-		SET out TO accel(p3, v3, attitude).
-		LOCAL a3 IS out[0].
-		 
-		LOCAL  p4 IS position + v3 * dt.
-		LOCAL  v4 IS velocity + a3 * dt.
-		SET out TO accel(p4, v4, attitude).
-		LOCAL a4 IS out[0].
-		 
-		SET position TO position + (dt / 6) * (v1 + 2 * v2 + 2 * v3 + v4).
-		SET velocity TO velocity + (dt / 6) * (a1 + 2 * a2 + 2 * a3 + a4).
-		
-	}
+	//RK3
+	LOCAL p1 IS pos.
+	LOCAL v1 IS vel.
+	SET out TO accel(p1, v1, attitude).
+	LOCAL a1 IS out[0].
+	SET state["aero"] TO out[1].
+	 
+	LOCAL  p2 IS  pos + 0.5 * v1 * dt.
+	LOCAL  v2 IS vel + 0.5 * a1 * dt.
+	SET out TO accel(p2, v2, attitude).
+	LOCAL a2 IS out[0].
+	 
+	LOCAL  p3 IS pos + (2*v2 - v1) * dt.
+	LOCAL  v3 IS vel + (2*a2 - a1) * dt.
+	SET out TO accel(p3, v3, attitude).
+	LOCAL a3 IS out[0].
+	 
+	 
+	SET pos TO pos + (dt / 6) * (v1 + 4 * v2 + v3 ).
+	SET vel TO vel + (dt / 6) * (a1 + 4 * a2 + a3).
 	
-	SET state["position"] TO position.
-	SET state["velocity"] TO velocity.
+	SET state["position"] TO pos.
+	SET state["velocity"] TO vel.
 	
 	RETURN state.
 
 }
+
+
+DECLARE FUNCTION rk4 {
+	PARAMETER dt.
+	PARAMETER state.
+	PARAMETER attitude.
+	
+	LOCAL pos IS state["position"].
+	LOCAL vel IS state["velocity"].
+	
+	set state["simtime"] to state["simtime"] + dt.
+	
+	LOCAL out IS LIST().
+	
+	//RK4
+	LOCAL p1 IS pos.
+	LOCAL v1 IS vel.
+	SET out TO accel(p1, v1, attitude).
+	LOCAL a1 IS out[0].
+	SET state["aero"] TO out[1].
+	 
+	LOCAL  p2 IS  pos + 0.5 * v1 * dt.
+	LOCAL  v2 IS vel + 0.5 * a1 * dt.
+	SET out TO accel(p2, v2, attitude).
+	LOCAL a2 IS out[0].
+	 
+	LOCAL  p3 IS pos + 0.5 * v2 * dt.
+	LOCAL  v3 IS vel + 0.5 * a2 * dt.
+	SET out TO accel(p3, v3, attitude).
+	LOCAL a3 IS out[0].
+	 
+	LOCAL  p4 IS pos + v3 * dt.
+	LOCAL  v4 IS vel + a3 * dt.
+	SET out TO accel(p4, v4, attitude).
+	LOCAL a4 IS out[0].
+	 
+	SET pos TO pos + (dt / 6) * (v1 + 2 * v2 + 2 * v3 + v4).
+	SET vel TO vel + (dt / 6) * (a1 + 2 * a2 + 2 * a3 + a4).
+
+	
+	SET state["position"] TO pos.
+	SET state["velocity"] TO vel.
+	
+	RETURN state.
+
+}
+
+
 
 
 
@@ -236,9 +273,14 @@ declare function simulate_reentry {
 	
 	
 	LOCAL poslist IS LIST().
+	
+	//sample initial values for proper termination conditions check
+	SET simstate["altitude"] TO bodyalt(simstate["position"]).
+	SET simstate["surfvel"] TO surfacevel(simstate["velocity"],simstate["position"]).
 
-
-	UNTIL FALSE  {
+	
+	//putting the termination conditions here should save an if check per step
+	UNTIL (( simstate["altitude"]< tgtalt AND simstate["surfvel"]:MAG < end_conditions["surfvel"] ) OR simstate["altitude"]>140000)  {
 	
 		SET simstate["altitude"] TO bodyalt(simstate["position"]).
 		
@@ -280,17 +322,8 @@ declare function simulate_reentry {
 			log_data(loglex).
 		}
 		
-		//do the termination checks 
-		
-		IF ( simstate["altitude"]< tgtalt AND simstate["surfvel"]:MAG < end_conditions["surfvel"] ) OR simstate["altitude"]>140000 {
-			BREAK.
-		}
-		
-		SET simstate TO integrate(simsets,simstate,LIST(pitch_prof,roll_prof)).
-		
-		
-		
-		
+		SET simstate TO simsets["integrator"]:CALL(simsets["deltat"],simstate,LIST(pitch_prof,roll_prof)).
+
 	}
 	
 	IF plot_traj {

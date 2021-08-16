@@ -5,10 +5,7 @@ CLEARGUIS().
 
 
 //load parameters
-RUNPATH("0:/Shuttle_entrysim/parameters/landing_sites").
-RUNPATH("0:/Shuttle_entrysim/parameters/pitch_profile").
-RUNPATH("0:/Shuttle_entrysim/parameters/sim_params").
-RUNPATH("0:/Shuttle_entrysim/parameters/constants").
+RUNPATH("0:/Shuttle_entrysim/constants").
 
 
 //hard-coded check to run the script only in atmosphere
@@ -20,16 +17,21 @@ If (SHIP:ALTITUDE >= constants["atmalt"]) {
 	//SET TERMINAL:WIDTH TO 40.
 	//SET TERMINAL:HEIGHT TO 8.
 
+	//load parameters
+	RUNPATH("0:/Shuttle_entrysim/vessel_dir").
+	RUNPATH("0:/Shuttle_entrysim/VESSELS/" + vessel_dir + "/pitch_profile").
+	RUNPATH("0:/Shuttle_entrysim/landing_sites").
+	RUNPATH("0:/Shuttle_entrysim/parameters").
 
 
 	//	Load libraries
 	RUNPATH("0:/Libraries/misc_library").	
 	RUNPATH("0:/Libraries/maths_library").	
 	RUNPATH("0:/Libraries/navigation_library").	
-	RUNPATH("0:/Shuttle_entrysim/simulate_vehicle").
-	RUNPATH("0:/Shuttle_entrysim/gui_utility").
-	RUNPATH("0:/Shuttle_entrysim/entry_utility").
-	RUNPATH("0:/Shuttle_entrysim/approach_utility").
+	RUNPATH("0:/Shuttle_entrysim/src/simulate_vehicle").
+	RUNPATH("0:/Shuttle_entrysim/src/gui_utility").
+	RUNPATH("0:/Shuttle_entrysim/src/entry_utility").
+	RUNPATH("0:/Shuttle_entrysim/src/approach_utility").
 
 
 
@@ -43,7 +45,7 @@ If (SHIP:ALTITUDE >= constants["atmalt"]) {
 
 			
 
-	RUNPATH("0:/Shuttle_entrysim/entry_main").
+	RUNPATH("0:/Shuttle_entrysim/src/entry_main").
 	entry_main_loop().
 
 }
