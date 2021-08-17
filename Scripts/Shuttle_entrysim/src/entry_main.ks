@@ -10,13 +10,9 @@ STEERINGMANAGER:RESETPIDS().
 STEERINGMANAGER:RESETTODEFAULT().
 
 
-//SET STEERINGMANAGER:ROLLCONTROLANGLERANGE TO 4.0.
 SET STEERINGMANAGER:PITCHTS TO 10.0.
 SET STEERINGMANAGER:YAWTS TO 10.0.
 SET STEERINGMANAGER:ROLLTS TO 8.0.
-SET STEERINGMANAGER:PITCHPID:KD TO 0.01.
-SET STEERINGMANAGER:YAWPID:KD TO 0.01.
-SET STEERINGMANAGER:ROLLPID:KD TO 0.05.
 
 
 //unset the PIDs that may still be in memory 
@@ -217,7 +213,19 @@ SET pitchprof_segments[pitchprof_segments:LENGTH - 1][1] TO pitchv.
 //initialise gains for PID
 GLOBAL gains_log_path IS "0:/Shuttle_entrysim/VESSELS/" + vessel_dir + "/gains.ks".
 IF EXISTS(gains_log_path) {RUNPATH(gains_log_path).}
-ELSE {GLOBAL gains IS LEXICON("Kp",0.008,"Kd",0.001,"Khdot",2,"Kalpha",0,"strmgr",8).}
+ELSE {GLOBAL gains IS LEXICON(	"rangeKP",0.008,
+								"rangeKD",0.001,
+								"Khdot",2,
+								"strmgr",60,
+								"pitchKD",0.05,
+								"yawKD",0.05,
+								"rollKD",0.05
+							).
+}
+SET STEERINGMANAGER:MAXSTOPPINGTIME TO gains["strmgr"].
+SET STEERINGMANAGER:PITCHPID:KD TO gains["pitchKD"].
+SET STEERINGMANAGER:YAWPID:KD TO gains["yawKD"].
+SET STEERINGMANAGER:ROLLPID:KD TO gains["rollKD"].
  
  
 make_entry_GUI(pitchv,rollv).
@@ -396,15 +404,15 @@ UNTIL FALSE {
 		//register guidance enabled 
 		SET mode TO 2.
 	
-		//PID stuff
+		//Roll ref PID stuff
 		LOCAL P IS range_err.
 		LOCAL D IS (range_err - range_err_p)/delta_t.
 
-		LOCAL delta_roll IS  P*gains["Kp"] + D*gains["Kd"].
+		LOCAL delta_roll IS  P*gains["rangeKP"] + D*gains["rangeKD"].
 		
 		SET roll_ref_p TO roll_ref.
 		//update the reference roll value and clamp it
-		SET roll_ref TO clamp( roll_ref + delta_roll, 0.5, 120) .
+		SET roll_ref TO clamp( roll_ref + delta_roll, 0, 120) .
 		
 		//measure vertical acceleration
 		//will be used for roll modulation

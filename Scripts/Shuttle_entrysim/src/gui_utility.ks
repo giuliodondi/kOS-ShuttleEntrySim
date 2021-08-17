@@ -73,21 +73,21 @@ FUNCTION make_global_deorbit_GUI {
 	GLOBAL entry_interface_databox IS all_box:ADDVBOX().
 	SET entry_interface_databox:STYLE:ALIGN TO "center".
 	SET entry_interface_databox:STYLE:WIDTH TO 230.
-    SET entry_interface_databox:STYLE:HEIGHT TO 100.
+    SET entry_interface_databox:STYLE:HEIGHT TO 115.
 	set entry_interface_databox:style:margin:h to 80.
 	set entry_interface_databox:style:margin:v to 0.
 	
 	
-	GLOBAL text1 IS entry_interface_databox:ADDLABEL("Time to interface : ").
-	set text1:style:margin:v to -4.
-	GLOBAL text2 IS entry_interface_databox:ADDLABEL("Azimuth  error    : ").
-	set text2:style:margin:v to -4.
-	GLOBAL text3 IS entry_interface_databox:ADDLABEL("Distance to TGT : ").
-	set text3:style:margin:v to -4.
-	GLOBAL text4 IS entry_interface_databox:ADDLABEL("Flight-path angle : ").
-	set text4:style:margin:v to -4.
-	GLOBAL text5 IS entry_interface_databox:ADDLABEL("Reference FPA     : ").
-	set text5:style:margin:v to -4.
+	GLOBAL textEI1 IS entry_interface_databox:ADDLABEL("Time to interface : ").
+	set textEI1:style:margin:v to -4.
+	GLOBAL textEI2 IS entry_interface_databox:ADDLABEL("Azimuth  error    : ").
+	set textEI2:style:margin:v to -4.
+	GLOBAL textEI3 IS entry_interface_databox:ADDLABEL("Ref. FPA at EI   : ").
+	set textEI3:style:margin:v to -4.
+	GLOBAL textEI5 IS entry_interface_databox:ADDLABEL("Flight-path angle : ").
+	set textEI5:style:margin:v to -4.
+	GLOBAL textEI6 IS entry_interface_databox:ADDLABEL("Range at EI       : ").
+	set textEI6:style:margin:v to -4.
 	
 	
 	
@@ -103,12 +103,12 @@ FUNCTION make_global_deorbit_GUI {
 	set entry_terminal_databox:style:margin:h to 80.
 	set entry_terminal_databox:style:margin:v to 0.	
 	
-	GLOBAL text6 IS entry_terminal_databox:ADDLABEL("Distance error  : ").
-	set text6:style:margin:v to -4.
-	GLOBAL text7 IS entry_terminal_databox:ADDLABEL("Downrange error       : ").
-	set text7:style:margin:v to -4.
-	GLOBAL text8 IS entry_terminal_databox:ADDLABEL("Ref. bank angle   : ").
-	set text8:style:margin:v to -4.	
+	GLOBAL textTM1 IS entry_terminal_databox:ADDLABEL("Distance error  : ").
+	set textTM1:style:margin:v to -4.
+	GLOBAL textTM2 IS entry_terminal_databox:ADDLABEL("Downrange error       : ").
+	set textTM2:style:margin:v to -4.
+	GLOBAL textTM3 IS entry_terminal_databox:ADDLABEL("Ref. bank angle   : ").
+	set textTM3:style:margin:v to -4.	
 
 	
 
@@ -120,24 +120,27 @@ FUNCTION make_global_deorbit_GUI {
 FUNCTION update_deorbit_GUI {
 	PARAMETER interf_t.
 	PARAMETER interf_azerr.
-	PARAMETER interf_dist.
+	PARAMETER rei.
 	PARAMETER interf_vel.
 	PARAMETER fpa.
 	
 	PARAMETER term_dist.
 	PARAMETER range_err.
 	PARAMETER roll0.
+	
+	LOCAL ref_fpa IS FPA_reference(interf_vel).
 
 		//data output
-	SET text1:text TO "Time to interface : " + sectotime(interf_t).
-	SET text2:text TO "Azimuth  error    : " + ROUND(interf_azerr,1) + " °".
-	SET text3:text TO "Distance to TGT  : " + ROUND(interf_dist,1) + " km".
-	SET text4:text TO "Flight-path angle : " + ROUND(fpa,2) + " °".
-	SET text5:text TO "Reference FPA    : " + ROUND(FPA_reference(interf_vel),2) + " °".
+	SET textEI1:text TO "Time to EI       : " + sectotime(interf_t).
+	SET textEI2:text TO "Azimuth  error   : " + ROUND(interf_azerr,1) + " °".
+	SET textEI3:text TO "Ref. FPA at EI   :  " + ROUND(ref_fpa,2) + " °".
+	SET textEI5:text TO "FPA at EI        : " + ROUND(fpa,2) + " °".
+	SET textEI6:text TO "Range at EI      : " + ROUND(rei,1) + " km".
 	
-	SET text6:text TO "Distance error   : " + ROUND(term_dist,1) + " km".
-	SET text7:text TO "Downrange error  : " + ROUND(range_err,1) + " km".
-	SET text8:text TO "Ref. bank angle  : " + ROUND(roll0,1) + " °".
+	
+	SET textTM1:text TO "Distance error   : " + ROUND(term_dist,1) + " km".
+	SET textTM2:text TO "Downrange error  : " + ROUND(range_err,1) + " km".
+	SET textTM3:text TO "Ref. bank angle  : " + ROUND(roll0,1) + " °".
 
 }
 
@@ -466,43 +469,54 @@ FUNCTION make_entry_GUI {
 		SET gainsbox:STYLE:ALIGN TO "center".
 		SET gainsbox:STYLE:WIDTH TO 150.
 		GLOBAL p_gain IS gainsbox:addhlayout().
-		GLOBAL p_gain_text IS p_gain:addlabel("Kp Gain: ").
-		GLOBAL Kp_box is p_gain:addtextfield(gains["Kp"]:tostring).
-		set Kp_box:style:width to 60.
+		GLOBAL p_gain_text IS p_gain:addlabel("Range P Gain: ").
+		GLOBAL Kp_box is p_gain:addtextfield(gains["rangeKP"]:tostring).
+		set Kp_box:style:width to 65.
 		set Kp_box:style:height to 18.
 		GLOBAL d_gain IS gainsbox:addhlayout().
-		GLOBAL d_gain_text IS d_gain:addlabel("Kd Gain: ").
-		GLOBAL Kd_box is d_gain:addtextfield(gains["Kd"]:tostring).
-		set Kd_box:style:width to 60.
+		GLOBAL d_gain_text IS d_gain:addlabel("Range D Gain: ").
+		GLOBAL Kd_box is d_gain:addtextfield(gains["rangeKD"]:tostring).
+		set Kd_box:style:width to 65.
 		set Kd_box:style:height to 18.
 		GLOBAL hdot_gain IS gainsbox:addhlayout().
-		GLOBAL hdot_gain_text IS hdot_gain:addlabel("Khdot Gain: ").
+		GLOBAL hdot_gain_text IS hdot_gain:addlabel("Roll hdot Gain: ").
 		GLOBAL Khdot_box is hdot_gain:addtextfield(gains["Khdot"]:tostring).
-		set Khdot_box:style:width to 60.
+		set Khdot_box:style:width to 65.
 		set Khdot_box:style:height to 18.
-		GLOBAL alpha_gain IS gainsbox:addhlayout().
-		GLOBAL alpha_gain_text IS alpha_gain:addlabel("Kalpha Gain: ").
-		GLOBAL Kalpha_box is alpha_gain:addtextfield(gains["Kalpha"]:tostring).
-		set Kalpha_box:style:width to 60.
-		set Kalpha_box:style:height to 18.
 		GLOBAL strmgr_gain IS gainsbox:addhlayout().
 		GLOBAL strmgr_gain_text IS strmgr_gain:addlabel("Stopping T: ").
 		GLOBAL strmgr_box is strmgr_gain:addtextfield(gains["strmgr"]:tostring).
-		set strmgr_box:style:width to 60.
+		set strmgr_box:style:width to 65.
 		set strmgr_box:style:height to 18.
 		
+		GLOBAL pitchd_gain IS gainsbox:addhlayout().
+		GLOBAL pitchd_gain_text IS pitchd_gain:addlabel("Pitch D Gain: ").
+		GLOBAL pitchd_gain_box is pitchd_gain:addtextfield(gains["pitchKD"]:tostring).
+		set pitchd_gain_box:style:width to 65.
+		set pitchd_gain_box:style:height to 18.
+		GLOBAL yawd_gain IS gainsbox:addhlayout().
+		GLOBAL yawd_gain_text IS yawd_gain:addlabel("Yaw D Gain: ").
+		GLOBAL yawd_gain_box is yawd_gain:addtextfield(gains["yawKD"]:tostring).
+		set yawd_gain_box:style:width to 65.
+		set yawd_gain_box:style:height to 18.
+		GLOBAL rolld_gain IS gainsbox:addhlayout().
+		GLOBAL rolld_gain_text IS rolld_gain:addlabel("Roll D Gain: ").
+		GLOBAL rolld_gain_box is rolld_gain:addtextfield(gains["rollKD"]:tostring).
+		set rolld_gain_box:style:width to 60.
+		set rolld_gain_box:style:height to 18.
+	
 		set Kp_box:onconfirm to { 
-		parameter val.
-		set val to val:tonumber(gains["Kp"]).
-		if val < 0 set val to 0.
-		set gains["Kp"] to val.
-		log_gains(gains,gains_log_path).
+			parameter val.
+			set val to val:tonumber(gains["rangeKP"]).
+			if val < 0 set val to 0.
+			set gains["rangeKP"] to val.
+			log_gains(gains,gains_log_path).
 		}.
 		set Kd_box:onconfirm to { 
 			parameter val.
-			set val to val:tonumber(gains["Kd"]).
+			set val to val:tonumber(gains["rangeKD"]).
 			if val < 0 set val to 0.
-			set gains["Kd"] to val.
+			set gains["rangeKD"] to val.
 			log_gains(gains,gains_log_path).
 		}.
 		set Khdot_box:onconfirm to { 
@@ -512,13 +526,6 @@ FUNCTION make_entry_GUI {
 			set gains["Khdot"] to val.
 			log_gains(gains,gains_log_path).
 		}.
-		set Kalpha_box:onconfirm to { 
-			parameter val.
-			set val to val:tonumber(gains["Kalpha"]).
-			if val < 0 set val to 0.
-			set gains["Kalpha"] to val.
-			log_gains(gains,gains_log_path).
-		}.
 		set strmgr_box:onconfirm to { 
 			parameter val.
 			set val to val:tonumber(gains["strmgr"]).
@@ -526,6 +533,31 @@ FUNCTION make_entry_GUI {
 			set gains["strmgr"] to val.
 			log_gains(gains,gains_log_path).
 			SET STEERINGMANAGER:MAXSTOPPINGTIME TO val.
+		}.
+		
+		set pitchd_gain_box:onconfirm to { 
+			parameter val.
+			set val to val:tonumber(gains["pitchKD"]).
+			if val < 0 set val to 0.
+			set gains["pitchKD"] to val.
+			log_gains(gains,gains_log_path).
+			SET STEERINGMANAGER:PITCHPID:KD TO val.
+		}.
+		set yawd_gain_box:onconfirm to { 
+			parameter val.
+			set val to val:tonumber(gains["yawKD"]).
+			if val < 0 set val to 0.
+			set gains["yawKD"] to val.
+			log_gains(gains,gains_log_path).
+			SET STEERINGMANAGER:YAWPID:KD TO val.
+		}.
+		set rolld_gain_box:onconfirm to { 
+			parameter val.
+			set val to val:tonumber(gains["rollKD"]).
+			if val < 0 set val to 0.
+			set gains["rollKD"] to val.
+			log_gains(gains,gains_log_path).
+			SET STEERINGMANAGER:ROLLPID:KD TO val.
 		}.
 		
 		

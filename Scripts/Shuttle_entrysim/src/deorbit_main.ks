@@ -96,9 +96,17 @@ FUNCTION deorbit_main {
 	//initialise global internal variables
 	
 	//initialise gains for PID
-	LOCAL gains_log_path IS "./Shuttle_entrysim/parameters/gains.ks".
+	GLOBAL gains_log_path IS "0:/Shuttle_entrysim/VESSELS/" + vessel_dir + "/gains.ks".
 	IF EXISTS(gains_log_path) {RUNPATH(gains_log_path).}
-	ELSE {GLOBAL gains IS LEXICON("Kp",0.006,"Kd",0,"Khdot",0,"Kalpha",0).}
+	ELSE {GLOBAL gains IS LEXICON(	"rangeKP",0.008,
+									"rangeKD",0.001,
+									"Khdot",2,
+									"strmgr",60,
+									"pitchKD",0.05,
+									"yawKD",0.05,
+									"rollKD",0.05
+								).
+	}
 
 	
 	local next is nextnode.
@@ -300,7 +308,7 @@ FUNCTION deorbit_main {
 			LOCAL P IS range_err.
 			LOCAL D IS (range_err - range_err_p)/delta_t.
 				
-			LOCAL delta_roll IS P*gains["Kp"] + D*gains["Kd"].
+			LOCAL delta_roll IS P*gains["rangeKP"] + D*gains["rangeKD"].
 			
 			SET roll_ref TO MAX(0,MIN(120,roll_ref + delta_roll)).
 			

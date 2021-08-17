@@ -105,15 +105,14 @@ FUNCTION define_td_points {
 FUNCTION FPA_reference {
 	PARAMETER vel.
 	
-
 	//shallow
 	LOCAL p1 IS  -8.396.
 	LOCAL p2 IS 64340.
 	LOCAL q1 IS -6347.
 	
-	
 	RETURN (p1*vel + p2) / (vel + q1).
 }
+
 
 
 //determines if the conditions are right for the reference pitch value (pitch of highest velocity point in 
@@ -219,12 +218,10 @@ FUNCTION pitchroll_profiles_entry {
 	IF (roll_cur = 0) {
 		SET roll_sign TO SIGN(delaz).
 	} ELSE {
-		SET roll_sign TO roll_reversal(SIGN(roll_cur),delaz,az_band).
+		SET roll_sign TO roll_reversal(SIGN(roll_cur),delaz,az_band,roll_ref).
 	}
-	
-	
 		
-	LOCAL roll_prof IS roll_sign*roll_profile(simstate,roll_ref,hddot).
+	LOCAL roll_prof IS roll_sign*roll_profile(simstate,roll_ref,hddot,delaz).
 
 	LOCAL pitch_prof IS pitch_profile(pitch_ref,simstate["surfvel"]:MAG).
 
@@ -260,6 +257,7 @@ FUNCTION roll_profile {
 	PARAMETER state.
 	PARAMETER roll0.
 	PARAMETER hddot.
+	PARAMETER delaz.
 	
 	//wil not command any roll above this altitude
 	IF state["altitude"]>constants["firstrollalt"] {
@@ -270,38 +268,51 @@ FUNCTION roll_profile {
 	//to try and dampen altitude oscillations
 	//not too much since it reduces range a lot
 	//this effect decays with velocity
-	LOCAL base_gain is 10.
-	IF (DEFINED gains) {SET base_gain TO gains["Khdot"].}
 	LOCAL refvel IS 6500.
-	LOCAL gain IS base_gain*(state["surfvel"]:MAG/refvel)^4.
+	LOCAL gain IS gains["Khdot"]*(state["surfvel"]:MAG/refvel)^4.
 	LOCAL newroll IS roll0 + gain*hddot.
 	
 	//let the base roll value decrease linearly with velocity
 	SET newroll TO MIN(newroll,(roll0/2)*(state["surfvel"]:MAG + 2500 - 500)/(2500 - 250)).
 	
-	RETURN clamp(newroll,0,120).
+	LOCAL roll_min IS 0.
+	//heuristic minimum roll taken from the training manuals
+	//min value to still ensure proper lateral guidance even in low-energy situations
+	//only enable it if the reference roll is too small
+	IF (roll0 < 10) {
+		SET roll_min TO 2*ABS(delaz).
+	}
+	
+	RETURN clamp(newroll,roll_min,120).
 }
 
 
 
-//determine the sign of the roll given the error and its variation
+//determine the sign of the roll given the az error and its variation
 FUNCTION roll_reversal {
-
 	PARAMETER cur_sign.
-	PARAMETER az_err.
+	PARAMETER delaz.
 	PARAMETER bandwidth.
+	PARAMETER roll_ref.
+	
+	//the 0.9 factor is to compensate for slow roll reversal and tendency to overshoot
+	
+	//the logic for low energy guidance is to bank towards the target at minimum bank angle but then
+	//to disable the roll reversals and fly at zero bank
+	//do this by clamping the delaz bandwidth using the roll ref value which is small or even zero in low energy cases
+	//divide by 2 because of the same heuristic used for the min bank angle, only the other way around
+	LOCAL red_bandwidth IS 0.9*MIN(bandwidth,roll_ref/2).
 	
 	//the default output is simply set to the current roll sign
 	LOCAL out_s IS cur_sign.
 	
-	
-	IF ABS(az_err) > 0.9*bandwidth{
+	IF ABS(delaz) > red_bandwidth {
 		//if we're out of the error band we command a reversal
 		//we set the bank sign to the same sign as the error.
 		//recall that the error is + if the tgt is to our right
 		//and - if it's to the left 
 		//and the same convention is used for bank angles 
-		SET out_s TO SIGN(az_err).
+		SET out_s TO SIGN(delaz).
 	} 
 	RETURN out_s.
 }
