@@ -11,10 +11,11 @@
 # Remarks
 
 These scripts have been tested in Kerbal Space Program 1.8.1 and 1.9.1.
-They are designed to do one single thing: to provide deorbit and reentry guidance for the Space Shuttle System in RSS/Realism Overhaul. Only DECQ's Shuttle is supported at the moment. 
+They are designed to do one single thing: to provide deorbit and reentry guidance for the Space Shuttle System in RSS/Realism Overhaul.
+The script was originally engineered for DECQ's Shuttle. Support was added for different spacecraft by means of configuration files in the **Scripts/Shuttle_entrysim/VESSELS** directory.
 
-The scripts are not calibrated to work in stock KSP or with anything other than the Space Shuttle.
-I'm sure they can be modified accordingly but it's not a trivial task. I do not play stock KSP and do not plan on ever releasing a version of these scripts for it. 
+The scripts are not calibrated to work in stock KSP or with anything other than Space Shuttle-like vehicles.
+I'm positive they can be modified accordingly but it's not a trivial task. I do not play stock KSP and do not plan on ever releasing a version of these scripts for it. 
 
 This code is provided as is, please keep in mind I am not a professional programmer nor an experienced mod maker. The script has most likely has several bugs within that I didn't discover with enough testing, and is certainly not the most efficient way to implement this kind of functionality. 
 
@@ -54,8 +55,7 @@ In particular, you will run two scripts:
 
 # Setup
 
-## Setting up the Space Shuttle
-
+## Setting up the Space Shuttle in the VAB
 
 **IMPORTANT**  
 These scripts are not magic and rely on the Shuttle being easy to control. I can give you hints on what to look out for but ultimately it will be
@@ -76,17 +76,23 @@ They must be Stock A.I.R.B.R.A.K.E.S. and nothing else, otherwise you will need 
 Place them either on the sides of the OMS pods or on the sides of the Engine block. Place them on the surface, do not tuck them inside or KSP will prevent them from deploying. Do not put them on the tail or on the wings or you will introduce a pitching moment.
 Make sure to add these A.I.R.B.R.A.K.E.S. to the brakes Action Group.
 
-## Setting up the rest
+## Setting up the script config files and runways
 
-In the folder **Scripts/Shuttle_entrysim_parameters** you will see a file **landing_sites.ks**. This contains the definition of the Runways available for targeting by the scripts.
+The folder **Scripts/Shuttle_entrysim/VESSELS** contains the different vehicle config files. By default I provide the **DECQ_Shuttle** folder with the files that I use.  
+There are three vehicle config files:
+- **gains.ks** which I do not advise touching unless you know what you are doing.
+- **pitch_profile.ks** which specifies the pitch versus surface velocity points that the Entry Guidance will follow. The profile I provide you with is taken directly from early Shuttle technical
+documents, therefore it as designed to respect the Shuttle's thermal limits. In KSP this is _not really_ crucial, so if you want some extra range you can bring it down to 35°.
+Bear in mind that you will be able to adjust the initial pitch value in flight, more about that later.
+- **flapcontrol.ks** which specifies which parts allow for flap control and the angle ranges of motion of each. Here you specify the names of your elevon and body flap parts. The file provided is already good for DECQ shuttle so leave it alone.
+
+In the main folder **Scripts/Shuttle_entrysim** you will see more configuration files. The only one you should pay attention to is **landing_sites.ks**. This contains the definition of the Runways available for targeting by the scripts.
 
 You must create the runways wherever you like on Earth using Kerbal Konstructs. You must then write down the coordinates of its halfway point, its length, elevation and heading
 and fill in the details in the **landing_sites.ks** folloring the formatting inside. Don't forget the name of the landing site, also.
 I provide you with my own landing sites definitions for reference, but I strongly suggest you replace the details with your own measured data for better accuracy.
 
-The file **pitch_profile.ks** specifies the pitch versus surface velocity points that the Entry Guidance will follow. The profile I provide you with is taken directly from the Shuttle technical
-documents, remember the Real shuttle had to keep a 38° high angle of attack for thermal control. In KSP we don't _really_ need that, so if you want some extra range you can bring it down to 35°.
-Bear in mind that you will be able to adjust the initial pitch value in flight, more about that later.
+
 
 # How to use
 
