@@ -128,26 +128,59 @@ FUNCTION update_ref_pitch {
 }
 
 
+//old strategy : compare curent heading and bearing to target
+//prone to angle singularities and weird stuff when flying retrograde or due north
+//FUNCTION az_error {
+//	PARAMETEr position.
+//	PARAMETER tgt_pos.
+//	PARAMETER surfv.
+//
+//
+//	//use haversine formula to get the bearings to target and impact point
+//	LOCAL tgt_bng IS bearingg(tgt_pos, position).
+//
+//	local hdg is compass_for(surfv,position).
+//	
+//
+//
+//	LOCAL out IS tgt_bng - hdg.
+//	IF ABS(out)>90 {
+//		SET out TO unfixangle(out + 180).
+//	}
+//	
+//	RETURN out.
+//}
 
+//new approach, hopefully more robust
+//simply calculate the angle between velocity vector and vector pointing to the target
 FUNCTION az_error {
-	PARAMETEr position.
+	PARAMETEr pos.
 	PARAMETER tgt_pos.
 	PARAMETER surfv.
-
-
-	//use haversine formula to get the bearings to target and impact point
-	LOCAL tgt_bng IS bearingg(tgt_pos, position).
-
-	local hdg is compass_for(surfv,position).
 	
-
-
-	LOCAL out IS tgt_bng - hdg.
-	IF ABS(out)>90 {
-		SET out TO unfixangle(out + 180).
+	IF pos:ISTYPE("geocoordinates") {
+		SET pos TO pos2vec(pos).
 	}
+	IF tgt_pos:ISTYPE("geocoordinates") {
+		SET tgt_pos TO pos2vec(tgt_pos).
+	}
+
+		
+	//vector normal to vehicle vel and in the same plane as vehicle pos
+	//defines the "plane of velocity"
+	LOCAL n1 IS VXCL(surfv,pos):NORMALIZED.
 	
-	RETURN out.
+	//vector pointing from vehicle pos to target, projected "in the plane of velocity"
+	LOCAL dr IS VXCL(n1,tgt_pos - pos):NORMALIZED.
+	
+	//clamp to -180 +180 range
+	RETURN signed_angle(
+		surfv:NORMALIZED,
+		dr,
+		n1,
+		0
+	).
+
 }
 
 

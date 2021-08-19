@@ -261,8 +261,8 @@ declare function simulate_reentry {
 	PARAMETER pitchroll_profiles.
 	PARAMETER plot_traj IS FALSE.
 	
-	LOCAL tgtpos IS tgtrwy["position"].
-	LOCAL tgtalt IS tgtrwy["elevation"] + end_conditions["altitude"].
+	LOCAL tgtpos IS tgt_rwy["position"].
+	LOCAL tgtalt IS tgt_rwy["elevation"] + end_conditions["altitude"].
 
 
 	LOCAL hdotp IS 0.

@@ -1,4 +1,7 @@
 						//DEORBIT GUI FUNCTIONS 
+						
+//GLOBAL guitextgreen IS RGB(167/255,207/255,147/255).
+GLOBAL guitextgreen IS RGB(81/255,255/255,21/255).
 
 FUNCTION make_global_deorbit_GUI {
 	//create the GUI.
@@ -8,7 +11,7 @@ FUNCTION make_global_deorbit_GUI {
 	SET main_gui:STYLe:WIDTH TO 400.
 	SET main_gui:STYLe:HEIGHT TO 350.
 
-	set main_gui:skin:LABEL:TEXTCOLOR to RGB(167/255,207/255,147/255).
+	set main_gui:skin:LABEL:TEXTCOLOR to guitextgreen.
 
 
 	// Add widgets to the GUI
@@ -163,7 +166,7 @@ FUNCTION make_global_entry_GUI {
 	SET main_gui:STYLe:WIDTH TO 530.
 	SET main_gui:STYLe:HEIGHT TO 430.
 
-	set main_gui:skin:LABEL:TEXTCOLOR to RGB(167/255,207/255,147/255).
+	set main_gui:skin:LABEL:TEXTCOLOR to guitextgreen.
 
 
 	// Add widgets to the GUI
@@ -281,6 +284,9 @@ FUNCTION make_global_entry_GUI {
 
 FUNCTION close_global_GUI {
 	main_gui:HIDE().
+	IF (DEFINED(hud_gui)) {
+		hud_gui:HIDE.
+	}
 }
 
 //interface functions between the main loops and the GUI
@@ -644,7 +650,6 @@ FUNCTION update_entry_GUI {
 								
 
 FUNCTION make_apch_GUI {
-
 	
 	SET select_rwy:ONCHANGE to { 
 		PARAMETER rwy.	
@@ -657,16 +662,29 @@ FUNCTION make_apch_GUI {
 		SET runway["hac_side"] TO side.
 		define_hac(runway,apch_params).
 	}.
+	
+	
+	SET main_gui:STYLe:HEIGHT TO 130.
 
 
-	set main_gui:skin:horizontalslider:BG to "Shuttle_entrysim/src/gui_images/brakeslider.png".
-	set main_gui:skin:horizontalsliderthumb:BG to "Shuttle_entrysim/src/gui_images/hslider_thumb.png".
-	set main_gui:skin:horizontalsliderthumb:HEIGHT to 17.
-	set main_gui:skin:horizontalsliderthumb:WIDTH to 20.
-	set main_gui:skin:verticalslider:BG to "Shuttle_entrysim/src/gui_images/vspdslider2.png".
-	set main_gui:skin:verticalsliderthumb:BG to "Shuttle_entrysim/src/gui_images/vslider_thumb.png".
-	set main_gui:skin:verticalsliderthumb:HEIGHT to 20.
-	set main_gui:skin:verticalsliderthumb:WIDTH to 17.
+	GLOBAL hud_gui is gui(430,320).
+	SET hud_gui:X TO 1720.
+	SET hud_gui:Y TO 300.
+	SET hud_gui:STYLe:WIDTH TO 430.
+	SET hud_gui:STYLe:HEIGHT TO 320.
+	SET hud_gui:style:BG to "Shuttle_entrysim/src/gui_images/hudbackground.png".
+	SET hud_gui:skin:LABEL:TEXTCOLOR to guitextgreen.
+	hud_gui:SHOW.
+
+
+	set hud_gui:skin:horizontalslider:BG to "Shuttle_entrysim/src/gui_images/brakeslider.png".
+	set hud_gui:skin:horizontalsliderthumb:BG to "Shuttle_entrysim/src/gui_images/hslider_thumb.png".
+	set hud_gui:skin:horizontalsliderthumb:HEIGHT to 17.
+	set hud_gui:skin:horizontalsliderthumb:WIDTH to 20.
+	set hud_gui:skin:verticalslider:BG to "Shuttle_entrysim/src/gui_images/vspdslider2.png".
+	set hud_gui:skin:verticalsliderthumb:BG to "Shuttle_entrysim/src/gui_images/vslider_thumb.png".
+	set hud_gui:skin:verticalsliderthumb:HEIGHT to 20.
+	set hud_gui:skin:verticalsliderthumb:WIDTH to 17.
 
 
 	GLOBAL hud_container IS main_gui:ADDHLAYOUT().
@@ -677,7 +695,7 @@ FUNCTION make_apch_GUI {
 	hud_container:addspacing(50).
 
 
-	GLOBAL hud IS hud_container:ADDVLAYOUT().
+	GLOBAL hud IS hud_gui:ADDVLAYOUT().
 
 	GLOBAL hdg IS hud:ADDHLAYOUT().
 	SET hdg:STYLE:ALIGN TO "Center".
