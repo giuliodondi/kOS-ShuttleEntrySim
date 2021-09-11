@@ -201,7 +201,8 @@ If you're low on energy pick the runway and HAC side nearest to you to reduce th
 
 Keep in mind that the approach path is completely dumb and oblivious to your energy state, contrary to the real Space Shuttle Guidance. 
 
-The approach GUI will create an undocked HUD thta you can drag wherever you like. Here is a screenshot with labels describing the features:
+The approach GUI will create an undocked HUD thta you can drag wherever you like. Here is a screenshot with labels describing the features:  
+
 ![hud_example](https://github.com/giuliodondi/kOS-ShuttleEntrySim/blob/master/hud_example.png)
 
 The program will simulate the Shuttle a couple seconds in the future and measure the deviations from the guidance profile. The diamond-shaped pipper displays this deviation in a way that suggests where the nose should be pointed to correct the error.
