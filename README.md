@@ -199,6 +199,8 @@ If you're low on energy pick the runway and HAC side nearest to you to reduce th
 
 Keep in mind that the approach path is completely dumb and oblivious to your energy state, contrary to the real Space Shuttle Guidance. 
 
+![hud_example](./hud_example.jpg)
+
 Speedbrakes are controlled either manually using the throttle slider or automatically by the script. A button lets you switch between the modes.
 Leave them on manual and closed until you are stabilised on the descent profile and the pipper is mostly centered, you don't want to waste energy until you are sure 
 you have plenty to spare.
