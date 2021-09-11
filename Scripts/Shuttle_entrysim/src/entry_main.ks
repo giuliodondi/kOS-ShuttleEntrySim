@@ -95,6 +95,7 @@ IF NOT (DEFINED gimbals) {
 	GLOBAL gimbals IS englist[0]:GIMBAL.
 }
 
+activate_flaps(flap_control["parts"]).
 
 //if conducting an ALT this will prevent the entry guidance from running
 //the flap trim logic is contained within entry guidance block
@@ -111,32 +112,22 @@ IF SHIP:ALTITUDE>constants["apchalt"] {
 	//gg:DOEVENT("Show actuation toggles").
 	gimbals:DOACTION("toggle gimbal roll", TRUE).
 	gimbals:DOACTION("toggle gimbal yaw", TRUE).
-	
-	RUNPATH("0:/Shuttle_entrysim/VESSELS/" + vessel_dir + "/flapcontrol").
-
-	
-
-	activate_flaps(flap_control["parts"]).
-
 
 	entry_loop().
-	
-	deactivate_flaps(flap_control["parts"]).
-
 
 	//remove entry GUI sections
 	clean_entry_gui().
 
 }
 
-
+deactivate_flaps(flap_control["parts"]).
 
 SET mode TO 3.
-SET CONFIG:IPU TO 1000.
+SET CONFIG:IPU TO 600.
 
 
-get_closest_ldg_site().
-
+LOCAL closest_out IS get_closest_site(ldgsiteslex).
+SET select_tgt:INDEX TO closest_out[0].
 
 
 SET loglex["range"] TO 0.
@@ -164,7 +155,7 @@ FUNCTION entry_loop{
 
 IF quitflag {RETURN.}
 
-//SET STEERINGMANAGER:MAXSTOPPINGTIME TO 8. 
+
 
 //steer towards an initial direction before starting the whole thing
 //the direction is defined by the first profile pithch value and zero roll
@@ -326,7 +317,7 @@ UNTIL FALSE {
 	}
 	
 	//wil not command any roll above this altitude
-	IF (SHIP:ALTITUDE < constants["firstrollalt"]) AND (SAS) {
+	IF ( is_auto_steering() AND SHIP:ALTITUDE < constants["firstrollalt"]) AND (SAS) {
 		SAS OFF.
 	}
 
@@ -531,6 +522,14 @@ define_hac(runway,apch_params).
 make_apch_GUI().
 
 
+//lexicon to measure vertical G force 
+LOCAL nz IS LEXICON(
+							"cur_t",TIME:SECONDS,
+							"dt",0,
+							"cur_nz",0,
+							"cur_hdot",SHIP:VERTICALSPEED
+	).
+
 
 //gear and brakes trigger
 WHEN mode=6 THEN {
@@ -598,12 +597,18 @@ UNTIL FALSE{
 		SET deltas TO mode6(simstate,runway,apch_params).
 	}
 	
+	SET nz TO update_g_force(nz).
+	
 	SET airbrake_control["spdbk_val"] TO speed_control(is_autoairbk(),airbrake_control["spdbk_val"],mode).
+	
+	SET flap_control TO flaptrim_control_apch( flap_control).
 
 	update_apch_GUI(
 		diamond_deviation(deltas,mode),
 		mode_dist(simstate,runway,apch_params),
-		airbrake_control["spdbk_val"]
+		airbrake_control["spdbk_val"],
+		flap_control["deflection"],
+		nz["cur_nz"]
 	).
 	
 	

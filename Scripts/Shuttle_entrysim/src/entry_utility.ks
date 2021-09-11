@@ -470,6 +470,8 @@ FUNCTION  flaptrim_control{
 	LOCAL flap_incr IS  FLAPPID:UPDATE(TIME:SECONDS,flap_control["pitch_control"][0]).
 	SET flap_control["deflection"] TO  flap_control["deflection"] + flap_incr.
 	
+	print flap_control["pitch_control"][0] at (0,10).
+	
 	deflect_flaps(flap_control["parts"] , flap_control["deflection"]).
 	
 	
@@ -478,6 +480,8 @@ FUNCTION  flaptrim_control{
 
 FUNCTION activate_flaps {
 	PARAMETER flap_parts.
+	
+
 	
 	FOR f in flap_parts {
 		LOCAL fmod IS f["flapmod"].
@@ -499,15 +503,16 @@ FUNCTION deactivate_flaps {
 	
 	deflect_flaps(flap_parts , 0).
 	
-	FOR f in flap_parts {
-		LOCAL fmod IS f["flapmod"].
-		fmod:SETFIELD("Flp/Splr dflct",0).
-		wait 0.
-		LOCAL flapset IS fmod:GETFIELD("Flap Setting").
-		FROM {local k is flapset.} UNTIL k=0  STEP {set k to k-1.} DO {
-			fmod:DOACTION("Decrease Flap Deflection", TRUE).
-		}
-	}
+	//leave the flaps enabled to let the user manipulate them manually
+	//FOR f in flap_parts {
+	//	LOCAL fmod IS f["flapmod"].
+	//	fmod:SETFIELD("Flp/Splr dflct",0).
+	//	wait 0.
+	//	LOCAL flapset IS fmod:GETFIELD("Flap Setting").
+	//	FROM {local k is flapset.} UNTIL k=0  STEP {set k to k-1.} DO {
+	//		fmod:DOACTION("Decrease Flap Deflection", TRUE).
+	//	}
+	//}
 }
 
 FUNCTION deflect_flaps{

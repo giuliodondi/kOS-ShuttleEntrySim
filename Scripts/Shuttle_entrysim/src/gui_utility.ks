@@ -597,6 +597,9 @@ FUNCTION is_guidance {
 	RETURN guidb:PRESSED.
 }
 
+FUNCTION is_auto_steering {
+	RETURN sasb:PRESSED.
+}
 
 
 FUNCTION get_roll_slider {
@@ -668,9 +671,9 @@ FUNCTION make_apch_GUI {
 
 
 	GLOBAL hud_gui is gui(430,320).
-	SET hud_gui:X TO 1720.
-	SET hud_gui:Y TO 300.
-	SET hud_gui:STYLe:WIDTH TO 430.
+	SET hud_gui:X TO 200.
+	SET hud_gui:Y TO 200.
+	SET hud_gui:STYLe:WIDTH TO 450.
 	SET hud_gui:STYLe:HEIGHT TO 320.
 	SET hud_gui:style:BG to "Shuttle_entrysim/src/gui_images/hudbackground.png".
 	SET hud_gui:skin:LABEL:TEXTCOLOR to guitextgreen.
@@ -700,7 +703,7 @@ FUNCTION make_apch_GUI {
 	GLOBAL hdg IS hud:ADDHLAYOUT().
 	SET hdg:STYLE:ALIGN TO "Center".
 	SET hdg:STYLe:HEIGHT TO 20.
-	hdg:addspacing(150).
+	hdg:addspacing(162).
 	GLOBAL hdg_box IS hdg:ADDHLAYOUT().
 	SET hdg_box:STYLe:WIDTH TO 60.
 	SET hdg_box:STYLe:HEIGHT TO 20.
@@ -710,10 +713,21 @@ FUNCTION make_apch_GUI {
 
 
 	GLOBAL hud_main IS hud:ADDHLAYOUT().
-	SET hud_main:STYLe:WIDTH TO 400.
+	SET hud_main:STYLe:WIDTH TO 430.
 	SET hud_main:STYLe:HEIGHT TO 240.
 	SET hud_main:STYLE:ALIGN TO "Center".
 	hud_main:addspacing(0).
+	
+	GLOBAL flaptrim_sliderbox IS hud_main:ADDVLAYOUT().
+	SET flaptrim_sliderbox:STYLe:WIDTH TO 15.
+	SET flaptrim_sliderbox:STYLE:ALIGN TO "right".
+	flaptrim_sliderbox:addspacing(72).
+	GLOBAL flaptrim_slider is flaptrim_sliderbox:addvslider(0,0.5,-0.5).
+	SET flaptrim_slider:STYLE:ALIGN TO "Center".
+	SET flaptrim_slider:style:vstretch to false.
+	SET flaptrim_slider:style:hstretch to false.
+	SET flaptrim_slider:STYLE:WIDTH TO 20.
+	SET flaptrim_slider:STYLE:HEIGHT TO 100.
 
 
 	GLOBAL hud_spd IS hud_main:ADDVLAYOUT().
@@ -725,6 +739,15 @@ FUNCTION make_apch_GUI {
 	SET spdbox:STYLe:HEIGHT TO 30.
 	GLOBAL spd_text IS spdbox:ADDLABEL("").
 	SET spd_text:STYLE:ALIGN TO "Center".
+	
+
+	GLOBAL hud_nz IS hud_spd:ADDHLAYOUT().
+	SET hud_nz:STYLe:WIDTH TO 60.
+	SET hud_nz:STYLe:HEIGHT TO 60.
+	hud_nz:addspacing(55).
+	GLOBAL nz_text IS hud_nz:ADDLABEL("").
+	SET nz_text:STYLe:WIDTH TO 100.
+	SET nz_text:STYLE:ALIGN TO "Right".
 
 
 
@@ -776,7 +799,7 @@ FUNCTION make_apch_GUI {
 	SET bottom_box:STYLe:WIDTH TO 400.
 	//SET bottom_box:STYLE:ALIGN TO "left".
 
-	bottom_box:addspacing(30).
+	bottom_box:addspacing(75).
 
 	GLOBAL bottom_txtbox IS bottom_box:ADDHLAYOUT().
 	SET bottom_txtbox:STYLe:WIDTH TO 185.
@@ -866,6 +889,8 @@ FUNCTION update_apch_GUI {
 	PARAMETER pipper_pos.
 	PARAMETEr modedist.
 	PARAMETER spdbk_val.
+	PARAMETER flapval.
+	PARAMETER cur_nz.
 
 	SET diamond:STYLE:margin:h TO pipper_pos[0].
 	SET diamond:STYLE:margin:v TO pipper_pos[1]. 
@@ -880,8 +905,12 @@ FUNCTION update_apch_GUI {
 		SET alt_text:text TO "<size=18>" + ROUND(SHIP:ALTITUDE,0) + "</size>".
 	}	
 	
+	SET nz_text:text TO "<size=18>" + ROUND(cur_nz,1) + "G</size>".
+	
 	SET mode_dist_text:text TO "<size=18>" + ROUND(modedist,1) + "</size>".
 		
 	SET spdbk_slider:VALUE TO spdbk_val.
+	
+	SET flaptrim_slider:VALUE TO flapval.
 
 }

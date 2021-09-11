@@ -164,37 +164,8 @@ FUNCTION define_hac {
 
 
 
-
-//determine which landing site is the closest
-FUNCTION get_closest_ldg_site {
-
-
-	LOCAL pos IS SHIP:GEOPOSITION.
-
-	LOCAL min_dist IS 0.
-	LOCAL closest_site IS 0.
-	LOCAL k IS 0.
-
-	FOR s in ldgsiteslex:KEYS {
-		
-		LOCAL site IS ldgsiteslex[s].
-		LOCAL sitepos IS site["position"].
-		
-		LOCAL sitedist IS downrangedist(pos,sitepos).
-
-		IF (min_dist = 0) {
-			SET min_dist TO sitedist.
-			SET closest_site TO k.
-		} ELSE {
-			IF (min_dist > sitedist) {
-				SET min_dist TO sitedist.
-				SET closest_site TO k.
-			}
-		}
-		SET k TO k + 1.
-	}
-	SET select_tgt:INDEX TO  closest_site.
-}
+//moved closest_site function to navigation library so it could 
+//be used by ops1 abort functions
 
 
 //update the entry point to the HAC
@@ -712,4 +683,31 @@ FUNCTION define_flare_circle {
 
 }
 
+FUNCTION flaptrim_control_apch {
+	PARAMETER flap_control.
+	
+	SET flap_control["deflection"] TO  SHIP:CONTROL:PILOTPITCHTRIM..
+	
+	deflect_flaps(flap_control["parts"] , -flap_control["deflection"]*25).
+	
+	
+	RETURN flap_control.
 
+}
+
+FUNCTION update_g_force {
+	PARAMETER nz.
+	
+	LOCAL g0 IS 9.80665.
+	LOCAL cur_t IS TIME:SECONDS.
+	LOCAL cur_hdot IS SHIP:VERTICALSPEED.
+	SET nz["dt"] TO cur_t - nz["cur_t"].
+	
+	IF nz["dt"]>0 {
+		SET nz["cur_nz"] TO (cur_hdot- nz["cur_hdot"])/(g0*nz["dt"]) + 1.
+	}
+	SET nz["cur_hdot"] TO cur_hdot.
+	SET nz["cur_t"] TO cur_t.
+
+	RETURN nz.
+}

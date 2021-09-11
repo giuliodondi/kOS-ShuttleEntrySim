@@ -22,6 +22,7 @@ If (SHIP:ALTITUDE >= constants["atmalt"]) {
 	RUNPATH("0:/Shuttle_entrysim/VESSELS/" + vessel_dir + "/pitch_profile").
 	RUNPATH("0:/Shuttle_entrysim/landing_sites").
 	RUNPATH("0:/Shuttle_entrysim/parameters").
+	RUNPATH("0:/Shuttle_entrysim/VESSELS/" + vessel_dir + "/flapcontrol").
 
 
 	//	Load libraries

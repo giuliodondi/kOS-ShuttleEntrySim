@@ -3,7 +3,7 @@
 									//	NAVIGATION FUNCTIONS
 
 
-//GEBERAL NAVIGATION FUNCTIONS 
+//GENERAL NAVIGATION FUNCTIONS 
 
 
 //given a position vector returns altitude above the body datum
@@ -70,6 +70,7 @@ function vec2pos {
 
 //moves a position along the surface of the body by a given time 
 //mimics the body's rotation on its axis
+//positive time values rotate the position due WEST
 FUNCTION shift_pos {
 	PARAMETER pos.
 	PARAMETER dt.
@@ -166,7 +167,102 @@ FUNCTION new_position {
 }
 
 
+//determine which site is the closest to the current position.
+// takes in a lexicon of sites which are themselves lexicons
+// each must have at least the "position" field defined
+FUNCTION get_closest_site {
+	PARAMETER sites_lex.
 
+	LOCAL pos IS SHIP:GEOPOSITION.
+
+	LOCAL min_dist IS 0.
+	LOCAL closest_site IS 0.
+	LOCAL closest_site_idx IS 0.
+	LOCAL k IS 0.
+
+	FOR s in sites_lex:KEYS {
+		
+		LOCAL site IS sites_lex[s].
+		LOCAL sitepos IS site["position"].
+		
+		LOCAL sitedist IS downrangedist(pos,sitepos).
+
+		IF (min_dist = 0) {
+			SET min_dist TO sitedist.
+			SET closest_site TO sitepos.
+			SET closest_site_idx TO k.
+		} ELSE {
+			IF (min_dist > sitedist) {
+				SET min_dist TO sitedist.
+				SET closest_site TO sitepos.
+				SET closest_site_idx TO k.
+			}
+		}
+		SET k TO k + 1.
+	}
+	RETURN LIST(closest_site_idx,closest_site).
+}
+
+
+
+
+//ORBITAL MECHANICS FUNCTIONS
+
+
+//computes time taken from periapsis to given true anomaly
+//for differences of true anomalies call twice and subtract times
+declare function eta_to_dt {
+
+	parameter etaa.
+	parameter sma.
+	parameter ecc.
+
+	local COS_ee IS (ecc + COS(fixangle(etaa)))/(1 + ecc*COS(fixangle(etaa))).
+
+	LOCAL ee IS ARCCOS(limitarg(COS_ee)).			
+
+	LOCAL mean_an IS deg2rad(ee)  - ecc*SIN(ee).
+	
+	IF etaa>180 { SET mean_an TO 2*CONSTANT:PI - mean_an.}
+	
+	LOCAL n IS SQRT(sma^3/(SHIP:ORBIT:BODY:MU)).
+	
+
+	RETURN n*mean_an.
+}
+
+//given true anomaly at t0 and a time interval, computes new true anomaly
+//approximation correct at ecc^3
+
+declare function t_to_eta {
+	parameter etaa0.
+	parameter dt.
+	parameter sma.
+	parameter ecc.
+	
+	
+	local COS_ee IS (ecc + COS(fixangle(etaa0)))/(1 + ecc*COS(fixangle(etaa0))). 
+	LOCAL ee IS ARCCOS(limitarg(COS_ee)).
+
+	LOCAL mean_an IS deg2rad(ee)  - ecc*SIN(ee).
+	
+	IF etaa0>180 { SET mean_an TO 2*CONSTANT:PI - mean_an.}
+	
+
+	LOCAL n IS SQRT(sma^3/(SHIP:ORBIT:BODY:MU)).
+	
+	SET mean_an TO mean_an + dt/n.
+	
+	local out is mean_an.
+	
+	SET mean_an TO  fixangle(rad2deg(mean_an)).
+
+	SET out TO out + ecc*(2*SIN(mean_an) + 1.25*ecc*SIN(2*mean_an)).
+	
+	RETURN fixangle(rad2deg(out)).
+
+}
+		
 
 
 
