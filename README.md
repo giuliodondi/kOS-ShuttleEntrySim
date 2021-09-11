@@ -126,6 +126,8 @@ It's not a stupid idea to eyeball it using Google Earth in a separate window. If
 Make sure not to have more than about 4 tons or 180 m/s deltaV worth of OMS propellant before the deorbit burn.
 
 One orbit before your desired landing pass, create a manoeuvre node and adjust it so your periapsis is about 20km high and about 1000km after the landing site.
+The program will still display deorbit predictions even if there is no manoeuvre node, as long as your current trajectory brings you deep into the atmosphere.
+
 Then, run **deorbit.ks**. In the GUI window that opens select immediately your desired landing site from the list.
 This script extrapolates the conic trajectory from the manoeuvre node to the **Entry Interface** point, where you cross the 122km altitude line. It displays several pieces of data about your
 predicted state at entry interface. From there, it simulates the reentry trajectory using the Guidance algorithm and the specified profiles, drawing the trajectory in the Map view and displaying 
@@ -192,21 +194,28 @@ Do not switch to approach until you're below 25 km and ~30 km from the target, f
 - if you disconnect far away from the site you will most likely not fly the pitch-roll profile exactly and thus the range calculatons are meaningless
 - when transitioning between entry and approach guidance, the script calculates which landing site you're closest to and locks it . If you transition far away you might be closest to a different landing site than the one you planned.
 
-
-Using the buttons, up at the top, choose a combination runway/HAC side based on your inbound heading and how far you are from the actual runway. 
+The first thing is to set up the guidance profile.
+Using the buttons up at the top, choose a combination runway/HAC side based on your inbound heading and how far you are from the actual runway. 
 To simulate a real Shuttle approach you should fly over the runway and turn around a HAC on the opposide side of where you came from.
 If you're low on energy pick the runway and HAC side nearest to you to reduce the distance to be travelled.
 
 Keep in mind that the approach path is completely dumb and oblivious to your energy state, contrary to the real Space Shuttle Guidance. 
 
-![hud_example](./hud_example.jpg)
+The approach GUI will create an undocked HUD thta you can drag wherever you like. Here is a screenshot with labels describing the features:
+![hud_example](https://github.com/giuliodondi/kOS-ShuttleEntrySim/blob/master/hud_example.png)
+
+The program will simulate the Shuttle a couple seconds in the future and measure the deviations from the guidance profile. The diamond-shaped pipper displays this deviation in a way that suggests where the nose should be pointed to correct the error.
+Your focus should be on following the pipper diamond around with gentle commands. The pipper will guide you through several approach phases that align the Shuttle with the runway and settle it on the proper glideslope for landing.
 
 Speedbrakes are controlled either manually using the throttle slider or automatically by the script. A button lets you switch between the modes.
 Leave them on manual and closed until you are stabilised on the descent profile and the pipper is mostly centered, you don't want to waste energy until you are sure 
 you have plenty to spare.
 
+You can (and should) use some pitch trim to help you during approach. The elevons and body flap will deflect according to the pitch trim setting, you will only need a little.
+
 Needless to say, to fly the shuttle manually it's best to use a flight stick or, at the very least, some kind of gaming controller. 
-Even so, following the pipper around the HAC is hard. It doesn't need to be very centered but it should not escape beyond the GUI window. It is especially important to be on profile 
+Even so, following the pipper around the HAC is hard. The pipper is sensitive to control surface deflections and will jitter around if you're hard on the control inputs, that's why you need to be gentle and trim your controls.
+The pipper doesn't need to be very centered but it should not escape beyond the GUI window. It is especially important to be on profile 
 near the end of the HAC turn since during the final descent on glideslope there is not much time to get back on profile. It takes practice.
 
 
