@@ -262,8 +262,6 @@ FUNCTION pitchroll_profiles_entry {
 }
 
 
-
-
 //new version which expects a global list of vel-pitch points 
 // and builds the profile by linear interpolation
 //if vel is higher than the highest velocity point it will update the reference 
@@ -281,6 +279,40 @@ FUNCTION pitch_profile {
 	}
 
 	RETURN out.
+}
+
+
+
+
+//alternative pitch modulation logic based on range error
+//create a profile of acceptable range error values vs velocity
+//if the range error is outside this band , increase or decrease pitch to adjust drag 
+//the pitch delta is scaled to the current pitch times a gain
+FUNCTION pitch_modulation {
+	PARAMETER range_err.
+	PARAMETER pitchv.
+	
+	
+	LOCAL range_err_profile IS LIST(
+								LIST(250,5),
+								LIST(8000,30)
+								).
+	
+	LOCAL range_band IS INTPLIN(range_err_profile,SHIP:VELOCITY:SURFACE:MAG).
+	
+	LOCAL pitch_corr IS 0.
+	
+	//the pitch correction should have the same sign as the range error
+	//i.e. negative if we're short and positive if we're long
+	//the correction is scaled to be between 0 and 1 when the range error is between 1x and 2x the range_band
+	IF ABS(range_err) > range_band {
+		SET pitch_corr TO SIGN(range_err) * ABS(range_err/range_band) - 1 * pitchv *  gains["pchmod"].
+	}
+	
+	print "range band " + range_band at (0,14).
+	print "modulated pitch " + (pitchv + pitch_corr) at (0,15).
+	
+	RETURN pitchv + pitch_corr.
 }
 
 

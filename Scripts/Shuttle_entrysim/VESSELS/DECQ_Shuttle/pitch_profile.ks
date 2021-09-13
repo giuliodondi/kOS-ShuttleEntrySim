@@ -15,11 +15,20 @@
 //}
 
 //	40/30
+//IF NOT (DEFINEd pitchprof_segments) {
+//	GLOBAL pitchprof_segments IS LIST(
+//								LIST(250,3),
+//								LIST(1800,30),
+//								LIST(5300,30),
+//								LIST(6700,40)
+//								).
+//}
+
+//40
 IF NOT (DEFINEd pitchprof_segments) {
 	GLOBAL pitchprof_segments IS LIST(
 								LIST(250,3),
-								LIST(1800,30),
-								LIST(5300,30),
+								LIST(3000,40),
 								LIST(6700,40)
 								).
 }

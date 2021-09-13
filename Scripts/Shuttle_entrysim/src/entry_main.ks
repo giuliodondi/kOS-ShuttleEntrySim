@@ -207,6 +207,7 @@ IF EXISTS(gains_log_path) {RUNPATH(gains_log_path).}
 ELSE {GLOBAL gains IS LEXICON(	"rangeKP",0.008,
 								"rangeKD",0.001,
 								"Khdot",2,
+								"pchmod",0.1,
 								"strmgr",60,
 								"pitchKD",0.05,
 								"yawKD",0.05,
@@ -413,13 +414,19 @@ UNTIL FALSE {
 		//get updated pitch and roll from the profiles
 		LOCAL out IS pitchroll_profiles_entry(LIST(roll_ref,pitch_ref),LIST(rollv,pitchv),current_simstate(),hddot,az_err,az_err_band).
 		LOCAL new_roll IS out[0].
-		SET pitchv TO out[1].
+		SET pitch_ref TO out[1].
+		SET pitchv TO pitch_ref.
+		
 			
 		
 		//use it only if the reference roll value is converged
-		IF (NOT start_guid_flag AND ABS(roll_ref - roll_ref_p) <constants["rolltol"]) OR start_guid_flag {
+		IF start_guid_flag OR (NOT start_guid_flag AND ABS(roll_ref - roll_ref_p) <constants["rolltol"]) {
 			SET rollv TO new_roll.
 			SET start_guid_flag TO TRUE.
+			//only if guidance is converged and if we're below first roll alt do pitch modulation
+			IF SHIP:ALTITUDE < constants["firstrollalt"] {		
+				SET pitchv TO pitch_modulation(range_err,pitch_ref).
+			}
 		}
 		
 		
@@ -433,7 +440,7 @@ UNTIL FALSE {
 	}
 	
 	
-	update_entry_GUI(rollv, pitchv, az_err, tgt_range, range_err, roll_ref , is_guidance(), update_reference ).
+	update_entry_GUI(rollv, pitchv, az_err, tgt_range, range_err, roll_ref, pitch_ref, is_guidance(), update_reference ).
 	
 	
 	if is_log() {

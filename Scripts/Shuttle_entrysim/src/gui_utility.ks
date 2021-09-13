@@ -335,19 +335,21 @@ FUNCTION make_entry_GUI {
 	SET databox:STYLE:ALIGN TO "left".
 	set databox:style:padding:h to 10.
 	SET databox:STYLE:WIDTH TO 230.
-	SET databox:STYLE:HEIGHT TO 135.
+	SET databox:STYLE:HEIGHT TO 165.
 
 	GLOBAL text0 IS databox:ADDLABEL("      Mach       : ").
 	GLOBAL text1 IS databox:ADDLABEL(" Azimuth Error   : ").
 	GLOBAL text2 IS databox:ADDLABEL("Distance to TGT  : ").
 	GLOBAL text3 IS databox:ADDLABEL("Downrange error  : ").
 	GLOBAL text4 IS databox:ADDLABEL("Reference Roll   : ").
+	GLOBAL text5 IS databox:ADDLABEL("Reference Pitch   : ").
 
 	SET text0:STYLE:ALIGN TO "left".
 	SET text1:STYLE:ALIGN TO "left".
 	SET text2:STYLE:ALIGN TO "left".
 	SET text3:STYLE:ALIGN TO "left".
 	SET text4:STYLE:ALIGN TO "left".
+	SET text5:STYLE:ALIGN TO "left".
 
 
 	leftbox:addspacing(6).	
@@ -465,7 +467,7 @@ FUNCTION make_entry_GUI {
 
 	function gainsgui {
 	  //create the gains gui
-		GLOBAL gains_gui is gui(150,130).
+		GLOBAL gains_gui is gui(180,200).
 		SET gains_gui:X TO main_gui:X.
 		SET gains_gui:Y TO main_gui:Y + 500.
 		GLOBAL gainstext IS gains_gui:ADDLABEL("<size=18>Controller Gains</size>").
@@ -473,7 +475,7 @@ FUNCTION make_entry_GUI {
 		
 		GLOBAL gainsbox IS gains_gui:ADDVLAYOUT().
 		SET gainsbox:STYLE:ALIGN TO "center".
-		SET gainsbox:STYLE:WIDTH TO 150.
+		SET gainsbox:STYLE:WIDTH TO 180.
 		GLOBAL p_gain IS gainsbox:addhlayout().
 		GLOBAL p_gain_text IS p_gain:addlabel("Range P Gain: ").
 		GLOBAL Kp_box is p_gain:addtextfield(gains["rangeKP"]:tostring).
@@ -489,6 +491,11 @@ FUNCTION make_entry_GUI {
 		GLOBAL Khdot_box is hdot_gain:addtextfield(gains["Khdot"]:tostring).
 		set Khdot_box:style:width to 65.
 		set Khdot_box:style:height to 18.
+		GLOBAL pchmod_gain IS gainsbox:addhlayout().
+		GLOBAL pchmod_gain_text IS pchmod_gain:addlabel("Pitch mod Gain: ").
+		GLOBAL pchmod_box is pchmod_gain:addtextfield(gains["pchmod"]:tostring).
+		set pchmod_box:style:width to 65.
+		set pchmod_box:style:height to 18.
 		GLOBAL strmgr_gain IS gainsbox:addhlayout().
 		GLOBAL strmgr_gain_text IS strmgr_gain:addlabel("Stopping T: ").
 		GLOBAL strmgr_box is strmgr_gain:addtextfield(gains["strmgr"]:tostring).
@@ -530,6 +537,13 @@ FUNCTION make_entry_GUI {
 			set val to val:tonumber(gains["Khdot"]).
 			if val < 0 set val to 0.
 			set gains["Khdot"] to val.
+			log_gains(gains,gains_log_path).
+		}.
+		set pchmod_box:onconfirm to { 
+			parameter val.
+			set val to val:tonumber(gains["pchmod"]).
+			if val < 0 set val to 0.
+			set gains["pchmod"] to val.
 			log_gains(gains,gains_log_path).
 		}.
 		set strmgr_box:onconfirm to { 
@@ -618,6 +632,7 @@ FUNCTION update_entry_GUI {
 	PARAMETER tgt_range.
 	PARAMETER range_err.
 	PARAMETER roll_ref.
+	PARAMETER pitch_ref.
 	PARAMETER isguidance.	
 	PARAMETER update_reference.
 
@@ -635,6 +650,7 @@ FUNCTION update_entry_GUI {
 	SET text2:text TO "<size=15>Distance to TGT  :  " + ROUND(tgt_range,1) + " km</size>".
 	SET text3:text TO "<size=15>Downrange error  :  " + ROUND(range_err,1) + " km</size>".
 	SET text4:text TO "<size=15>Reference roll    :  " + ROUND(roll_ref,1) + " °</size>".
+	SET text5:text TO "<size=15>Reference pitch   :  " + ROUND(pitch_ref,1) + " °</size>".
 
 }
 
