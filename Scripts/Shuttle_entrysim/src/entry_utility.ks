@@ -294,7 +294,7 @@ FUNCTION pitch_modulation {
 	
 	
 	LOCAL range_err_profile IS LIST(
-								LIST(250,5),
+								LIST(250,3),
 								LIST(8000,30)
 								).
 	
@@ -304,9 +304,9 @@ FUNCTION pitch_modulation {
 	
 	//the pitch correction should have the same sign as the range error
 	//i.e. negative if we're short and positive if we're long
-	//the correction is scaled to be between 0 and 1 when the range error is between 1x and 2x the range_band
+	//the correction is scaled to be between 0 and 1 when the range error is between 0.5x and 1.5x the range_band
 	IF ABS(range_err) > range_band {
-		SET pitch_corr TO SIGN(range_err) * ABS(range_err/range_band) - 1 * pitchv *  gains["pchmod"].
+		SET pitch_corr TO SIGN(range_err) * CLAMP((ABS(range_err/range_band) - 1),0,1) * pitchv *  gains["pchmod"].
 	}
 	
 	print "range band " + range_band at (0,14).
