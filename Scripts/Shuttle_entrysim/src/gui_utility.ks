@@ -391,6 +391,10 @@ FUNCTION make_entry_GUI {
 
 
 	GLOBAL guidb IS  sasbox:ADDCHECKBOX("Enable Guidance",false).
+	SET guidb:ONTOGGLE TO {
+		PARAMETER val.
+		SET reset_entry_flag TO TRUE.
+	}.
 
 
 	GLOBAL sliderbox IS rightbox:ADDVLAYOUT().
