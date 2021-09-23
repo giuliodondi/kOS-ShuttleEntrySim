@@ -19,14 +19,14 @@ I'm positive they can be modified accordingly but it's not a trivial task. I do 
 
 This code is provided as is, please keep in mind I am not a professional programmer nor an experienced mod maker. The script has most likely has several bugs within that I didn't discover with enough testing, and is certainly not the most efficient way to implement this kind of functionality. 
 
-I will welcome bug reports or improvement suggestions, although I make no promise to act on them promptly or ever.
+I encourage bug reports or improvement suggestions, although I make no promise to act on them promptly or ever.
 I will not be available around the clock to help you get it working, I do not have the time unfortunately.
 If you decide to modify the code yourself you do so 100% on your own.
 
 # Installation
 
 **Required mods:**
-- A complete install of RSS/Realism Overhaul with Ferram Aerospace Resarch. INCOMPATIBLE WITH FAR 0.16.0.2, use 0.16.0.1 or below.
+- A complete install of RSS/Realism Overhaul with Ferram Aerospace Resarch. Confrmed to work with FAR 0.16.0.1, should now also work with 0.16.0.4
 - Kerbal Operating System
 - DECQ's Space Shuttle System mod, this fork seems to be the most up-to-date : https://github.com/DylanSemrau/Space-Shuttle-System
 - RO configs that come with the Realism Overhaul package
