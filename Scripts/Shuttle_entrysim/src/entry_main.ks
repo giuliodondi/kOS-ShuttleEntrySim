@@ -357,6 +357,12 @@ UNTIL FALSE {
 	
 	//distance to target
 	set tgt_range to greatcircledist(tgtrwy["hac"], SHIP:GEOPOSITION).
+		
+	//put TAEM transition calculation here 
+	IF TAEM_transition(tgt_range) {
+		SET TAEM_flag TO TRUE.
+		BREAK.
+	}
 	
 		
 	//run the vehicle simulation
@@ -509,6 +515,219 @@ IF (NOT TAEM_flag) {
 	RETURN.
 }
 
+//update overhead hac selection 
+select_opposite_hac().
+define_hac(SHIP:GEOPOSITION,tgtrwy,apch_params).
+
+
+// put TAEM stuff here bc it has much infrastructure in common with entry guidance
+
+//TAEM is a different form of simulation guidance for low velocity (mach <3)
+//the idea is to no longer control drag through bank angle because @ low pitch and velocity we are in high L/D
+//instead we control altitude with pitch directly (we can do this in high L/D) and drag indirectly through distance to fly 
+
+//we no longer target the runway centre but the HAC entrance point and altitude (re-calculated @every loop)
+//roll is commanded to guide the simulated state to the HAC entrance point,
+//bank angle is proportional to the heading error in some way and velocity
+//pitch is the control value but it's modulated by both the reference vertical speed
+//calculated from the altitude difference between now and target and the time of simulation
+//and thebank angle to keep the vertical component of lift consistent
+//simulation terminates when we are close to the hac entry point and we overtake it
+//outside the simulation loop, we adjust pitch based on altitude errors
+
+//we aLso check the velocity at simulation termination 
+//if it's higher than the initial approach acquire phase target velocity (need to make the profile visible) we 
+//do an S-TURN : bank away from the HAC entrance point at a constant bank angle, the direction depends on HAC position
+//the simulation will always guide towards the HAC as if the S-turn were to stop immediately
+//when the final speed is low enough we stop the S-turn and start tracking the HAC 
+
+//force a lower deltat 
+SET sim_settings["deltat"] TO 10.
+
+LOCAL alt_err IS 0.
+
+SET start_guid_flag TO FALSE.
+
+//force manual speedbrakes and 30% extension
+TAEM_spdbk().
+
+//keep track of whether we are in an s-turn or not
+LOCAL is_s_turn IS FALSE.
+LOCAL s_turn_tgt_vel IS constants["TAEMtgtvel"].
+
+//guesstimate of the reference hdot value
+LOCAL hdot_ref IS -50.
+
+//TAEM loop
+UNTIL FALSE {
+
+
+	//initialise roll and pitch values to the sliders
+	SET rollv TO get_roll_slider().
+	SEt pitchv TO get_pitch_slider().
+	
+	IF reset_entry_flag {
+		SET reset_entry_flag TO FALSE.
+		SET pitch_ref TO pitchv. 
+	}
+	
+	//update HAC entry 
+	update_hac_entry_pt(SHIP:GEOPOSITION, tgtrwy, apch_params). 
+	
+	set tgt_range to greatcircledist(tgtrwy["hac_entry"], SHIP:GEOPOSITION).
+	//check if we should switch to approach 
+	apch_transition(tgt_range).
+		
+	//calculte azimuth error
+	SET az_err TO az_error(SHIP:GEOPOSITION,tgtrwy["hac_entry"],SHIP:VELOCITY:SURFACE).
+	
+	//calculate the target altitude 
+	//do it now instead of after simulation because we don't trust where the hac entry point is at the end
+	LOCAL alt_err_p IS alt_err.
+	LOCAL tgtalt IS get_hac_profile_alt(tgtrwy, apch_params).
+		
+	//run the vehicle simulation
+	LOCAL ICS IS LEXICON(
+					 "position",-SHIP:ORBIT:BODY:POSITION,
+	                 "velocity",SHIP:VELOCITY:ORBIT
+	).
+	LOCAL simstate IS blank_simstate(ICS).
+	
+	//calculate deltah now while we have the simstate set at the initial conditions
+	LOCAL deltah IS bodyalt(simstate["position"]) - tgtalt.
+		
+	SET simstate TO  simulate_TAEM(
+					sim_settings,
+					simstate,
+					tgtrwy,
+					apch_params,
+					roll_ref,
+					pitch_ref,
+					hdot_ref
+	).
+	
+	//update hdotref with the new simulation time
+	SET hdot_ref TO -deltah/simstate["simtime"].
+	
+	//calculate altitude error in km (to keep the order of magnitude of the gains)
+	LOCAL finalalt IS simstate["altitude"].
+	SET alt_err TO ( finalalt - tgtalt )/1000. 
+		
+	//calculate time elapsed since last cycle
+	LOCAL delta_t IS  TIME:SECONDS - last_T.
+	SET last_T TO TIME:SECONDS.
+		
+	//adjust the timestep adaptively
+	//the idea is to keep the number of steps roughly constant
+	//and to account for the fact that the simulation time
+	//becomes shorter and shorter as we fly the reentry profile.
+	
+	//first compute the number of steps of last simulation.
+	SET step_num TO clamp(ROUND(simstate["simtime"]/sim_settings["deltat"],0),25,50).
+	
+	//predict the next simulation time by reducing it by the cycle time
+	LOCAL next_simtime IS simstate["simtime"] - delta_t.
+	SET sim_settings["deltat"] TO  next_simtime/step_num.
+
+	
+	clearscreen.
+	print "simulation steps: " + step_num at (1,2).
+	print "timestep: " + sim_settings["deltat"] at (1,3).
+	
+	print "tgtalt : " + tgtalt at (0,8).
+	print "finalalt : " + finalalt at (0,9).
+	print "hdotref : " + hdot_ref at (0,11).
+	
+	
+	IF is_guidance() {
+		//register guidance enabled 
+		SET mode TO 2.
+	
+		//Pitch ref PID stuff
+		//invert signs to keep the signs of the gains consistent with entry guidance
+		LOCAL P IS -alt_err.
+		LOCAL D IS (alt_err_p - alt_err)/delta_t.
+
+		LOCAL delta_pitch IS  P*gains["taemKP"] + D*gains["taemKD"].
+		
+		
+		//print "alt err : " + alt_err at (1,6).
+		//print "delta pch : " + delta_pitch at (1,7).
+		
+		SET pitch_ref_p TO pitch_ref.
+		//update the reference roll value and clamp it
+		SET pitch_ref TO CLAMP(pitch_ref + delta_pitch,0,20).
+		
+		//determine if s-turn is to be commanded
+		LOCAL is_s_turn_p IS is_s_turn.
+		SET is_s_turn TO s_turn(
+			tgt_range,
+			s_turn_tgt_vel,
+			simstate["surfvel"]:MAG
+		).
+		
+		//when we exit an s-turn we raise the target velocity so we prevent re-trigger unless the velocity is way too big
+		IF (is_s_turn_p AND (NOT is_s_turn)) {
+			SET s_turn_tgt_vel TO s_turn_tgt_vel*1.1.
+		}
+
+		//get updated roll from the profiles
+		SET roll_ref TO TAEM_bank_angle(az_err, is_s_turn, tgtrwy["hac_side"]).
+		SET rollv TO roll_ref.
+		
+		SET pitchv TO TAEM_pitch_roll_cor(
+			TAEM_pitch_profile(pitch_ref, roll_ref,SHIP:VELOCITY:SURFACE:MAG,  SHIP:VERTICALSPEED - hdot_ref  ),
+			get_roll()
+		).
+
+	
+	} ELSE {
+		SET mode TO 1.
+		//in this case we use the current commanded roll value for the trajectory prediction
+		SET pitch_ref TO pitchv.
+		//reset the start guidance flag 
+		SET start_guid_flag TO FALSE.
+	}
+	
+	
+	update_TAEM_GUI(rollv, pitchv, az_err, tgt_range, alt_err, simstate["surfvel"]:MAG, pitch_ref, is_guidance(), update_reference ).
+	
+	
+	if is_log() {
+	
+		
+		//prepare list of values to log.
+		
+		SET loglex["mode"] TO mode.
+		SET loglex["time"] TO TIME:SECONDS.
+		SET loglex["alt"] TO SHIP:ALTITUDE/1000.
+		SET loglex["speed"] TO SHIP:VELOCITY:SURFACE:MAG. 
+		SET loglex["hdot"] TO SHIP:VERTICALSPEED.
+		SET loglex["range"] TO tgt_range.
+		SET loglex["lat"] TO SHIP:GEOPOSITION:LAT.
+		SET loglex["long"] TO SHIP:GEOPOSITION:LNG.
+		SET loglex["pitch"] TO get_pitch().
+		SET loglex["roll"] TO get_roll().
+		SET loglex["tgt_range"] TO tgt_range.
+		SET loglex["range_err"] TO range_err.
+		SET loglex["az_err"] TO az_err.
+		SET loglex["roll_ref"] TO roll_ref. 
+			
+			
+
+		log_data(loglex,"0:/Shuttle_entrysim/LOGS/entry_log").
+	}
+	
+	IF quitflag OR stop_entry_flag {
+		SET TAEM_flag TO FALSE.
+		BREAK.
+	}
+	wait 0.
+}
+
+SET preserve_loop TO FALSE.
+
+close_TAEM_GUI().
 
 }
 

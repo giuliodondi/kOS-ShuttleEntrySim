@@ -9,6 +9,7 @@ GLOBAL constants is LEXICON(
 					"firstrollalt",100000,
 					"apchalt",20000,
 					"rolltol",2,
-					"rollguess",45
+					"rollguess",45,
+					"TAEMtgtvel",260
 ).
 

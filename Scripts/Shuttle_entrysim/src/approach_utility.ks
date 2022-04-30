@@ -429,27 +429,6 @@ function get_hac_profile_alt {
 
 
 
-//redefine the ACQC given present position and 
-//FUNCTION define_acqc {
-//	PARAMETER cur_pos.
-//	PARAMETER acq_err.
-//	PARAMETER rwy.
-//	PARAMETER params.
-//	
-//	LOCAL entry_bng IS bearingg(rwy["hac_entry"],rwy["hac"]).
-//
-//	//for a right hac the exit bearing is the entry bearing plus the angle travelled around the hac, bar overflows
-//	// while for a left hac the reverse is true
-//	LOCAL hac_entry_sign IS 1.
-//	IF rwy["hac_side"]="left" {SET hac_entry_sign TO -1.}
-//	LOCAL exit_bng IS fixangle(entry_bng + hac_entry_sign*hac_angle).
-//	
-//	SET rwy["hac_exit"] TO  new_position(rwy["hac"],params["hac_radius"],exit_bng).
-//
-//}
-
-
-
 //give nthe current mode, returns the ground-track distance between the predicted point and 
 //the appropriate target point 
 FUNCTION mode_dist {

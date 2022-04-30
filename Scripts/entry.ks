@@ -36,6 +36,7 @@ If (SHIP:ALTITUDE >= constants["atmalt"]) {
 	RUNPATH("0:/Shuttle_entrysim/src/gui_utility").
 	RUNPATH("0:/Shuttle_entrysim/src/entry_utility").
 	RUNPATH("0:/Shuttle_entrysim/src/approach_utility").
+	RUNPATH("0:/Shuttle_entrysim/src/taem_utility").
 			
 
 	RUNPATH("0:/Shuttle_entrysim/src/entry_main").
