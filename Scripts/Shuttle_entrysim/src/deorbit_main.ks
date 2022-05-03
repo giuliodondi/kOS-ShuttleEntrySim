@@ -5,7 +5,9 @@
 
 
 FUNCTION deorbit_main {
-	
+
+	IF (DEFINED tgtrwy) {UNSET tgtrwy.}
+	GLOBAL tgtrwy IS ldgsiteslex[ldgsiteslex:keys[0]].
 	
 	make_global_deorbit_GUI().
 	
@@ -214,7 +216,7 @@ FUNCTION deorbit_main {
 			SET simstate TO  simulate_reentry(
 							sim_settings,
 							simstate,
-							tgtrwy,
+							LEXICON("position",tgtrwy["position"],"elevation",tgtrwy["elevation"]),
 							sim_end_conditions,
 							az_err_band,
 							roll_ref,

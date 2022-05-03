@@ -209,16 +209,8 @@ FUNCTION make_global_entry_GUI {
 	FOR site IN ldgsiteslex:KEYS {
 		select_tgt:addoption(site).
 	}		
-	SET select_tgt:ONCHANGE to { 
-		PARAMETER lex_key.	
-		SET tgtrwy TO ldgsiteslex[lex_key].
-		select_rwy:CLEAR.
-		FOR rwy IN tgtrwy["rwys"]:KEYS {
-			select_rwy:addoption(rwy).
-		}	
-
 		
-	}.		
+		
 
 
 
@@ -229,10 +221,10 @@ FUNCTION make_global_entry_GUI {
 	SET select_rwy:STYLE:WIDTH TO 50.
 	SET select_rwy:STYLE:HEIGHT TO 25.
 	SET select_rwy:STYLE:ALIGN TO "center".
-	FOR rwy IN tgtrwy["rwys"]:KEYS {
+	
+	FOR rwy IN ldgsiteslex[select_tgt:VALUE]["rwys"]:KEYS {
 		select_rwy:addoption(rwy).
 	}	
-
 
 	GLOBAL select_sidebox IS popup_box:ADDHLAYOUT().
 	//SET select_sidebox:STYLE:ALIGN TO "right".
@@ -243,10 +235,45 @@ FUNCTION make_global_entry_GUI {
 	SET select_side:STYLE:ALIGN TO "center".
 	select_side:addoption("Right" ).
 	select_side:addoption("Left" ).
-
-
-
-
+	
+	SET select_side:ONCHANGE to { 
+		PARAMETER side.	
+		SET tgtrwy["hac_side"] TO side.
+		define_hac(SHIP:GEOPOSITION,tgtrwy,apch_params).
+	}.
+	SET select_rwy:ONCHANGE to { 
+		PARAMETER rwy.	
+		
+		LOCAL newsite IS ldgsiteslex[select_tgt:VALUE].
+		
+		SET tgtrwy["heading"] TO newsite["rwys"][rwy]["heading"].
+		SET tgtrwy["td_pt"] TO newsite["rwys"][rwy]["td_pt"].
+		
+		select_opposite_hac().
+		
+		define_hac(SHIP:GEOPOSITION,tgtrwy,apch_params).
+	}.
+	SET select_tgt:ONCHANGE to {
+		PARAMETER lex_key.
+		
+		LOCAL newsite IS ldgsiteslex[lex_key].
+		
+		SET tgtrwy TO refresh_runway_lex(newsite).
+		
+		select_rwy:CLEAR.
+		FOR rwy IN newsite["rwys"]:KEYS {
+			select_rwy:addoption(rwy).
+		}	
+		
+		select_random_rwy().
+		
+		SET tgtrwy["heading"] TO newsite["rwys"][select_rwy:VALUE]["heading"].
+		SET tgtrwy["td_pt"] TO newsite["rwys"][select_rwy:VALUE]["td_pt"].
+		SET tgtrwy["hac_side"] TO select_side:VALUE.
+		define_hac(SHIP:GEOPOSITION,tgtrwy,apch_params).
+	}.	
+	
+	
 	GLOBAL toggles_box IS main_gui:ADDHLAYOUT().
 	toggles_box:addspacing(150).	
 	SET toggles_box:STYLE:ALIGN TO "center".
@@ -258,28 +285,63 @@ FUNCTION make_global_entry_GUI {
 	//modify the speedbrake button 
 	IF arbkb:PRESSED {
 		SET arbkb:text TO " Auto Airbrake".
-		} ELSE {
+	} ELSE {
+		SET arbkb:text TO "Manual Airbrake".
+	}
+	
+	SET arbkb:ONTOGGLE TO {
+		parameter b. 
+		IF b {
+			SET arbkb:text TO " Auto  Airbrake".
+		}
+		ELSE {
 			SET arbkb:text TO "Manual Airbrake".
 		}
-		SET arbkb:ONTOGGLE TO {
-			parameter b. 
-			IF b {
-				SET arbkb:text TO " Auto  Airbrake".
-			}
-			ELSE {
-				SET arbkb:text TO "Manual Airbrake".
-			}
 
 	}.
-
-
-
-
 
 
 	main_gui:SHOW().
 }
 
+
+//sets the runway choice between the availle options to a random one
+//to simulate daily wind conditions & introduce variability
+FUNCTION select_random_rwy {
+	LOCAL rwynum IS select_rwy:OPTIONS:LENGTH.
+	SET select_rwy:INDEX TO FLOOR(rwynum*RANDOM()).
+	
+	select_opposite_hac().
+	WAIT 0.
+}
+
+
+
+//given current runway choice selects the overhead HAC option 
+FUNCTION select_opposite_hac {
+
+	LOCAL newsite IS ldgsiteslex[select_tgt:VALUE].
+	
+	LOCAL rwyhdg IS newsite["rwys"][select_rwy:VALUE]["heading"].
+	
+	LOCAL shiprwybng IS bearingg(SHIP:GEOPOSITION,newsite["position"]).
+	
+	LOCAL rel_hdg IS unfixangle(shiprwybng - rwyhdg).
+	
+	print "rwyhdg : " + rwyhdg at (0,20).
+	print "shiprwybng : " + shiprwybng at (0,21).
+	
+	print "relativehdg : " + rel_hdg at (0,22).
+	
+	//this assumes that option 0 is "right" and option 1 is "left".
+	IF (rel_hdg < 0) {
+		SET select_side:INDEX TO 0.
+	} ELSE {
+		SET select_side:INDEX TO 1.
+	}
+
+
+}
 
 
 FUNCTION close_global_GUI {
@@ -500,12 +562,22 @@ FUNCTION make_entry_GUI {
 		GLOBAL pchmod_box is pchmod_gain:addtextfield(gains["pchmod"]:tostring).
 		set pchmod_box:style:width to 65.
 		set pchmod_box:style:height to 18.
+		GLOBAL taem_p_gain IS gainsbox:addhlayout().
+		GLOBAL taem_p_gain_text IS taem_p_gain:addlabel("TAEM P Gain: ").
+		GLOBAL taem_Kp_box is taem_p_gain:addtextfield(gains["taemKP"]:tostring).
+		set taem_Kp_box:style:width to 65.
+		set taem_Kp_box:style:height to 18.
+		GLOBAL taem_d_gain IS gainsbox:addhlayout().
+		GLOBAL taem_d_gain_text IS taem_d_gain:addlabel("TAEM D Gain: ").
+		GLOBAL taem_Kd_box is taem_d_gain:addtextfield(gains["taemKD"]:tostring).
+		set taem_Kd_box:style:width to 65.
+		set taem_Kd_box:style:height to 18.
+		
 		GLOBAL strmgr_gain IS gainsbox:addhlayout().
 		GLOBAL strmgr_gain_text IS strmgr_gain:addlabel("Stopping T: ").
 		GLOBAL strmgr_box is strmgr_gain:addtextfield(gains["strmgr"]:tostring).
 		set strmgr_box:style:width to 65.
 		set strmgr_box:style:height to 18.
-		
 		GLOBAL pitchd_gain IS gainsbox:addhlayout().
 		GLOBAL pitchd_gain_text IS pitchd_gain:addlabel("Pitch D Gain: ").
 		GLOBAL pitchd_gain_box is pitchd_gain:addtextfield(gains["pitchKD"]:tostring).
@@ -550,6 +622,21 @@ FUNCTION make_entry_GUI {
 			set gains["pchmod"] to val.
 			log_gains(gains,gains_log_path).
 		}.
+		set taem_Kp_box:onconfirm to { 
+			parameter val.
+			set val to val:tonumber(gains["taemKP"]).
+			if val < 0 set val to 0.
+			set gains["taemKP"] to val.
+			log_gains(gains,gains_log_path).
+		}.
+		set taem_Kd_box:onconfirm to { 
+			parameter val.
+			set val to val:tonumber(gains["taemKD"]).
+			if val < 0 set val to 0.
+			set gains["taemKD"] to val.
+			log_gains(gains,gains_log_path).
+		}.
+		
 		set strmgr_box:onconfirm to { 
 			parameter val.
 			set val to val:tonumber(gains["strmgr"]).
@@ -601,15 +688,7 @@ FUNCTION make_entry_GUI {
 }
 
 
-FUNCTION clean_entry_gui {
-	SET leftbox:STYLE:HEIGHT TO 0.
-	SET rightbox:STYLE:HEIGHT TO 0.
-	leftbox:DISPOSE().
-	rightbox:DISPOSE().
-	all_box:DISPOSE().
-	//freeze the target site selection 
-	SET select_tgt:ENABLED to FALSE.
-}
+
 
 FUNCTION is_guidance {
 	RETURN guidb:PRESSED.
@@ -659,8 +738,50 @@ FUNCTION update_entry_GUI {
 }
 
 
+//relatively few modifications to entry gui
+FUNCTION make_TAEM_GUI {
+	//freeze the target site selection 
+	SET select_tgt:ENABLED to FALSE.
+
+}
+
+FUNCTION update_TAEM_GUI {
+	PARAMETER rollv.
+	PARAMETER pitchv.
+	PARAMETER az_err.
+	PARAMETER tgt_range.
+	PARAMETER alt_err.
+	PARAMETER entry_vel.
+	PARAMETER pitch_ref.
+	PARAMETER isguidance.	
+	PARAMETER update_reference.
+
+	If isguidance {
+		//update the displayed values of roll and pitch
+		SET slider1:VALUE TO  rollv.
+		IF NOT update_reference {
+			SET slider2:VALUE TO  pitchv.
+		}
+	}
+	
+	//data output
+	SET text0:text TO "<size=15>      Mach         :  " + ROUND(ADDONS:FAR:MACH,1) + "</size>".
+	SET text1:text TO "<size=15> Azimuth Error    :  " + ROUND(az_err,1) + " °</size>".
+	SET text2:text TO "<size=15>Distance to TGT  :  " + ROUND(tgt_range,1) + " km</size>".
+	SET text3:text TO "<size=15>HAC entry alt err :  " + ROUND(alt_err,1) + " km</size>".
+	SET text4:text TO "<size=15>HAC entry speed   :  " + ROUND(entry_vel,1) + " m/s</size>".
+	SET text5:text TO "<size=15>Reference pitch   :  " + ROUND(pitch_ref,1) + " °</size>".
+
+}
 
 
+//if coming from TAEM we are close to the HAC entry, disable HAc choices
+//don't want to do this in case of an ALT
+FUNCTION close_TAEM_GUI {
+	SET select_tgt:ENABLED to FALSE.
+	SET select_rwy:ENABLED to FALSE.
+	SET select_side:ENABLED to FALSE.
+}
 
 
 
@@ -669,27 +790,30 @@ FUNCTION update_entry_GUI {
 
 								//APPROACH GUI FUNCTIONS 
 								
-								
+
+FUNCTION clean_entry_gui {
+
+	//moved the clean entry gui commands here
+	SET leftbox:STYLE:HEIGHT TO 0.
+	SET rightbox:STYLE:HEIGHT TO 0.
+	leftbox:DISPOSE().
+	rightbox:DISPOSE().
+	all_box:DISPOSE().
+	
+}								
 								
 
 FUNCTION make_apch_GUI {
 	
-	SET select_rwy:ONCHANGE to { 
-		PARAMETER rwy.	
-		SET runway["heading"] TO tgtrwy["rwys"][rwy]["heading"].
-		SET runway["td_pt"] TO tgtrwy["rwys"][rwy]["td_pt"].
-		define_hac(runway,apch_params).
-	}.
-	SET select_side:ONCHANGE to { 
-		PARAMETER side.	
-		SET runway["hac_side"] TO side.
-		define_hac(runway,apch_params).
-	}.
 	
 	
+	//freeze the target site selection 
+	SET select_tgt:ENABLED to FALSE.
+		
+		
+		
 	SET main_gui:STYLe:HEIGHT TO 130.
-
-
+	
 	GLOBAL hud_gui is gui(430,320).
 	SET hud_gui:X TO 200.
 	SET hud_gui:Y TO 200.
@@ -863,7 +987,6 @@ FUNCTION make_apch_GUI {
 	}
 
 }
-
 
 
 //scales the deltas by the right amount for display

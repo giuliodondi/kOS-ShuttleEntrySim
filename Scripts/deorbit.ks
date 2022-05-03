@@ -13,9 +13,6 @@ RUNPATH("0:/Shuttle_entrysim/landing_sites").
 RUNPATH("0:/Shuttle_entrysim/parameters").
 
 
-GLOBAL tgtrwy IS ldgsiteslex[ldgsiteslex:keys[0]].
-
-
 //	Load libraries
 RUNPATH("0:/Libraries/misc_library").	
 RUNPATH("0:/Libraries/maths_library").	

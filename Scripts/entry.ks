@@ -23,6 +23,7 @@ If (SHIP:ALTITUDE >= constants["atmalt"]) {
 	RUNPATH("0:/Shuttle_entrysim/landing_sites").
 	RUNPATH("0:/Shuttle_entrysim/parameters").
 	RUNPATH("0:/Shuttle_entrysim/VESSELS/" + vessel_dir + "/flapcontrol").
+	RUNPATH("0:/Shuttle_entrysim/VESSELS/" + vessel_dir + "/approach_params").
 
 
 	//	Load libraries
@@ -33,17 +34,6 @@ If (SHIP:ALTITUDE >= constants["atmalt"]) {
 	RUNPATH("0:/Shuttle_entrysim/src/gui_utility").
 	RUNPATH("0:/Shuttle_entrysim/src/entry_utility").
 	RUNPATH("0:/Shuttle_entrysim/src/approach_utility").
-
-
-
-	//this is the default initialised landing site 
-	//can be changed with the GUI
-	GLOBAL tgtrwy IS ldgsiteslex[ldgsiteslex:keys[0]].
-
-
-
-
-
 			
 
 	RUNPATH("0:/Shuttle_entrysim/src/entry_main").

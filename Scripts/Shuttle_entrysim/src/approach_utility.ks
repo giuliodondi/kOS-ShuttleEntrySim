@@ -5,18 +5,19 @@
 //scales with distance from ship for visibility
 FUNCTION pos_arrow {
 	PARAMETER pos.
+	PARAMETEr stringlabel.
 	
 	LOCAL start IS pos:POSITION.
 	LOCAL end IS (pos:POSITION - SHIP:ORBIT:BODY:POSITION).
 	
 	VECDRAW(
       start,//{return start.},
-      end,//{return end.},
+      end:NORMALIZED*5000,//{return end.},
       RGB(1,0,0),
-      "",
-      1000,
+      stringlabel,
+      1,
       TRUE,
-      0.05
+      10
     ).
 
 }
@@ -38,8 +39,75 @@ FUNCTION arrow {
 
 }
 
+//	DOES NOT WORK - KEEP FOR LEGACY
+//automatic path tracking, using the lateral and vertical deltas
+//pipper deviation must correspond to corrections to the value of angle of attack and bank angle
+//clamp corrections so that we never set extreme bank angle or aoa
+//adjust pitch and roll input increments based on corrections
 
+FUNCTION autoland {
+	PARAMETER deltas.
+	PARAMETER mode.		//probably need to adjust the gains based on mode
+	
+	//get current aoa and roll
+	LOCAL cur_rol IS get_roll().
+	LOCAL cur_aoa IS get_pitch().
+	
+	//transform deltas based on current roll angle
+	LOCAL sinr IS SIN(cur_rol).
+	LOCAL cosr IS COS(cur_rol).
+	LOCAL deltas_rot IS LIST(
+		CLAMP(deltas[0]*cosr + deltas[1]*sinr, -100,100),
+		CLAMP(deltas[1]*cosr - deltas[0]*sinr,-100,100)
+	).
+	
+	PRINT "( " + round(deltas[0],3) + " , " + round(deltas[1],3) + " )" at (0,20).
+	PRINT "( " + round(deltas_rot[0],3) + " , " + round(deltas_rot[1],3) + " )" at (0,21).
 
+	
+	
+	//calculate correction limits, distinct values for positive/negative aoa
+	LOCAL roll_corr_lim IS MAX(0,45 - ABS(cur_rol)).
+	LOCAL aoa_corr_lim_pos IS MAX(0,25 - ABS(cur_aoa)).
+	LOCAL aoa_corr_lim_neg IS -MAX(0,15 - ABs(cur_aoa)).
+	
+	LOCAL rol_corr IS CLAMP(deltas_rot[0]*0.5, -roll_corr_lim, roll_corr_lim).
+	
+	LOCAL aoa_corr IS CLAMP(deltas_rot[1]*0.3, aoa_corr_lim_neg, aoa_corr_lim_pos).
+	
+
+	PRINT "( " + round(rol_corr,3) + " , " + round(aoa_corr,3) + " )" at (0,22).
+
+	//initialise the flap control pid loop 
+	IF NOT (DEFINED AUTOLPITCHPID) {
+		LOCAL Kp IS -0.017.
+		LOCAL Ki IS 0.
+		LOCAL Kd IS -0.012.
+	
+		GLOBAL AUTOLPITCHPID IS PIDLOOP(Kp,Ki,Kd).
+		SET AUTOLPITCHPID:SETPOINT TO 0.
+
+	}
+	
+	//initialise the flap control pid loop 
+	IF NOT (DEFINED AUTOLROLLPID) {
+		LOCAL Kp IS -0.015.
+		LOCAL Ki IS 0.
+		LOCAL Kd IS 0.005.
+	
+		GLOBAL AUTOLROLLPID IS PIDLOOP(Kp,Ki,Kd).
+		SET AUTOLROLLPID:SETPOINT TO 0.
+	}
+	
+	LOCAL pchctrlcorr IS AUTOLPITCHPID:UPDATE(TIME:SECONDS,aoa_corr).
+	LOCAL rolctrlcorr IS AUTOLROLLPID:UPDATE(TIME:SECONDS,rol_corr).
+	
+	PRINT "( " + round(rolctrlcorr,3) + " , " + round(pchctrlcorr,3) + " )" at (0,23).
+	
+	SET SHIP:CONTROL:PITCH TO CLAMP( SHIP:CONTROL:PITCH + pchctrlcorr, -0.4, 0.4).
+	//SET SHIP:CONTROL:ROLL TO CLAMP( SHIP:CONTROL:ROLL + rolctrlcorr, -0.4, 0.4).
+
+}
 
 
 
@@ -113,14 +181,93 @@ FUNCTION speed_control {
 
 
 
-//hac functions 
+//runway and hac functions 
 
+
+
+//given runway coordinates, assumed to be centre, and length 
+//finds the coordinates of the touchdown points and adds them to the lexicon
+FUNCTION define_td_points {
+
+	FUNCTION add_runway_tdpt {
+		PARAMETER site.
+		PARAMETER bng.
+		PARAMETER dist.
+
+		LOCAL rwy_lexicon IS LEXICON(
+											"heading",0,
+											"td_pt",LATLNG(0,0)
+								).
+								
+								
+		LOCAL pos IS site["position"].
+		
+		local rwy_number IS "" + ROUND(bng/10,0).
+		SET rwy_lexicon["heading"] TO bng.
+		SET rwy_lexicon["td_pt"] TO new_position(pos,dist,fixangle(bng - 180)).
+		
+		
+		site["rwys"]:ADD(rwy_number,rwy_lexicon).
+		
+		RETURN site.
+	}
+	
+	FROM {LOCAL k IS 0.} UNTIL k >= (ldgsiteslex:KEYS:LENGTH) STEP { SET k TO k+1.} DO{	
+		LOCAL site IS ldgsiteslex[ldgsiteslex:KEYS[k]].
+	
+	
+		LOCAL dist IS site["length"].
+		LOCAL head IS site["heading"].
+		
+		site:ADD("rwys",LEXICON()).
+		
+		//convert in kilometres
+		SET dist TO dist/1000.
+		
+		//multiply by a hard-coded value identifying the touchdown marks from the 
+		//runway halfway point
+		SET dist TO dist*0.39.
+		
+		SET site TO add_runway_tdpt(site,head,dist).
+		
+		//now get the touchdown point for the opposite side of the runway
+		SET head TO fixangle(head + 180).
+		SET site TO add_runway_tdpt(site,head,dist).
+		
+		SET ldgsiteslex[ldgsiteslex:KEYS[k]] TO site.
+
+	}
+
+}
+
+
+
+//refresh the runway lexicon upon changing runway.
+FUNCTION refresh_runway_lex {
+	PARAMETER tgtsite.
+
+	RETURN LEXICON(
+							"position",tgtsite["position"],
+							"elevation",tgtsite["elevation"],
+							"heading",tgtsite["heading"],
+							"td_pt",LATLNG(0,0),
+							"glideslope",0,
+							"hac_side","left",	//placeholder choice
+							"aiming_pt",LATLNG(0,0),
+							"hac",LATLNG(0,0),
+							"hac_entry",LATLNG(0,0),
+							"hac_exit",LATLNG(0,0),
+							"upvec",V(0,0,0)
+
+	).
+}
 
 
 //called upon changing either the runway or the hac side
 //defined the hac centre, the displaced final point (hac exit) and the reference up vector
 //also sets the runway elevation
 FUNCTION define_hac {
+	PARAMETER cur_pos.
 	PARAMETER rwy.
 	PARAMETER params.
 	
@@ -148,17 +295,15 @@ FUNCTION define_hac {
 	
 	//initialise the hac entry point
 	
-	update_hac_entry_pt(rwy,params).
+	update_hac_entry_pt(cur_pos,rwy,params).
 	
 	//clearvecdraws().
-	//pos_arrow(tgtrwy["position"]).
-	//pos_arrow(rwy["td_pt"]).
-	//pos_arrow(rwy["aiming_pt"]).
-	//pos_arrow(rwy["hac"]).
-	//pos_arrow(rwy["hac_exit"]).
-	
-
-
+	//pos_arrow(rwy["position"],"runwaypos").
+	//pos_arrow(rwy["td_pt"],"td_pt").
+	//pos_arrow(rwy["aiming_pt"],"aiming_pt").
+	//pos_arrow(rwy["hac"],"hac").
+	//pos_arrow(rwy["hac_exit"],"hac_exit").
+	//pos_arrow(rwy["hac_entry"],"hac_entry").
 
 }
 
@@ -168,8 +313,10 @@ FUNCTION define_hac {
 //be used by ops1 abort functions
 
 
+
 //update the entry point to the HAC
 FUNCTION update_hac_entry_pt {
+	PARAMETER cur_pos.
 	PARAMETER rwy.
 	PARAMETER params.
 	
@@ -183,19 +330,18 @@ FUNCTION update_hac_entry_pt {
 	//add or subtract 	the beta angle accordingly
 	//then get the geoposition from the hac given that bearing and the hac radius
 	
-	LOCAL d IS greatcircledist(rwy["hac"],SHIP:GEOPOSITION).
+	LOCAL d IS greatcircledist(rwy["hac"],cur_pos).
 	LOCAL alpha IS ARCSIN(LIMITARG(params["hac_radius"]/d)).
 	LOCAL beta IS 90 - alpha.
 	
 	//same calculations as the hac definition routine 
-	LOCAL ship_bng IS bearingg(SHIP:GEOPOSITION,rwy["hac"]).
+	LOCAL ship_bng IS bearingg(cur_pos,rwy["hac"]).
 	LOCAL hac_entry_sign IS 1.
 	IF rwy["hac_side"]="left" {SET hac_entry_sign TO -1.}
 	LOCAL entry_bng IS fixangle(ship_bng + hac_entry_sign*beta).
 	SET rwy["hac_entry"] TO  new_position(rwy["hac"],params["hac_radius"],entry_bng).
 
 }
-
 
 //update the glideslope based in current altitude and distance to travel
 FUNCTION get_glideslope {
@@ -218,14 +364,91 @@ FUNCTION get_glideslope {
 //	RETURN signed_angle(exitvec,entryvec,rwy["upvec"],1).
 //	
 //}
+
+
 FUNCTION get_hac_angle {
 	PARAMETER rwy.
 	PARAMETER entryvec.
 		
 	LOCAL exitvec IS (rwy["hac_exit"]:POSITION - rwy["hac"]:POSITION):NORMALIZED.
-	RETURN signed_angle(exitvec,entryvec,rwy["upvec"],1).
+	LOCAL hac_angle IS signed_angle(exitvec,entryvec,rwy["upvec"],1).
+	
+	LOCAL hac_gndtrk IS get_hac_groundtrack(hac_angle, apch_params).
+	
+	//calculate profile altitude
+	//if we're off by hal a turn's worth of altitude assume that the angle is off by 360° and add another turn around the HAC
+	//LOCAL profile_alt IS ( apch_params["final_dist"] + hac_gndtrk)*apch_params["glideslope"]["outer"].
+	//SET profile_alt TO rwy["elevation"] +  profile_alt*1000.
+	//LOCAL alt_tol IS get_hac_groundtrack(180,apch_params)*apch_params["glideslope"]["outer"]*1000.
+	//IF ABS(profile_alt - simstate["altitude"])
+	
+	RETURN hac_angle.
 	
 }
+
+
+//for now it's a wrapper, but in the future we might want to do something fancy like a conical HAC
+FUNCTION get_hac_radius {
+	PARAMETER hac_angle.
+	PARAMETER params.
+	
+	RETURN params["hac_radius"].	// + 0.0000283464*hac_angle^2.
+}
+
+
+//for now it's a wrapper, but in the future we might want to do something fancy like a conical HAC
+FUNCTION get_hac_groundtrack {
+	PARAMETER hac_angle.
+	PARAMETER params.
+	
+	RETURN params["hac_radius"]*hac_angle*CONSTANT:PI/180.
+	
+	//RETURN (params["hac_radius"] + 0.0000094488*hac_angle^2)*hac_angle/57.
+}
+
+
+
+//given HAC position calculate entry altitude, target for TAEM guidance
+function get_hac_profile_alt {
+	PARAMETER rwy.
+	PARAMETER apch_params.
+
+	LOCAL entryvec IS (rwy["hac_entry"]:POSITION - rwy["hac"]:POSITION):NORMALIZED.
+	LOCAL theta IS get_hac_angle(rwy,entryvec).
+	
+	LOCAL hac_gndtrk IS get_hac_groundtrack(theta, apch_params).
+	
+	LOCAL profile_alt IS ( apch_params["final_dist"] + hac_gndtrk)*apch_params["glideslope"]["outer"].
+	
+	print "theta : " + theta at (0,15).
+	print "hac_gndtrk : " + hac_gndtrk at (0,16).
+	print "profile_alt : " + profile_alt at (0,17).
+	
+	RETURN rwy["elevation"] +  profile_alt*1000.
+}
+
+
+
+//redefine the ACQC given present position and 
+//FUNCTION define_acqc {
+//	PARAMETER cur_pos.
+//	PARAMETER acq_err.
+//	PARAMETER rwy.
+//	PARAMETER params.
+//	
+//	LOCAL entry_bng IS bearingg(rwy["hac_entry"],rwy["hac"]).
+//
+//	//for a right hac the exit bearing is the entry bearing plus the angle travelled around the hac, bar overflows
+//	// while for a left hac the reverse is true
+//	LOCAL hac_entry_sign IS 1.
+//	IF rwy["hac_side"]="left" {SET hac_entry_sign TO -1.}
+//	LOCAL exit_bng IS fixangle(entry_bng + hac_entry_sign*hac_angle).
+//	
+//	SET rwy["hac_exit"] TO  new_position(rwy["hac"],params["hac_radius"],exit_bng).
+//
+//}
+
+
 
 //give nthe current mode, returns the ground-track distance between the predicted point and 
 //the appropriate target point 
@@ -247,7 +470,7 @@ FUNCTION mode_dist {
 		
 		
 		//find the groundtrack around the hac
-		RETURN params["hac_radius"]*theta*CONSTANT:PI/180.
+		RETURN get_hac_groundtrack(theta,params).
 		
 	}
 	ELSE IF mode=5 OR mode=6{
@@ -257,7 +480,6 @@ FUNCTION mode_dist {
 
 
 }
-
 
 
 
@@ -289,14 +511,16 @@ FUNCTION mode3 {
 	//Calculate distance from the current entry point 
 	//if it's less than 1km we no longer update the entry point 
 	LOCAL ship_hac_dist IS greatcircledist(rwy["hac_entry"],SHIP:GEOPOSITION).
-	IF (ship_hac_dist>1) { update_hac_entry_pt(rwy,params). }
+	IF (ship_hac_dist>1) { update_hac_entry_pt(SHIP:GEOPOSITION,rwy,params). }
 
 	
 	LOCAL entryvec IS (rwy["hac_entry"]:POSITION - rwy["hac"]:POSITION):NORMALIZED.
 
-	//once we have the entry point find the theta angle
+	//once we have the entry point find the theta angle and hac radius
 	LOCAL theta IS get_hac_angle(rwy,entryvec).
 	print "hac angle:  " + theta at (1,1).
+	
+	LOCAL hac_radius IS get_hac_radius(theta, params).
 	
 	
 	//build the vertical profile 
@@ -304,7 +528,7 @@ FUNCTION mode3 {
 	LOCAL final_alt IS params["final_dist"]*params["glideslope"]["outer"].
 	
 	//find the groundtrack around the hac
-	LOCAL hac_gndtrk IS params["hac_radius"]*theta*CONSTANT:PI/180.
+	LOCAL hac_gndtrk IS get_hac_groundtrack(theta, params).
 	
 	//find the distance to the entry point
 
@@ -327,7 +551,7 @@ FUNCTION mode3 {
 	
 	LOCAL hac_tangentaz IS bearingg(rwy["hac_entry"],rwy["hac"]).
 	
-	print "horiz err:  " + (greatcircledist(rwy["hac"],SHIP:GEOPOSITION) - params["hac_radius"])*1000 AT (1,3).
+	print "horiz err:  " + (greatcircledist(rwy["hac"],SHIP:GEOPOSITION) - hac_radius)*1000 AT (1,3).
 
 	//move the current position on the HAC of the ship HAc radius
 	//along the tangent direction by an arbtrary distance 
@@ -378,11 +602,13 @@ FUNCTION mode4 {
 	LOCAL theta IS get_hac_angle(rwy,shipvec).
 	print "hac angle:  " + theta at (1,1).
 	
+	LOCAL hac_radius IS get_hac_radius(theta, params).
+	
 	//get the vertical profile value at the predicted point 
 	LOCAL final_alt IS params["final_dist"]*params["glideslope"]["outer"].
 	
 	//find the groundtrack around the hac
-	LOCAL hac_gndtrk IS params["hac_radius"]*theta*CONSTANT:PI/180.
+	LOCAL hac_gndtrk IS get_hac_groundtrack(theta, params).
 	
 	
 
@@ -398,9 +624,9 @@ FUNCTION mode4 {
 	//build the target point as described
 	//first get the HAC position corresponding to the predicted point
 	LOCAL hac_tangentaz IS bearingg(simstate["latlong"],rwy["hac"]).
-	LOCAL hac_tangentpos IS new_position(rwy["hac"],params["hac_radius"],hac_tangentaz). 
+	LOCAL hac_tangentpos IS new_position(rwy["hac"],hac_radius,hac_tangentaz). 
 	
-	print "horiz err:  " + (greatcircledist(rwy["hac"],SHIP:GEOPOSITION) - params["hac_radius"])*1000 AT (1,3).
+	print "horiz err:  " + (greatcircledist(rwy["hac"],SHIP:GEOPOSITION) - hac_radius)*1000 AT (1,3).
 
 	//move the current position on the HAC of the ship HAc radius
 	//along the tangent direction by an arbtrary distance 
@@ -552,10 +778,9 @@ FUNCTION mode6 {
 }
 
 
-
-
 //logic to determine when to switch modes
 //given the current mode, do the appropriate test and increment if required
+//overhauled - simplified logic to switch modes 3 and 4 based on distance
 FUNCTION mode_switch {
 	PARAMETER simstate.
 	PARAMETER rwy.
@@ -564,52 +789,16 @@ FUNCTION mode_switch {
 	PARAMETER switch_mode IS FALSE.
 	
 	IF mode=3 {
-			//measure the hac-centered angle bw the hac exit and the predicted point 
-			//if it's negative the predicted point is in the hac phase, switch
-			//also check distance between that point and the hac entry point
-			LOCAL entryvec IS (rwy["hac_entry"]:POSITION - rwy["hac"]:POSITION):NORMALIZED.
-			LOCAL shipvec IS (simstate["latlong"]:POSITION - rwy["hac"]:POSITION):NORMALIZED.
-
-			
-			LOCAL theta IS unfixangle(get_hac_angle(rwy,shipvec) - get_hac_angle(rwy,entryvec)).
-
-			IF ( theta)<0 AND greatcircledist(rwy["hac_entry"],simstate["latlong"])<2 {SET switch_mode TO TRUE.}
-			
-
+			IF (mode_dist(simstate,tgtrwy,apch_params) < 0.1) {SET switch_mode TO TRUE.}
 			
 	} ELSE IF mode=4 {
-			//measure the hac-centered angle bw the hac exit and the predicted point  (theta)
-			//if it's negative the predicted point has exited the hac and switch
-			LOCAL exitvec IS (rwy["hac_exit"]:POSITION - rwy["hac"]:POSITION):NORMALIZED.
-			LOCAL shipvec IS (simstate["latlong"]:POSITION - rwy["hac"]:POSITION):NORMALIZED.
-			
-			//we must wrap theta around the range -180 +180 
-			//but theta will be in general >180 upon entering mode 4 
-			//therefore we only do it if we're in the quadrants adjacent to
-			//the hac exit vector
-			LOCAL theta IS get_hac_angle(rwy,shipvec).
-			IF ABS(VANG(shipvec,exitvec))<90 {
-				SET theta TO unfixangle(theta).
-			}
-			
-			IF theta<1 {
+			IF (mode_dist(simstate,tgtrwy,apch_params) < 0.1) {
 				SET switch_mode TO TRUE.
 				//override the previously calculated glideslope value
 				SET rwy["glideslope"] TO params["glideslope"]["outer"].
 				
-				////calculate the new aiming point distance for the middle glideslope
-				//LOCAL yp IS params["flare_alt"].
-				//LOCAL x IS yp*(1 - TAN(params["glideslope"]["middle"])/TAN(params["glideslope"]["outer"]) )/params["glideslope"]["middle"].
-				//SET params["aiming_pt_dist"] TO arams["aiming_pt_dist"] - x.
-				//
-				////prepare the pre-flare trigger 
-				//WHEN SHIP:ALTITUDE<(rwy["elevation"] + params["preflare_alt"]) THEN {
-				//	SET rwy["glideslope"] TO params["glideslope"]["middle"].
-				//	LOCAL bng IS fixangle(rwy["heading"] - 180).
-				//	SET rwy["aiming_pt"] TO  new_position(rwy["td_pt"],params["aiming_pt_dist"],bng).
-				//}
-
 			}
+		
 	
 	} ELSE IF mode=5 {
 			//measure the predicted altitude above the site elevation
@@ -627,6 +816,11 @@ FUNCTION mode_switch {
 	RETURN mode.
 
 }
+
+
+
+
+
 
 //given the outer and inner glideslope and the radius 
 //find the centre of the flare circle, the flare altitudes and the middle glideslope

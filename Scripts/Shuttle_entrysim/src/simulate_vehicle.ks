@@ -51,12 +51,12 @@ DEclare Function accel {
 }
 
 declare function gravitacc {
-	parameter position.
-	return -BODY:mu * position:normalized / position:sqrmagnitude.
+	parameter pos.
+	return -BODY:mu * pos:normalized / pos:sqrmagnitude.
 }
 
 declare function aeroforce {
-	parameter position.
+	parameter pos.
 	parameter surfvel.
 	parameter attitude.
 	
@@ -69,7 +69,7 @@ declare function aeroforce {
 						"drag",0
 						).
 	
-	LOCAL altt IS position:mag-BODY:radius.
+	LOCAL altt IS pos:mag-BODY:radius.
 	
 	LOCAL vesselfore IS SHIP:FACING:FOREVECTOR:NORMALIZED.
 	LOCAL vesseltop IS SHIP:FACING:TOPVECTOR:NORMALIZED.
@@ -87,7 +87,7 @@ declare function aeroforce {
 	 
 	//build a frame of reference centered about the survace velocity and the local up direction
 	LOCAL velforward IS surfvel:NORMALIZED.
-	LOCAL velup IS position:NORMALIZED.
+	LOCAL velup IS pos:NORMALIZED.
 	LOCAL velright IS VCRS( velup, velforward).
 	IF (velright:MAG < 0.001) {
 		SET velright TO VCRS( vesseltop, velforward).
@@ -248,91 +248,7 @@ DECLARE FUNCTION rk4 {
 
 
 
-declare function simulate_reentry {
 
-	
-	PARAMETER simsets.
-	parameter simstate.
-	PARAMETER tgt_rwy.
-	PARAMETER end_conditions.
-	PARAMETER az_err_band .
-	PARAMETER roll0.
-	PARAMETER pitch0.
-	PARAMETER pitchroll_profiles.
-	PARAMETER plot_traj IS FALSE.
-	
-	LOCAL tgtpos IS tgt_rwy["position"].
-	LOCAL tgtalt IS tgt_rwy["elevation"] + end_conditions["altitude"].
-
-
-	LOCAL hdotp IS 0.
-	LOCAL hddot IS 0.
-	
-	LOCAL pitch_prof IS 0.
-	LOCAL roll_prof IS 0.
-	
-	
-	LOCAL poslist IS LIST().
-	
-	//sample initial values for proper termination conditions check
-	SET simstate["altitude"] TO bodyalt(simstate["position"]).
-	SET simstate["surfvel"] TO surfacevel(simstate["velocity"],simstate["position"]).
-
-	
-	//putting the termination conditions here should save an if check per step
-	UNTIL (( simstate["altitude"]< tgtalt AND simstate["surfvel"]:MAG < end_conditions["surfvel"] ) OR simstate["altitude"]>140000)  {
-	
-		SET simstate["altitude"] TO bodyalt(simstate["position"]).
-		
-		SET simstate["surfvel"] TO surfacevel(simstate["velocity"],simstate["position"]).
-		
-		LOCAL hdot IS VDOT(simstate["position"]:NORMALIZED,simstate["surfvel"]).
-		SET hddot TO (hdot - hdotp)/simsets["deltat"].
-		SET hdotp TO hdot.
-
-	
-		LOCAL delaz IS az_error(simstate["latlong"],tgtpos,simstate["surfvel"]).
-		
-		
-		
-		LOCAL out IS pitchroll_profiles(LIST(roll0,pitch0),LIST(roll_prof,pitch_prof),simstate,hddot,delaz,az_err_band).
-		SET roll_prof TO out[0].
-		SET pitch_prof TO out[1].
-		
-
-
-		SET simstate["latlong"] TO shift_pos(simstate["position"],simstate["simtime"]).
-		
-		IF plot_traj {
-			poslist:ADD( simstate["latlong"]:ALTITUDEPOSITION(simstate["altitude"]) ).
-		}
-		
-		IF simsets["log"]= TRUE {
-			
-			
-			SET loglex["time"] TO simstate["simtime"].
-			SET loglex["alt"] TO simstate["altitude"]/1000.
-			SET loglex["speed"] TO simstate["surfvel"]:MAG.
-			SET loglex["hdot"] TO hdot.
-			SET loglex["lat"] TO simstate["latlong"]:LAT.
-			SET loglex["long"] TO simstate["latlong"]:LNG.
-			SET loglex["pitch"] TO pitch_prof.
-			SET loglex["roll"] TO roll_prof.
-			SET loglex["az_err"] TO delaz.
-			log_data(loglex).
-		}
-		
-		SET simstate TO simsets["integrator"]:CALL(simsets["deltat"],simstate,LIST(pitch_prof,roll_prof)).
-
-	}
-	
-	IF plot_traj {
-		SET simstate["poslist"] TO poslist.
-	}
-	
-
-	return simstate.
-}
 
 
 

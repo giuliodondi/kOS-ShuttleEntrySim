@@ -10,24 +10,37 @@ STEERINGMANAGER:RESETPIDS().
 STEERINGMANAGER:RESETTODEFAULT().
 
 
-SET STEERINGMANAGER:PITCHTS TO 10.0.
-SET STEERINGMANAGER:YAWTS TO 10.0.
-SET STEERINGMANAGER:ROLLTS TO 8.0.
+SET STEERINGMANAGER:PITCHTS TO 8.0.
+SET STEERINGMANAGER:YAWTS TO 8.0.
+SET STEERINGMANAGER:ROLLTS TO 6.0.
 SET STEERINGMANAGER:PITCHPID:KP TO 0.5.
 
 
 //unset the PIDs that may still be in memory 
 IF (DEFINED BRAKESPID) {UNSET BRAKESPID.}
 IF (DEFINED FLAPPID) {UNSET FLAPPID.}
-
-
-
-
-
-
+IF (DEFINED AUTOLPITCHPID) {UNSET AUTOLPITCHPID.}
+IF (DEFINED AUTOLROLLPID) {UNSET AUTOLROLLPID.}
 
 //initialise touchdown points for all landing sites
 define_td_points().
+
+
+//initialised by default to first landing site 
+//can be changed with the GUI
+make_global_entry_GUI().
+
+
+//ths lexicon contains all the necessary guidance objects 
+IF (DEFINED tgtrwy) {UNSET tgtrwy.}
+GLOBAL tgtrwy IS refresh_runway_lex(ldgsiteslex[select_tgt:VALUE]).
+
+//this must be called after the GUI and the tgtrwy lexicon have been initialised
+select_random_rwy().
+SET tgtrwy["heading"] TO ldgsiteslex[select_tgt:VALUE]["rwys"][select_rwy:VALUE]["heading"].
+SET tgtrwy["td_pt"] TO ldgsiteslex[select_tgt:VALUE]["rwys"][select_rwy:VALUE]["td_pt"].
+SET tgtrwy["hac_side"] TO select_side:VALUE.
+define_hac(SHIP:GEOPOSITION, tgtrwy, apch_params).
 
 
 
@@ -64,7 +77,6 @@ GLOBAL loglex IS LEXICON(
 GLOBAL reset_entry_flag Is FALSE.
 
 
-make_global_entry_GUI().
 
 
 //find the airbrakes parts
@@ -81,19 +93,15 @@ GLOBAL airbrake_control IS LEXICON(
 						).
 
 
-//SHUTDOWN ALL engines and initalise gimbals parts
 LISt ENGINES IN englist.
-FOR eng in englist {
-	IF (eng:IGNITION) {
-		IF NOT (DEFINED gimbals) {
-			GLOBAL gimbals IS eng:GIMBAL.
-		}
-		eng:SHUTDOWN.
-	}
-
-}
 IF NOT (DEFINED gimbals) {
-	GLOBAL gimbals IS englist[0]:GIMBAL.
+	FOR e IN englist {
+		IF e:HASSUFFIX("gimbal") {
+			GLOBAL gimbals IS e:GIMBAL.
+			BREAK.
+		}
+	}
+	
 }
 
 activate_flaps(flap_control["parts"]).
@@ -101,6 +109,18 @@ activate_flaps(flap_control["parts"]).
 //if conducting an ALT this will prevent the entry guidance from running
 //the flap trim logic is contained within entry guidance block
 IF SHIP:ALTITUDE>constants["apchalt"] {
+
+	
+	//SHUTDOWN ALL engines and initalise gimbals parts
+	//don't necessarily want to do this for an alt
+	FOR eng in englist {
+		IF (eng:IGNITION) {
+			IF NOT (DEFINED gimbals) {
+				GLOBAL gimbals IS eng:GIMBAL.
+			}
+			eng:SHUTDOWN.
+		}
+	}
 
 	IF (NOT check_pitch_prof()) {
 		PRINT "Illegal pitch profile detected." at (0,1).
@@ -113,9 +133,32 @@ IF SHIP:ALTITUDE>constants["apchalt"] {
 	//gg:DOEVENT("Show actuation toggles").
 	gimbals:DOACTION("toggle gimbal roll", TRUE).
 	gimbals:DOACTION("toggle gimbal yaw", TRUE).
+	
+	
+	//steer towards an initial direction before starting the whole thing
+	//the direction is defined by the first profile pithch value and zero roll
+	//reference prograde vector about which everything is rotated
+	LOCAL initial_dir IS create_steering_dir(
+					SHIP:srfprograde:vector:NORMALIZED,
+					VXCL(SHIP:srfprograde:vector:NORMALIZED,-SHIP:ORBIT:BODY:POSITION:NORMALIZED),
+					pitchprof_segments[pitchprof_segments:LENGTH-1][1],
+					0
+					).
+
+	//SEt STEERING TO initial_dir.
+	//
+	//UNTIL FALSE {
+	//	IF (VANG(SHIP:FACING:FOREVECTOR , initial_dir:FOREVECTOR) < 5 ) { BREAK.}
+	//	WAIT 0.1.
+	//}
+
+	UNLOCK STEERING.
+	SAS  ON.
+
 
 	entry_loop().
-
+	
+	
 	//remove entry GUI sections
 	clean_entry_gui().
 
@@ -142,7 +185,7 @@ SET loglex["roll_ref"] TO 0.
 approach_loop().
 
 close_global_GUI().
-
+SET SHIP:CONTROL:NEUTRALIZE TO TRUE.
 clearscreen.
  
 }
@@ -156,27 +199,9 @@ FUNCTION entry_loop{
 
 IF quitflag {RETURN.}
 
-
-
-//steer towards an initial direction before starting the whole thing
-//the direction is defined by the first profile pithch value and zero roll
-//reference prograde vector about which everything is rotated
-LOCAL initial_dir IS create_steering_dir(
-					SHIP:srfprograde:vector:NORMALIZED,
-					VXCL(SHIP:srfprograde:vector:NORMALIZED,-SHIP:ORBIT:BODY:POSITION:NORMALIZED),
-					pitchprof_segments[pitchprof_segments:LENGTH-1][1],
-					0
-					).
-
-//SEt STEERING TO initial_dir.
-//
-//UNTIL FALSE {
-//	IF (VANG(SHIP:FACING:FOREVECTOR , initial_dir:FOREVECTOR) < 5 ) { BREAK.}
-//	WAIT 0.1.
-//}
-
-UNLOCK STEERING.
-SAS  ON.
+//this flag signals if entry guidance was halted automatically bc of taem transition
+//or because approach guidance was called manually, in which case skip TAEM
+LOCAL TAEM_flag IS FALSE.
 
 
 //internal variables
@@ -187,7 +212,6 @@ GLOBAL P_att IS SHIP:FACING.
 IF NOT (DEFINED start_guid_flag) {
 	GLOBAL start_guid_flag IS FALSE.
 }
-
 
 //flag to stop the entry loop and transition to approach
 GLOBAL stop_entry_flag IS FALSE.
@@ -285,6 +309,7 @@ SET len TO 1.
 //run the control loop 
 //faster than the main loop 
 LOCAL attitude_time_upd IS TIME:SECONDS.
+LOCAL preserve_loop IS TRUE.
 WHEN TIME:SECONDS>attitude_time_upd + 0.5 THEN {
 	SET attitude_time_upd TO TIME:SECONDS.
 	//steer to the new pitch and roll 
@@ -296,22 +321,23 @@ WHEN TIME:SECONDS>attitude_time_upd + 0.5 THEN {
 	SET flap_control["pitch_control"][count] TO  -gimbals:PITCHANGLE.
 	SET flap_control["pitch_control"][0] TO average_list(flap_control["pitch_control"]).
 
-	//update the flaps trim setting 
-	SET flap_control TO flaptrim_control( flap_control).
-		
-	
-	
-	SET airbrake_control["spdbk_val"] TO speed_control(arbkb:PRESSED,airbrake_control["spdbk_val"],mode).
-	
-	FOR b IN airbrakes {
-		b:SETFIELD("Deploy Angle",50*airbrake_control["spdbk_val"]). 
+	//update the flaps trim setting and airbrakes IF WE'RE BELOW FIRST ROLL ALT
+	IF SHIP:ALTITUDE < constants["firstrollalt"] {	
+		SET flap_control TO flaptrim_control( flap_control).
+		SET airbrake_control["spdbk_val"] TO speed_control(arbkb:PRESSED,airbrake_control["spdbk_val"],mode).
+		FOR b IN airbrakes {
+			b:SETFIELD("Deploy Angle",50*airbrake_control["spdbk_val"]). 
+		}
 	}
 	
-	PRESERVE.
+	IF (preserve_loop) {
+		PRESERVE.
+	}
 }
 
- 
+//reentry loop
 UNTIL FALSE {
+
 
 	IF reset_entry_flag {
 		SET reset_entry_flag TO FALSE.
@@ -333,12 +359,12 @@ UNTIL FALSE {
 	}
 	
 	//calculte azimuth error
-	SET az_err TO az_error(SHIP:GEOPOSITION,tgtrwy["position"],SHIP:VELOCITY:SURFACE).
+	SET az_err TO az_error(SHIP:GEOPOSITION,tgtrwy["hac"],SHIP:VELOCITY:SURFACE).
 	
 	//distance to target
-	set tgt_range to greatcircledist(tgtrwy["position"], SHIP:GEOPOSITION).
+	set tgt_range to greatcircledist(tgtrwy["hac"], SHIP:GEOPOSITION).
 	
-	
+		
 	//run the vehicle simulation
 	LOCAL ICS IS LEXICON(
 					 "position",-SHIP:ORBIT:BODY:POSITION,
@@ -349,7 +375,7 @@ UNTIL FALSE {
 	SET simstate TO  simulate_reentry(
 					sim_settings,
 					simstate,
-					tgtrwy,
+					LEXICON("position",tgtrwy["hac"],"elevation",tgtrwy["elevation"]),
 					sim_end_conditions,
 					az_err_band,
 					roll_ref,
@@ -360,6 +386,7 @@ UNTIL FALSE {
 	
 	//get great-circle distance from current position to impact pt
 	LOCAL end_range IS greatcircledist(simstate["latlong"], SHIP:GEOPOSITION).
+	
 	
 
 	//calculate the range error
@@ -391,7 +418,7 @@ UNTIL FALSE {
 	clearscreen.
 	print "simulation steps: " + step_num at (1,2).
 	print "timestep: " + sim_settings["deltat"] at (1,3).
-	
+		
 	
 	IF is_guidance() {
 		//register guidance enabled 
@@ -422,11 +449,13 @@ UNTIL FALSE {
 		
 		//use it only if the reference roll value is converged
 		IF start_guid_flag OR (NOT start_guid_flag AND ABS(roll_ref - roll_ref_p) <constants["rolltol"]) {
-			SET rollv TO new_roll.
+			//SET rollv TO new_roll.
 			SET start_guid_flag TO TRUE.
 			//only if guidance is converged and if we're below first roll alt do pitch modulation
+			//only use the updated roll value as steering if we're below first roll, else use the slider value
 			IF SHIP:ALTITUDE < constants["firstrollalt"] {		
 				SET pitchv TO pitch_modulation(range_err,pitch_ref).
+				SET rollv TO new_roll.
 			}
 		}
 		
@@ -468,21 +497,26 @@ UNTIL FALSE {
 
 		log_data(loglex,"0:/Shuttle_entrysim/LOGS/entry_log").
 	}
-	IF quitflag OR stop_entry_flag {BREAK.}
+	
+	IF quitflag OR stop_entry_flag {
+		SET TAEM_flag TO FALSE.
+		BREAK.
+	}
 	wait 0.
 }
 
 
+
+//if we broke out manually before TAEM conditions go directly to approach 
+IF (NOT TAEM_flag) { 
+	SET preserve_loop TO FALSE.
+	select_opposite_hac().
+	define_hac(SHIP:GEOPOSITION,tgtrwy,apch_params).
+	RETURN.
 }
 
 
-
-
-
-
-
-
-
+}
 
 
 
@@ -507,24 +541,7 @@ GLOBAL sim_settings IS LEXICON(
 
 
 
-//ths lexicon contains all the necessary guidance objects 
-GLOBAL runway IS LEXICON(
-						"elevation",tgtrwy["elevation"],
-						"heading",tgtrwy["rwys"][select_rwy:VALUE]["heading"],
-						"td_pt",tgtrwy["rwys"][select_rwy:VALUE]["td_pt"],
-						"glideslope",0,
-						"hac_side",select_side:VALUE,
-						"aiming_pt",LATLNG(0,0),
-						"hac",LATLNG(0,0),
-						"hac_entry",LATLNG(0,0),
-						"hac_exit",LATLNG(0,0),
-						"upvec",V(0,0,0)
 
-).
-
-
-
-define_hac(runway,apch_params).
 
 
 make_apch_GUI().
@@ -584,25 +601,25 @@ UNTIL FALSE{
 	SET simstate["surfvel"] TO surfacevel(simstate["velocity"],simstate["position"]).
 	SET simstate["latlong"] TO shift_pos(simstate["position"],simstate["simtime"]).
 	
-	SET mode tO mode_switch(simstate,runway,apch_params).
+	SET mode tO mode_switch(simstate,tgtrwy,apch_params).
 	
 	LOCAL deltas IS LIST(0,0).
 	
 	
 	IF mode=3 {
-		SET deltas TO mode3(simstate,runway,apch_params).
+		SET deltas TO mode3(simstate,tgtrwy,apch_params).
 	}
 	ELSE IF mode=4 {
 		
-		SET deltas TO mode4(simstate,runway,apch_params).
+		SET deltas TO mode4(simstate,tgtrwy,apch_params).
 	}
 	ELSE IF mode=5  {
 		
-		SET deltas TO mode5(simstate,runway,apch_params).
+		SET deltas TO mode5(simstate,tgtrwy,apch_params).
 	}
 	ELSE IF mode=6 {
 		
-		SET deltas TO mode6(simstate,runway,apch_params).
+		SET deltas TO mode6(simstate,tgtrwy,apch_params).
 	}
 	
 	SET nz TO update_g_force(nz).
@@ -610,21 +627,21 @@ UNTIL FALSE{
 	SET airbrake_control["spdbk_val"] TO speed_control(is_autoairbk(),airbrake_control["spdbk_val"],mode).
 	
 	SET flap_control TO flaptrim_control_apch( flap_control).
-
-	update_apch_GUI(
-		diamond_deviation(deltas,mode),
-		mode_dist(simstate,runway,apch_params),
-		airbrake_control["spdbk_val"],
-		flap_control["deflection"],
-		nz["cur_nz"]
-	).
-	
 	
 	FOR b IN airbrakes {
 		b:SETFIELD("Deploy Angle",50*airbrake_control["spdbk_val"]). 
 	}
 
+
+	update_apch_GUI(
+		diamond_deviation(deltas,mode),
+		mode_dist(simstate,tgtrwy,apch_params),
+		airbrake_control["spdbk_val"],
+		flap_control["deflection"],
+		nz["cur_nz"]
+	).
 	
+
 
 	if is_log() {
 

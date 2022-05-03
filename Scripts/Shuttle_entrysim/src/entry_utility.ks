@@ -39,62 +39,6 @@ FUNCTION average_list {
 
 
 
-//given runway coordinates, assumed to be centre, and length 
-//finds the coordinates of the touchdown points and adds them to the lexicon
-FUNCTION define_td_points {
-
-	FUNCTION add_runway_tdpt {
-		PARAMETER site.
-		PARAMETER bng.
-		PARAMETER dist.
-
-		LOCAL rwy_lexicon IS LEXICON(
-											"heading",0,
-											"td_pt",LATLNG(0,0)
-								).
-								
-								
-		LOCAL pos IS site["position"].
-		
-		local rwy_number IS "" + ROUND(bng/10,0).
-		SET rwy_lexicon["heading"] TO bng.
-		SET rwy_lexicon["td_pt"] TO new_position(pos,dist,fixangle(bng - 180)).
-		
-		
-		site["rwys"]:ADD(rwy_number,rwy_lexicon).
-		
-		RETURN site.
-	}
-	
-	FROM {LOCAL k IS 0.} UNTIL k >= (ldgsiteslex:KEYS:LENGTH) STEP { SET k TO k+1.} DO{	
-		LOCAL site IS ldgsiteslex[ldgsiteslex:KEYS[k]].
-	
-	
-		LOCAL dist IS site["length"].
-		LOCAL head IS site["heading"].
-		
-		site:ADD("rwys",LEXICON()).
-		
-		//convert in kilometres
-		SET dist TO dist/1000.
-		
-		//multiply by a hard-coded value identifying the touchdown marks from the 
-		//runway halfway point
-		SET dist TO dist*0.39.
-		
-		SET site TO add_runway_tdpt(site,head,dist).
-		
-		//now get the touchdown point for the opposite side of the runway
-		SET head TO fixangle(head + 180).
-		SET site TO add_runway_tdpt(site,head,dist).
-		
-		SET ldgsiteslex[ldgsiteslex:KEYS[k]] TO site.
-
-	}
-
-}
-
-
 
 
 
@@ -295,7 +239,7 @@ FUNCTION pitch_modulation {
 	
 	LOCAL range_err_profile IS LIST(
 								LIST(250,3),
-								LIST(8000,30)
+								LIST(8000,40)
 								).
 	
 	LOCAL range_band IS INTPLIN(range_err_profile,SHIP:VELOCITY:SURFACE:MAG).
@@ -308,10 +252,7 @@ FUNCTION pitch_modulation {
 	IF ABS(range_err) > range_band {
 		SET pitch_corr TO SIGN(range_err) * CLAMP((ABS(range_err/range_band) - 1),0,1) * pitchv *  gains["pchmod"].
 	}
-	
-	print "range band " + range_band at (0,14).
-	print "modulated pitch " + (pitchv + pitch_corr) at (0,15).
-	
+		
 	RETURN pitchv + pitch_corr.
 }
 
@@ -353,6 +294,7 @@ FUNCTION roll_profile {
 
 
 
+
 //determine the sign of the roll given the az error and its variation
 FUNCTION roll_reversal {
 	PARAMETER cur_sign.
@@ -383,7 +325,91 @@ FUNCTION roll_reversal {
 }
 
 
+declare function simulate_reentry {
 
+	
+	PARAMETER simsets.
+	parameter simstate.
+	PARAMETER tgt_rwy.
+	PARAMETER end_conditions.
+	PARAMETER az_err_band .
+	PARAMETER roll0.
+	PARAMETER pitch0.
+	PARAMETER pitchroll_profiles.
+	PARAMETER plot_traj IS FALSE.
+	
+	LOCAL tgtpos IS tgt_rwy["position"].
+	LOCAL tgtalt IS tgt_rwy["elevation"] + end_conditions["altitude"].
+
+
+	LOCAL hdotp IS 0.
+	LOCAL hddot IS 0.
+	
+	LOCAL pitch_prof IS 0.
+	LOCAL roll_prof IS 0.
+	
+	
+	LOCAL poslist IS LIST().
+	
+	//sample initial values for proper termination conditions check
+	SET simstate["altitude"] TO bodyalt(simstate["position"]).
+	SET simstate["surfvel"] TO surfacevel(simstate["velocity"],simstate["position"]).
+
+	
+	//putting the termination conditions here should save an if check per step
+	UNTIL (( simstate["altitude"]< tgtalt AND simstate["surfvel"]:MAG < end_conditions["surfvel"] ) OR simstate["altitude"]>140000)  {
+	
+		SET simstate["altitude"] TO bodyalt(simstate["position"]).
+		
+		SET simstate["surfvel"] TO surfacevel(simstate["velocity"],simstate["position"]).
+		
+		LOCAL hdot IS VDOT(simstate["position"]:NORMALIZED,simstate["surfvel"]).
+		SET hddot TO (hdot - hdotp)/simsets["deltat"].
+		SET hdotp TO hdot.
+
+	
+		LOCAL delaz IS az_error(simstate["latlong"],tgtpos,simstate["surfvel"]).
+		
+		
+		
+		LOCAL out IS pitchroll_profiles(LIST(roll0,pitch0),LIST(roll_prof,pitch_prof),simstate,hddot,delaz,az_err_band).
+		SET roll_prof TO out[0].
+		SET pitch_prof TO out[1].
+		
+
+
+		SET simstate["latlong"] TO shift_pos(simstate["position"],simstate["simtime"]).
+		
+		IF plot_traj {
+			poslist:ADD( simstate["latlong"]:ALTITUDEPOSITION(simstate["altitude"]) ).
+		}
+		
+		IF simsets["log"]= TRUE {
+			
+			
+			SET loglex["time"] TO simstate["simtime"].
+			SET loglex["alt"] TO simstate["altitude"]/1000.
+			SET loglex["speed"] TO simstate["surfvel"]:MAG.
+			SET loglex["hdot"] TO hdot.
+			SET loglex["lat"] TO simstate["latlong"]:LAT.
+			SET loglex["long"] TO simstate["latlong"]:LNG.
+			SET loglex["pitch"] TO pitch_prof.
+			SET loglex["roll"] TO roll_prof.
+			SET loglex["az_err"] TO delaz.
+			log_data(loglex).
+		}
+		
+		SET simstate TO simsets["integrator"]:CALL(simsets["deltat"],simstate,LIST(pitch_prof,roll_prof)).
+
+	}
+	
+	IF plot_traj {
+		SET simstate["poslist"] TO poslist.
+	}
+	
+
+	return simstate.
+}
 
 
 
