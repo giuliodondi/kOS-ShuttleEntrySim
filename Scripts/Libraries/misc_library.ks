@@ -171,4 +171,100 @@ declare function sectotime {
 }
 
 
+// object that implements a fixed-size list where elements are added at the front
+FUNCTION fixed_list_factory {
+	PARAMETER len.
+
+	local this is lexicon().
+	
+	this:add(
+			"list", LIST()
+	).
+	
+	this:add(
+			"maxlength", len
+	).
+	
+	this:add("trim", {
+		if (this:list:length > this:maxlength) {
+			local sublist is this:list:sublist(0,this:maxlength).
+			set this:list to sublist.
+		}
+	}
+	).
+	
+	this:add("push", {
+		parameter newval.
+		this:list:insert(0, newval).
+		this:trim().
+	}
+	).
+	
+	this:add("printat", {
+		parameter col.
+		parameter line.
+		
+		local c is col.
+		for v in this:list {
+			local str_v is v + ",".
+			print v at (c,line).
+			set c to c + str_v:length + 1.
+		}
+		//get rid of the last comma
+		print " " at (c - 1,line).
+	}
+	).
+
+	return this.
+}
+
+//object that keeps track of the last x values inserted and calculates the running average of them
+FUNCTION average_value_factory {
+	parameter avgcount.
+
+	local this is lexicon().
+	
+	this:add(
+			"numvalues", avgcount
+	).
+	
+	this:add(
+			"list", fixed_list_factory(this["numvalues"])
+	).
+	
+	
+	
+	this:add("reset", {
+		set this:list to fixed_list_factory(this["numvalues"]).
+	}
+	).
+	
+	
+	this:add("update", {
+		parameter newval.
+		this:list:push(newval).
+	}
+	).
+	
+	this:add("average", {
+		
+		local avg is 0.
+		
+		local values is this:list:list.
+		local len is values:length.
+		
+		if (len=0) {return 0.}
+		
+		for v in values {
+			set avg to avg + v.
+		}
+		
+		return avg/len.
+	}
+	).
+
+	return this.
+}
+
+
 
