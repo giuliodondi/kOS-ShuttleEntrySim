@@ -104,7 +104,7 @@ IF NOT (DEFINED gimbals) {
 	
 }
 
-activate_flaps(flap_control["parts"]).
+
 
 //if conducting an ALT this will prevent the entry guidance from running
 //the flap trim logic is contained within entry guidance block
@@ -296,12 +296,7 @@ LOCAL update_reference IS true.
 
 
 //initialise the running average for the pitch control values
-GLOBAL count IS 1.
-GLOBAL len IS 20.
-FROM {LOCAL k IS 1.} UNTIL k > len STEP { SET k TO k+1.} DO{
-	flap_control["pitch_control"]:ADD(0).
-}
-SET len TO 1.
+SET flap_control["pitch_control"] TO average_value_factory(5).
 
 
 
@@ -318,8 +313,7 @@ WHEN TIME:SECONDS>attitude_time_upd + 0.5 THEN {
 
 	//calculate trim deflection and speedbrake deflection
 	//read off the gimbal angle to get the pitch control input 
-	SET flap_control["pitch_control"][count] TO  -gimbals:PITCHANGLE.
-	SET flap_control["pitch_control"][0] TO average_list(flap_control["pitch_control"]).
+	flap_control["pitch_control"]:update(-gimbals:PITCHANGLE).
 
 	//update the flaps trim setting and airbrakes IF WE'RE BELOW FIRST ROLL ALT
 	IF SHIP:ALTITUDE < constants["firstrollalt"] {	

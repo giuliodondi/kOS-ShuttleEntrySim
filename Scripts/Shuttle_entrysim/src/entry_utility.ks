@@ -525,10 +525,12 @@ FUNCTION  flaptrim_control{
 		SET FLAPPID:SETPOINT TO 0.
 	}
 
-	LOCAL flap_incr IS  FLAPPID:UPDATE(TIME:SECONDS,flap_control["pitch_control"][0]).
+	
+	LOCAL controlavg IS flap_control["pitch_control"]:average().
+	LOCAL flap_incr IS  FLAPPID:UPDATE(TIME:SECONDS,controlavg).
 	SET flap_control["deflection"] TO  flap_control["deflection"] + flap_incr.
 	
-	print flap_control["pitch_control"][0] at (0,10).
+	print "pitch control: " + controlavg at (0,10).
 	
 	deflect_flaps(flap_control["parts"] , flap_control["deflection"]).
 	
