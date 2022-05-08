@@ -738,54 +738,6 @@ FUNCTION update_entry_GUI {
 }
 
 
-//relatively few modifications to entry gui
-FUNCTION make_TAEM_GUI {
-	//freeze the target site selection 
-	SET select_tgt:ENABLED to FALSE.
-
-}
-
-FUNCTION update_TAEM_GUI {
-	PARAMETER rollv.
-	PARAMETER pitchv.
-	PARAMETER az_err.
-	PARAMETER tgt_range.
-	PARAMETER alt_err.
-	PARAMETER entry_vel.
-	PARAMETER pitch_ref.
-	PARAMETER isguidance.	
-	PARAMETER update_reference.
-
-	If isguidance {
-		//update the displayed values of roll and pitch
-		SET slider1:VALUE TO  rollv.
-		IF NOT update_reference {
-			SET slider2:VALUE TO  pitchv.
-		}
-	}
-	
-	//data output
-	SET text0:text TO "<size=15>      Mach         :  " + ROUND(ADDONS:FAR:MACH,1) + "</size>".
-	SET text1:text TO "<size=15> Azimuth Error    :  " + ROUND(az_err,1) + " °</size>".
-	SET text2:text TO "<size=15>Distance to TGT  :  " + ROUND(tgt_range,1) + " km</size>".
-	SET text3:text TO "<size=15>HAC entry alt err :  " + ROUND(alt_err,1) + " km</size>".
-	SET text4:text TO "<size=15>HAC entry speed   :  " + ROUND(entry_vel,1) + " m/s</size>".
-	SET text5:text TO "<size=15>Reference pitch   :  " + ROUND(pitch_ref,1) + " °</size>".
-
-}
-
-
-//if coming from TAEM we are close to the HAC entry, disable HAc choices
-//don't want to do this in case of an ALT
-FUNCTION close_TAEM_GUI {
-	SET select_tgt:ENABLED to FALSE.
-	SET select_rwy:ENABLED to FALSE.
-	SET select_side:ENABLED to FALSE.
-}
-
-
-
-
 
 
 								//APPROACH GUI FUNCTIONS 
@@ -1034,9 +986,14 @@ FUNCTION update_apch_GUI {
 	PARAMETER spdbk_val.
 	PARAMETER flapval.
 	PARAMETER cur_nz.
-
-	SET diamond:STYLE:margin:h TO pipper_pos[0].
-	SET diamond:STYLE:margin:v TO pipper_pos[1]. 
+	
+		// set the pipper to an intermediate position between the desired and the current position so the transition is smoother
+	LOCAL smooth_fac IS 0.3.
+	
+	LOCAL pipper_pos_cur IS LIST(diamond:STYLE:margin:h, diamond:STYLE:margin:v).
+	
+	SET diamond:STYLE:margin:h TO pipper_pos_cur[0] + smooth_fac*(pipper_pos[0] - pipper_pos_cur[0]).
+	SET diamond:STYLE:margin:v TO pipper_pos_cur[1] + smooth_fac*(pipper_pos[1] - pipper_pos_cur[1]).
 	
 	SET vspd_slider:VALUE TO CLAMP(-SHIP:VERTICALSPEED/2,vspd_slider:MIN,vspd_slider:MAX).
 	
