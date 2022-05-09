@@ -1,7 +1,6 @@
 
 FUNCTION TAEM_spdbk {
-	SET arbkb:PRESSED TO FALSE.
-	SET SHIP:CONTROL:PILOTMAINTHROTTLE TO 0.5.
+	SET arbkb:PRESSED TO TRUE.
 
 }
 
@@ -47,14 +46,15 @@ FUNCTION TAEM_roll_profile {
 
 	
 	LOCAL bank_vel_profile IS LIST(
-								LIST(0,45),
-								LIST(300,45),
-								LIST(335,40)
+								LIST(0,40),
+								LIST(300,40),
+								LIST(335,35),
+								LIST(500,25)
 								).
 	
-	//LOCAL maxroll IS ABS(INTPLIN(bank_vel_profile,SHIP:VELOCITY:SURFACE:MAG)).
+	LOCAL maxroll IS ABS(INTPLIN(bank_vel_profile,SHIP:VELOCITY:SURFACE:MAG)).
 	
-	LOCAL maxroll IS 40.
+	// maxroll IS 40.
 	
 	IF (sturn) {
 		//if doing an s-turn disregard delaz and bank at close to maximum roll
