@@ -548,7 +548,7 @@ LOCAL alt_err IS 0.
 
 SET start_guid_flag TO FALSE.
 
-//force manual speedbrakes and 30% extension
+//force auto speedbrakes 
 TAEM_spdbk().
 
 //keep track of whether we are in an s-turn or not
