@@ -131,7 +131,7 @@ FUNCTION speed_control {
 		
 		IF (mode=1 OR mode=2) {
 			LOCAL tgt_rng IS greatcircledist(tgtrwy["position"], SHIP:GEOPOSITION).
-			SET tgtspeed TO 51.48*tgt_rng^(0.6431).
+			SET tgtspeed TO MAX(240,51.48*tgt_rng^(0.6431)).
 			SET delta_spd TO SHIP:VELOCITy:SURFACE:MAG - tgtspeed.
 		}
 		ELSE {
