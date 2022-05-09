@@ -25,8 +25,6 @@ If (SHIP:ALTITUDE >= constants["atmalt"]) {
 	RUNPATH("0:/Shuttle_entrysim/VESSELS/" + vessel_dir + "/flapcontrol").
 	RUNPATH("0:/Shuttle_entrysim/VESSELS/" + vessel_dir + "/approach_params").
 
-	//need to place the call here so RTLS bypasses it
-	activate_flaps(flap_control["parts"]).
 
 	//	Load libraries
 	RUNPATH("0:/Libraries/misc_library").	
@@ -37,6 +35,9 @@ If (SHIP:ALTITUDE >= constants["atmalt"]) {
 	RUNPATH("0:/Shuttle_entrysim/src/entry_utility").
 	RUNPATH("0:/Shuttle_entrysim/src/approach_utility").
 	RUNPATH("0:/Shuttle_entrysim/src/taem_utility").
+	
+	//need to place the call here so RTLS bypasses it
+	activate_flaps(flap_control["parts"]).
 			
 
 	RUNPATH("0:/Shuttle_entrysim/src/entry_main").
