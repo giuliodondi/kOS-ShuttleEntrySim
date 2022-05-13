@@ -1,6 +1,7 @@
 
 FUNCTION TAEM_spdbk {
-	SET arbkb:PRESSED TO TRUE.
+	SET arbkb:PRESSED TO FALSE.
+	SEt SHIP:CONTROL:PILOTMAINTHROTTLE to 0.5.
 
 }
 
@@ -10,7 +11,7 @@ FUNCTION TAEM_spdbk {
 FUNCTION TAEM_transition {
 	PARAMETER tgt_dist.
 	
-	IF ((tgt_dist <= 90) OR (SHIP:VELOCITY:SURFACE:MAG <= 800)) {
+	IF ((tgt_dist <= 100) OR (SHIP:VELOCITY:SURFACE:MAG <= 900)) {
 		RETURN TRUE.
 	}
 	
@@ -137,7 +138,8 @@ FUNCTION TAEM_pitch_roll_cor {
 	
 	//correct the pitch value by the roll angle to keep the vertical 
 	//component of lift consistent
-	LOCAL out_pitch IS ref_pitch/COS(ABS(cur_roll)).
+	//not too large a correction though
+	LOCAL out_pitch IS ref_pitch/COS(ABS(cur_roll/2)).
 	
 	//clamp to reasonable values.
 	RETURN CLAMP(out_pitch,0,20).
@@ -194,7 +196,7 @@ declare function simulate_TAEM {
 	
 	//putting the termination conditions here should save an if check per step
 	//UNTIL ( greatcircledist(initialpos,simstate["latlong"]) >= greatcircledist(initialpos,tgt_rwy["hac_entry"]) )  {
-	UNTIL ( (tgtdistp < tgtdist) AND (tgtdist<5) )  {
+	UNTIL (( (tgtdistp < tgtdist) AND (tgtdist<5) ) OR simstate["altitude"] < 5000 )  {
 			
 		//if target distance is less than 1km we no longer update the entry point 
 		IF (tgtdist>1) {
