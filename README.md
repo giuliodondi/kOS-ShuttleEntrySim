@@ -2,8 +2,9 @@
 
 
 
-
 # Kerbal Space Program Shuttle Entry and Approach Guidance
+
+## updated 29/02/2022
 
 **PLEASE Read along with watching the demonstration videos at https://youtu.be/5VkAmHpXwn8 and https://youtu.be/oMyd0d86eV4**
 
@@ -11,13 +12,13 @@
 # Remarks
 
 These scripts have been tested in Kerbal Space Program 1.8.1 and 1.9.1.
-They are designed to do one single thing: to provide deorbit and reentry guidance for the Space Shuttle System in RSS/Realism Overhaul.
+They are designed to provide deorbit and reentry guidance for the Space Shuttle System in RSS/Realism Overhaul.
 The script was originally engineered for DECQ's Shuttle. Support was added for different spacecraft by means of configuration files in the **Scripts/Shuttle_entrysim/VESSELS** directory.
 
 The scripts are not calibrated to work in stock KSP or with anything other than Space Shuttle-like vehicles.
-I'm positive they can be modified accordingly but it's not a trivial task. I do not play stock KSP and do not plan on ever releasing a version of these scripts for it. 
+I'm fairly sure they can be modified accordingly but it's not a trivial task. I do not play stock KSP and do not plan on ever releasing a version of these scripts for it. 
 
-This code is provided as is, please keep in mind I am not a professional programmer nor an experienced mod maker. The script has most likely has several bugs within that I didn't discover with enough testing, and is certainly not the most efficient way to implement this kind of functionality. 
+This code is provided as is, it is not the most elegant or efficient way to implement this functionality and it is not as robust as I'd like, meaning your mileage will vary depending on how you set everything up. Even I occasionally see some surprises
 
 I encourage bug reports or improvement suggestions, although I make no promise to act on them promptly or ever.
 I will not be available around the clock to help you get it working, I do not have the time unfortunately.
@@ -142,10 +143,34 @@ accurate burn.
 
 ## Entry
 
-Warp until you enter the atmosphere. Immediately have the nose pointed forward and up about 38° and wings level. It's not important to be precise.
-Disable the nose cabin RCS jets to save RCS, you don't need them, but keep all the rear RCS jets on for now. Transfer all the RCS fuel in the nose to the OMS pods.
+Warp until you enter the atmosphere. If your CG is close to the empty Orbiter transfer all the RCS fuel in the nose to the OMS pods,
+If you carry payload that shifts the CG aft you might want to keep fuel in the nose tank to balance out. You can see how payloads affect the CG in the Spaceplane Hangar (take away some OMS fuel since you will presumably have burned it suring your mission).
 
-Run **entry.ks*, this opens the main reentry guidance window.  
+**Run *entry.ks*, this opens the main reentry guidance window and the HUD.** Move them around to your liking.
+
+### Entry GUI window:
+![gui_example](https://github.com/giuliodondi/kOS-ShuttleEntrySim/blob/master/gui_entry.png)
+
+- In the top row you find a button to select the landing site form the list you specified in **landing_sites.ks**
+- Next button selects the landing runway. Upon choosing a new landing site, the script will select a random runway to simulate weather variations.
+- Next button selects the HAC position. This is also chosen automatically, disregard for now.
+- _Log Data_ will write telemetry information in a file in the **Scripts/Shuttle_entrysim/LOGS** folder, once every guidance pass.
+- The _Airbrake_ button is a toggle between Manual (off) and Automatic (on) airbrake control. You won't need it until TAEM gidance.
+- _Switch to Approach_ forces the program to break out of automatic guidance and take you to Approach. In normal operation you shouldn't need it as the program decides automatically when to switch. Do not press this button above Mach 2 or 20km or you may lose control.
+- _Auto Steering_ switches between manual and automatic control of the Orbiter's attitude during reentry. More on this later.
+- _Guidance_ turns on the background trajectory optimisation given the landing site you chose
+- _Modify Controller Gains_ should **never** be touched unless you read and understood the code and know what you're doing
+
+**After running the script, select and DOUBLE CHECK your landing site!!** Leave the runway and HAC selection alone unless you want to land on a specific runway. Then enable _Guidance_ and focus on the HUD.
+
+### Entry HUD window:
+
+![entry_hud_example](https://github.com/giuliodondi/kOS-ShuttleEntrySim/blob/master/hud_entry.png)
+
+Immediately have the nose pointed forward and up about 38° and wings level. It's not important to be precise.
+Disable the nose cabin RCS jets to save RCS, you don't need them, but keep all the rear RCS jets on for now. 
+
+
 Select immediately the correct landing site. **DOUBLE CHECK!!**
 
 The script will not take over control immediately.
