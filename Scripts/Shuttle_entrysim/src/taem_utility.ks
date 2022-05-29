@@ -11,8 +11,7 @@ FUNCTION TAEM_spdbk {
 FUNCTION TAEM_transition {
 	PARAMETER tgt_dist.
 	
-	IF ((tgt_dist <= 100) OR (SHIP:VELOCITY:SURFACE:MAG <= 900)) {
-	//IF ((tgt_dist <= 90) OR (SHIP:VELOCITY:SURFACE:MAG <= 800)) {
+	IF ((tgt_dist <= 120) AND (SHIP:VELOCITY:SURFACE:MAG <= 950)) {
 		RETURN TRUE.
 	}
 	
