@@ -2,8 +2,9 @@
 
 
 
-
 # Kerbal Space Program Shuttle Entry and Approach Guidance
+
+## updated 29/02/2022
 
 **PLEASE Read along with watching the demonstration videos at https://youtu.be/5VkAmHpXwn8 and https://youtu.be/oMyd0d86eV4**
 
@@ -11,13 +12,13 @@
 # Remarks
 
 These scripts have been tested in Kerbal Space Program 1.8.1 and 1.9.1.
-They are designed to do one single thing: to provide deorbit and reentry guidance for the Space Shuttle System in RSS/Realism Overhaul.
+They are designed to provide deorbit and reentry guidance for the Space Shuttle System in RSS/Realism Overhaul.
 The script was originally engineered for DECQ's Shuttle. Support was added for different spacecraft by means of configuration files in the **Scripts/Shuttle_entrysim/VESSELS** directory.
 
 The scripts are not calibrated to work in stock KSP or with anything other than Space Shuttle-like vehicles.
-I'm positive they can be modified accordingly but it's not a trivial task. I do not play stock KSP and do not plan on ever releasing a version of these scripts for it. 
+I'm fairly sure they can be modified accordingly but it's not a trivial task. I do not play stock KSP and do not plan on ever releasing a version of these scripts for it. 
 
-This code is provided as is, please keep in mind I am not a professional programmer nor an experienced mod maker. The script has most likely has several bugs within that I didn't discover with enough testing, and is certainly not the most efficient way to implement this kind of functionality. 
+This code is provided as is, it is not the most elegant or efficient way to implement this functionality and it is not as robust as I'd like, meaning your mileage will vary depending on how you set everything up. Even I occasionally see some surprises
 
 I encourage bug reports or improvement suggestions, although I make no promise to act on them promptly or ever.
 I will not be available around the clock to help you get it working, I do not have the time unfortunately.
@@ -82,7 +83,7 @@ The folder **Scripts/Shuttle_entrysim/VESSELS** contains the different vehicle c
 There are three vehicle config files:
 - **gains.ks** which I do not advise touching unless you know what you are doing.
 - **pitch_profile.ks** which specifies the pitch versus surface velocity points that the Entry Guidance will follow. The profile I provide you with is taken directly from early Shuttle technical
-documents, therefore it as designed to respect the Shuttle's thermal limits. In KSP this is _not really_ crucial, so if you want some extra range you can bring it down to 35°.
+documents, therefore it as designed to respect the Shuttle's thermal limits. During flight you can take manual control and adjust the pitch to increase or decrease drag, more on this later.
 Bear in mind that you will be able to adjust the initial pitch value in flight, more about that later.
 - **flapcontrol.ks** which specifies which parts allow for flap control and the angle ranges of motion of each. Here you specify the names of your elevon and body flap parts. The file provided is already good for DECQ shuttle so leave it alone.
 
@@ -140,50 +141,91 @@ cross-range independently from range error and you will miss the target. A 50° 
 Once the deorbit burn is adjusted, close the deorbit planner and perform the burn manually. Remember that the Shuttle engines are angled upwards relative to the nose centreline. Take that into account for a more
 accurate burn.
 
-## Entry
+## Entry and TAEM
 
-Warp until you enter the atmosphere. Immediately have the nose pointed forward and up about 38° and wings level. It's not important to be precise.
-Disable the nose cabin RCS jets to save RCS, you don't need them, but keep all the rear RCS jets on for now. Transfer all the RCS fuel in the nose to the OMS pods.
+### Never, ever, EVER engage SAS during Entry and TAEM
 
-Run **entry.ks*, this opens the main reentry guidance window.  
-Select immediately the correct landing site. **DOUBLE CHECK!!**
+Warp until you enter the atmosphere. If your CG is close to the empty Orbiter transfer all the RCS fuel in the nose to the OMS pods,
+If you carry payload that shifts the CG aft you might want to keep fuel in the nose tank to balance out. You can see how payloads affect the CG in the Spaceplane Hangar (take away some OMS fuel since you will presumably have burned it suring your mission).
 
-The script will not take over control immediately.
-You will see the two sliders displaying the current input values of pitch and roll. These can be manually adjusted or the script can do it automatically.
+Run **_entry.ks_**, this opens the main reentry guidance window and the HUD.** Move them around to your liking.
 
-The GUI has an "Enable SAS" button, which will engage the sliders and manoeuvre the Shuttle to the attitude specified. If disabled it will try to maintain present attitude.
-Set the sliders to 0° roll and 38° pitch and toggle the _Enable SAS_ button. The script will have control of the Shuttle's attitude.
+### Entry GUI window:
+![gui_example](https://github.com/giuliodondi/kOS-ShuttleEntrySim/blob/master/gui_entry.png)
+
+- In the top row you find a button to select the landing site form the list you specified in **landing_sites.ks**
+- Next button selects the landing runway. Upon choosing a new landing site, the script will select a random runway to simulate weather variations.
+- Next button selects the HAC position. This is also chosen automatically, disregard for now.
+- _Log Data_ will write telemetry information in a file in the **Scripts/Shuttle_entrysim/LOGS** folder, once every guidance pass.
+- The _Airbrake_ button is a toggle between Manual (off) and Automatic (on) airbrake control. You won't need it until TAEM gidance.
+- _Switch to Approach_ forces the program to break out of automatic guidance and take you to Approach. In normal operation you shouldn't need it as the program decides automatically when to switch. Do not press this button above Mach 2 or 20km or you may lose control.
+- _Auto Steering_ switches between manual and automatic control of the Orbiter's attitude during reentry. More on this later.
+- _Guidance_ turns on the background trajectory optimisation given the landing site you chose
+- _Modify Controller Gains_ should **never** be touched unless you read and understood the code and know what you're doing
+
+### After running the script, select and DOUBLE CHECK your landing site!!  
+Leave the runway and HAC selection alone unless you want to land on a specific runway.  
+Wait until you're below 120km, then enable _Guidance_ and focus on the HUD.
+
+### Entry HUD window:
+
+![entry_hud_example](https://github.com/giuliodondi/kOS-ShuttleEntrySim/blob/master/hud_entry.png)
+
+- _AZ ERROR_ is the angle between your trajectory and the bearing to the target. When it's 0 you are flying directly towards the target. If it's positive the target is to the right, if negative it's to the left
+- The square at the centre indicates the nose of the Orbiter. 
+- _AOA_ is Angle of Attack, the angle between the nose of the orbiter and the prograde velocity vector. It is always positive even if the nose points below the horizon
+- _BANK_ is  the angle between the lift vector and the local vertical vector. 
+- The _PIPPER_ moves around to indicate the values of bank and AOA that Guidance would like to fly right now
+- _WING LOAD_ is the lift generated by the wings measured in units of G
+- _MACH_ is self-explanatory, above 100km it is not a reliable measurement of speed. 
+- _FLAP TRIM_ indicates the flap deflection commanded by the automatic trim controller. The scale depends on the motion range specified in **flapcontrol.ks**. **It does not indicate the KSP controller trim**
+- _ALT_ is calculated above the elevation of the landing site (crucial to keep in mind if you're landing at Edwards)
+- _VERT SPEED_ is measured in increments of 100 m/s, the slider tops off at +-200 m/s
+- _TARGET_DIST_ is in km
+- _CONTROL MODE_ changes between **AUTO** when Auto Steering is enabled and **CSS** (Control Stick Steering) when it's on Manual
 
 
-Regardless of what control mode is engaged, the script will run a background trajectory simulation and display the result on the left side of the window. 
-The important figures are:
-- "Downrange error",  where positive error means overshoot and negative means undershoot,
-- "Relative bearing", where positive angle means we will need to turn right to head towards the landing site, and negative to the left.
+### On Steering modes
 
-Theoretically it is possible to fly the reentry manually adjusting the sliders based on the numbers on the left.
+Even when steering is set to manual, it is never _really_ manual like you may be used to flying planes in KSP. Instead the program implements a sort of Fly-By-Wire mechanism.    
+The Shuttle's attitude during reentry is determined by Bank and AOA angles. AOA will largely follow the pitch profile you specified in **pitch_profile.ks**, while Bank is optimised by the trajectory simulation to control range.  
 
-Wait until you are below 120 km  and press the "Enable Guidance" button. This will instead create the pitch and roll profiles (angles as functions of surface velocity) and adjust them based on reference values.
-The roll reference value is optimized iteration after iteration to try to drive the Downrange Error to zero. The optimal value is displayed as "Reference Roll".
+When Steering is set to manual, the values of bank and AOA calculated by guidance are **NOT** automatically used to steer the Shuttle, the actual steering bank and AOA are controlled by you the Pilot using WASD or your favourite joystick. If you move the controls around you should see the Shuttle changing slowly its attitude using RCS and the HUD angles reflecting the change in attitude. Do NOT look at the control input indicators in the bottom left as the control surfaces are actuated by kOS accoding to its own steering manager. If you see no movement, click repeatedly on the main KSP window as the cursor may be stuck on a GUI or the kOS terminal.  
 
-The Pitch reference value is the current pitch value, which is used to adjust the built-in pitch profile. The script basically has a table of velocity-pitch points that define 
-a segmented line, then given the current value of velocity the right valie of pitch is extrapolated.
-The script, however, leaves the highest velocity-pitch point free, and will update it with whatever value is currently on the slider. 
+When Steering is Automatic, the Shuttle steering angles are wired to the Guidance computed values and so you will see the nose indicator chase the pipper around as it moves. The Manual setting lets you achieve this by hand adjusting the steering to follow the Pipper commands, so you can feel like Joe Engle during STS-2.  
+I've seen that there are actually a few benefits to keeping manual control of the Shuttle Steering which I'll explain later on.
 
-The point is that if the Shuttle is very far from the runway at the beginning of re-entry, the optimal reference roll value will be low to reduce drag and increase range.
-But the roll value must not be too low or the Shuttle will be unable to align itself with the runway. It must be at least 30-35° but a much better margin is 45-50°.
+### Reentry guidance
 
-The initial pitch value is then left free so that if the reference roll is too low, the pitch can be decreased to decrease overall drag. The script will automatically adjust 
-and find a higher value of roll which is better for cross-range control as I explained.
-After the Shuttle slows down below the highest velocity-pitch point, this is frozen and the pitch slider will lock onto the pitch value specified by the profile.
+The script runs a background trajectory simulation using specified profiles of pitch (AOA) and roll (Bank) angles versus Velocity. The Velocity profile is fixed, while the  Roll profile depends on a parameter "roll_ref" that gets adjusted to drive the range error to zero.  
+**Important:** The bank angle commanded by Guidance is _not_ identical to the reference roll parameter, it is designed to ramp down as the Shuttle slows down plus there is a vertical speed modulation logic going on to try to dampen the phugoid behaviour of the trajectory.  
+
+Guidance will command the first roll angle below 100km. The bank is to the same side of the target, so it depends on the sign of the Azimuth error. You will see the pipper shoot off left or right, move your joystick in the same direction to aligh the nose indicator with the pipper.  
+Bank angles of 70+ degrees are a bit extreme and indicative of a high-energy reentry (you did your deorbit burn a bit too close to the landing site).  
+You can force Guidance to lower the reference bank angle by increasing drag through pitch. When your speed is above the speed of the first velocity-pitch point in the profile you specified, the program will overwrite the pitch value to the one you are flying right now. You can add 2-3° of pitch and hopefully see the bank angle decrease a bit. Conversely, if guidance commands a bank angle of 40- degrees that is indicative of low-energy conditions, so you can decrease pitch to lower drag. Keep in mind the shuttle needs at least 35° of bank to control crossrange, even more if the crossrange is high.  
+
+After the Shuttle slows down below the first pitch-velocity point, the pitch is locked in place, but if you use manual control you can still fly whatever pitch you want to "nudge" reference roll.  
+The standard pitch profile used by the Shuttle will ramp down to 28° between Mach 22 and 16, and then down to 16° betwene Mach 6 and 3.
+
+Keep an eye on Azimuth Error, it should move towards zero and then pick up on the other side as the Shuttle continues to bank in the same direction. When the absolute value comes close to 15°, a roll reversal is commanded, the pipper will shoot on the opposite side and, if flying manual, you must be ready to adjust attitude quickly.  
+As the Shuttle does the roll reversal it passes through zero bank, meaning all the lift is directed upwards for a few moments. You will see vertical speed shoot up and even go positive. The pipper may command an adjustment in pitch when this happens. This is the Pitch Modulation mechanism which tries to quickly change drag if the calculated range error is too large.  
+The other advantage of flying manual is that you can always modulate AOA and bank a bit to alter the trajectory. Of course you need to have a feel for how the Shuttle flies during hypersonic entry, in doubt stay close to the pipper. 
+
+Below 80km you theoretically only need Yaw RCS, you can use the actuation toggles to disable the other axes and save RCS if you are low on fuel. **Do NOT run out of RCS or you will lose yaw control**. The Script is much gentler on the controls compared to previous versions but it's not perfect.  
+You can also use fine controls to save RCS fuel, but **disengage fine controls during a Roll Reversal or you may lose control.** Below about 18° of pitch, the Rudder is no longer obstructed and becomes effective, you can (and should) disable RCS at this point, unless for some reason the Shuttle is hard to control.
 
 
-The script is programmed to start banking once the 90km line is crossed. It will keep the commanded roll angle frozen to zero before that.
-After this it will handle roll reversals automatically based on the "Relative bearing" value.
-**Make sure the KSP SAS (i.e. the "T" key) is OFF and that you have full RCS control (no fine controls). Otherwise kOS will freak out or be unable to keep control during a roll reversal.**
+### TAEM guidance
 
-Below 80km, pitch and roll RCS controls should be disabled since the elevons and body flap should have enough authority to handle it. This will save RCS fuel.
-Double check that the Body Flap and Elevon trim is actually working, or adjust the values manually if it is not.
-Yaw RCS should be left on until 30km and below mach 5, at which point the Shuttle should have pitched down below 20° and the rudder gains enough authority.
+### This mode is EXPERIMENTAL and doesn't work as well as I would like, nevertheless I find it useful so I kept it in
+
+Following entry guidance until you're above the landing site will most likely lead you to be very high on energy and 1-2km too high or too low. For this reason, at about 100km and Mach 3 the _Terminal Area Energy Management (TAEM)_ guidance is activated.  
+From the standpoint of you the Pilot hardly anything changes, you still have a HUD to look at and a pipper to follow with your controls. There is still a trajectory simulation done in the background and pitch-roll guidance values sent to the HUD.
+
+The guidance law is now different, though. We want to hit the 
+
+
+
 
 ## Approach
 
