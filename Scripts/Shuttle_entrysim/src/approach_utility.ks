@@ -50,8 +50,8 @@ FUNCTION autoland {
 	PARAMETER mode.		//probably need to adjust the gains based on mode
 	
 	//get current aoa and roll
-	LOCAL cur_rol IS get_roll().
-	LOCAL cur_aoa IS get_pitch().
+	LOCAL cur_rol IS get_roll_lvlh().
+	LOCAL cur_aoa IS get_pitch_lvlh().
 	
 	//transform deltas based on current roll angle
 	LOCAL sinr IS SIN(cur_rol).
@@ -131,7 +131,7 @@ FUNCTION speed_control {
 		
 		IF (mode=1 OR mode=2) {
 			LOCAL tgt_rng IS greatcircledist(tgtrwy["position"], SHIP:GEOPOSITION).
-			SET tgtspeed TO 51.48*tgt_rng^(0.6431).
+			SET tgtspeed TO MAX(250,51.48*tgt_rng^(0.6431)).
 			SET delta_spd TO SHIP:VELOCITy:SURFACE:MAG - tgtspeed.
 		}
 		ELSE {
@@ -260,6 +260,12 @@ FUNCTION refresh_runway_lex {
 							"upvec",V(0,0,0)
 
 	).
+}
+
+//simple wrapper to convert an altitude in metres to altitude above the landing site
+FUNCTION runway_alt {
+	PARAMETER altt.
+	RETURN altt - tgtrwy["elevation"].
 }
 
 
@@ -426,27 +432,6 @@ function get_hac_profile_alt {
 	
 	RETURN rwy["elevation"] +  profile_alt*1000.
 }
-
-
-
-//redefine the ACQC given present position and 
-//FUNCTION define_acqc {
-//	PARAMETER cur_pos.
-//	PARAMETER acq_err.
-//	PARAMETER rwy.
-//	PARAMETER params.
-//	
-//	LOCAL entry_bng IS bearingg(rwy["hac_entry"],rwy["hac"]).
-//
-//	//for a right hac the exit bearing is the entry bearing plus the angle travelled around the hac, bar overflows
-//	// while for a left hac the reverse is true
-//	LOCAL hac_entry_sign IS 1.
-//	IF rwy["hac_side"]="left" {SET hac_entry_sign TO -1.}
-//	LOCAL exit_bng IS fixangle(entry_bng + hac_entry_sign*hac_angle).
-//	
-//	SET rwy["hac_exit"] TO  new_position(rwy["hac"],params["hac_radius"],exit_bng).
-//
-//}
 
 
 
@@ -888,6 +873,20 @@ FUNCTION flaptrim_control_apch {
 	RETURN flap_control.
 
 }
+
+FUNCTION update_nz {
+	Parameter pos.
+	Parameter surfvel.
+	Parameter attitude.
+	
+	LOCAL g0 IS 9.80665.
+	
+	//sample lift force
+	LOCAL outlex IS aeroforce(pos, surfvel, attitude).
+
+	return outlex["lift"]/g0.
+}
+
 
 FUNCTION update_g_force {
 	PARAMETER nz.

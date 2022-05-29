@@ -164,7 +164,7 @@ FUNCTION make_global_entry_GUI {
 	SET main_gui:X TO 550.
 	SET main_gui:Y TO 350.
 	SET main_gui:STYLe:WIDTH TO 530.
-	SET main_gui:STYLe:HEIGHT TO 430.
+	SET main_gui:STYLe:HEIGHT TO 220.
 
 	set main_gui:skin:LABEL:TEXTCOLOR to guitextgreen.
 
@@ -348,6 +348,8 @@ FUNCTION close_global_GUI {
 	main_gui:HIDE().
 	IF (DEFINED(hud_gui)) {
 		hud_gui:HIDE.
+		hud_gui:DISPOSE.
+		
 	}
 }
 
@@ -361,6 +363,233 @@ FUNCTION is_autoairbk {
 
 FUNCTION is_log {
 	RETURN logb:PRESSED.
+}
+
+
+
+
+
+					// HUD SPECIFIC FUNCTIONS
+					
+					
+FUNCTION make_hud_gui {
+	IF (DEFINED hud_gui AND hud_gui:visible) {
+		RETURN.
+	}
+
+	GLOBAL hud_gui is gui(430,320).
+	SET hud_gui:X TO 200.
+	SET hud_gui:Y TO 200.
+	SET hud_gui:STYLe:WIDTH TO 450.
+	SET hud_gui:STYLe:HEIGHT TO 320.
+	SET hud_gui:style:BG to "Shuttle_entrysim/src/gui_images/hudbackground.png".
+	SET hud_gui:skin:LABEL:TEXTCOLOR to guitextgreen.
+	hud_gui:SHOW.
+
+
+	set hud_gui:skin:horizontalslider:BG to "Shuttle_entrysim/src/gui_images/brakeslider.png".
+	set hud_gui:skin:horizontalsliderthumb:BG to "Shuttle_entrysim/src/gui_images/hslider_thumb.png".
+	set hud_gui:skin:horizontalsliderthumb:HEIGHT to 17.
+	set hud_gui:skin:horizontalsliderthumb:WIDTH to 20.
+	set hud_gui:skin:verticalslider:BG to "Shuttle_entrysim/src/gui_images/vspdslider2.png".
+	set hud_gui:skin:verticalsliderthumb:BG to "Shuttle_entrysim/src/gui_images/vslider_thumb.png".
+	set hud_gui:skin:verticalsliderthumb:HEIGHT to 20.
+	set hud_gui:skin:verticalsliderthumb:WIDTH to 17.
+
+
+	GLOBAL hud_container IS main_gui:ADDHLAYOUT().
+	SET hud_container:STYLE:ALIGN TO "Center".
+	SET hud_container:STYLE:WIDTH TO 550.
+	SET hud_container:STYLE:HEIGHT TO 350.
+	SET hud_container:STYLE:MARGIN:top TO 0.
+	hud_container:addspacing(50).
+
+
+	GLOBAL hud IS hud_gui:ADDVLAYOUT().
+
+	GLOBAL hdg IS hud:ADDVLAYOUT().
+	SET hdg:STYLE:ALIGN TO "Center".
+	SET hdg:STYLe:HEIGHT TO 20.
+
+	GLOBAL hdg_box IS hdg:ADDVLAYOUT().
+	SET hdg_box:STYLe:WIDTH TO 60.
+	SET hdg_box:STYLe:HEIGHT TO 20.
+	SET hdg_box:STYLE:MARGIN:left TO 165.
+	GLOBAL hdg_text IS hdg_box:ADDLABEL("").
+	SET hdg_text:STYLE:ALIGN TO "Center".
+	
+	GLOBAL hudrll IS hdg:ADDVLAYOUT().
+	SET hudrll:STYLe:WIDTH TO 20.
+	SET hudrll:STYLe:HEIGHT TO 20.
+	SET hudrll:STYLE:MARGIN:top TO 80.
+	SET hudrll:STYLE:MARGIN:left TO 176.
+	GLOBAL hudrll_text IS hudrll:ADDLABEL("rll").
+	SET hudrll_text:STYLe:WIDTH TO 30.
+	SET hudrll_text:STYLE:ALIGN TO "Center".
+	
+	GLOBAL hudpch IS hdg:ADDVLAYOUT().
+	SET hudpch:STYLe:WIDTH TO 20.
+	SET hudpch:STYLe:HEIGHT TO 20.
+	SET hudpch:STYLE:MARGIN:top TO 4.
+	SET hudpch:STYLE:MARGIN:left TO 213.
+	GLOBAL hudpch_text IS hudpch:ADDLABEL("pch").
+	SET hudpch_text:STYLe:WIDTH TO 30.
+	SET hudpch_text:STYLE:ALIGN TO "Left".
+
+
+
+	GLOBAL hud_main IS hud:ADDHLAYOUT().
+	SET hud_main:STYLe:WIDTH TO 430.
+	SET hud_main:STYLe:HEIGHT TO 240.
+	SET hud_main:STYLE:ALIGN TO "Center".
+	hud_main:addspacing(0).
+	
+	GLOBAL flaptrim_sliderbox IS hud_main:ADDVLAYOUT().
+	SET flaptrim_sliderbox:STYLe:WIDTH TO 15.
+	SET flaptrim_sliderbox:STYLE:ALIGN TO "right".
+	flaptrim_sliderbox:addspacing(72).
+	GLOBAL flaptrim_slider is flaptrim_sliderbox:addvslider(0,0.5,-0.5).
+	SET flaptrim_slider:STYLE:ALIGN TO "Center".
+	SET flaptrim_slider:style:vstretch to false.
+	SET flaptrim_slider:style:hstretch to false.
+	SET flaptrim_slider:STYLE:WIDTH TO 20.
+	SET flaptrim_slider:STYLE:HEIGHT TO 100.
+
+
+	GLOBAL hud_spd IS hud_main:ADDVLAYOUT().
+	SET hud_spd:STYLe:WIDTH TO 60.
+	SET hud_spd:STYLE:ALIGN TO "Center".
+	hud_spd:addspacing(105).
+	GLOBAL spdbox IS hud_spd:ADDHLAYOUT().
+	SET spdbox:STYLe:WIDTH TO 70.
+	SET spdbox:STYLe:HEIGHT TO 30.
+	SET spdbox:STYLe:MARGIN:left TO 10.
+	GLOBAL spd_text IS spdbox:ADDLABEL("").
+	SET spd_text:STYLE:ALIGN TO "Left".
+
+
+	GLOBAL hud_nz IS hud_spd:ADDHLAYOUT().
+	SET hud_nz:STYLe:WIDTH TO 60.
+	SET hud_nz:STYLe:HEIGHT TO 60.
+	hud_nz:addspacing(55).
+	GLOBAL nz_text IS hud_nz:ADDLABEL("").
+	SET nz_text:STYLe:WIDTH TO 100.
+	SET nz_text:STYLE:ALIGN TO "Right".
+
+
+	GLOBAL pointbox IS hud_main:addhbox().
+	SET pointbox:STYLE:ALIGN TO "Center".
+	SET pointbox:STYLe:WIDTH TO 240.
+	SET pointbox:STYLe:HEIGHT TO 240.
+	set pointbox:style:margin:top to 0.
+	set pointbox:style:margin:left to 0.
+	SET  pointbox:style:BG to "Shuttle_entrysim/src/gui_images/bg_marker_square.png".
+	
+	
+	
+	GLOBAL diamond IS pointbox:ADDLABEL().
+	SET diamond:IMAGE TO "Shuttle_entrysim/src/gui_images/diamond.png".
+	SET diamond:STYLe:WIDTH TO 22.
+	SET diamond:STYLe:HEIGHT TO 22.
+	
+
+	//GLOBAL diamond_hmargin IS  pointbox:STYLe:WIDTH*0.458 .
+	//GLOBAL diamond_vmargin IS pointbox:STYLE:HEIGHT*0.447.
+	SET diamond:STYLE:margin:h TO pointbox:STYLe:WIDTH*0.482 .
+	SET diamond:STYLE:margin:v TO pointbox:STYLE:HEIGHT*0.466.
+
+
+
+	GLOBAL hud_alt IS hud_main:ADDVLAYOUT().
+	SET hud_alt:STYLe:WIDTH TO 60.
+	SET hud_alt:STYLE:ALIGN TO "Center".
+	hud_alt:addspacing(105).
+	GLOBAL altbox IS hud_alt:ADDHLAYOUT().
+	SET altbox:STYLe:WIDTH TO 60.
+	SET altbox:STYLe:HEIGHT TO 30.
+	GLOBAL alt_text IS altbox:ADDLABEL("").
+	SET alt_text:STYLE:ALIGN TO "Center".
+
+
+	GLOBAL vspd_sliderbox IS hud_main:ADDHLAYOUT().
+	SET vspd_sliderbox:STYLe:WIDTH TO 20.
+	SET vspd_sliderbox:STYLE:ALIGN TO "Center".
+	GLOBAL vspd_slider is vspd_sliderbox:addvslider(0,-20,20).
+	SET vspd_slider:STYLE:ALIGN TO "Center".
+	SET vspd_slider:style:vstretch to false.
+	SET vspd_slider:style:hstretch to false.
+	SET vspd_slider:STYLE:WIDTH TO 20.
+	SET vspd_slider:STYLE:HEIGHT TO 230.
+
+
+
+
+	GLOBAL bottom_box IS hud:ADDHLAYOUT().
+	SET bottom_box:STYLe:WIDTH TO 400.
+	//SET bottom_box:STYLE:ALIGN TO "left".
+
+	bottom_box:addspacing(75).
+
+	GLOBAL bottom_txtbox IS bottom_box:ADDHLAYOUT().
+	SET bottom_txtbox:STYLe:WIDTH TO 185.
+	GLOBAL mode_txt IS bottom_txtbox:ADDLABEL("<size=20>    </size>").
+	SET mode_txt:STYLE:ALIGN TO "Left".
+
+	GLOBAL mode_dist_text IS  bottom_txtbox:ADDLABEL( "<size=18>"+"</size>" ).
+
+	bottom_box:addspacing(0).
+
+	GLOBAL spdbk_slider_box IS bottom_box:ADDHLAYOUT().
+	GLOBAL spdbk_slider is spdbk_slider_box:addhslider(0,0,1).
+	SET spdbk_slider:style:vstretch to false.
+	SET spdbk_slider:style:hstretch to false.
+	SET spdbk_slider:STYLE:WIDTH TO 110.
+	SET spdbk_slider:STYLE:HEIGHT TO 20.
+
+}
+
+
+FUNCTION update_hud_gui {
+	PARAMETER mode_str.
+	PARAMETER pipper_pos.
+	PARAMETER altt.
+	PARAMETEr dist.
+	PARAMETER hdgval.
+	PARAMETER spd.
+	PARAMETER pch.
+	PARAMETER rll.
+	PARAMETER spdbk_val.
+	PARAMETER flapval.
+	PARAMETER cur_nz.
+
+	SET mode_txt:text TO "<size=20>" + mode_str + "</size>".
+
+	// set the pipper to an intermediate position between the desired and the current position so the transition is smoother
+	LOCAL smooth_fac IS 0.3.
+	
+	LOCAL pipper_pos_cur IS LIST(diamond:STYLE:margin:h, diamond:STYLE:margin:v).
+	
+	SET diamond:STYLE:margin:h TO pipper_pos_cur[0] + smooth_fac*(pipper_pos[0] - pipper_pos_cur[0]).
+	SET diamond:STYLE:margin:v TO pipper_pos_cur[1] + smooth_fac*(pipper_pos[1] - pipper_pos_cur[1]).
+	
+	SET vspd_slider:VALUE TO CLAMP(-SHIP:VERTICALSPEED,vspd_slider:MIN,vspd_slider:MAX).
+	
+	SET hdg_text:text TO "<size=18>" + hdgval + "</size>".
+	SET spd_text:text TO "<size=18>" + spd + "</size>".
+
+	SET alt_text:text TO "<size=18>" + altt + "</size>".
+	
+	SET nz_text:text TO "<size=18>" + ROUND(cur_nz,1) + "G</size>".
+	
+	SET mode_dist_text:text TO "<size=18>" + dist + "</size>".
+		
+	SET spdbk_slider:VALUE TO spdbk_val.
+	
+	SET flaptrim_slider:VALUE TO flapval.
+	
+	SET hudrll_text:text TO "<size=12>" + ROUND(rll,0) + "</size>".
+	SET hudpch_text:text TO "<size=12>" + ROUND(pch,0) + "</size>".
+
 }
 
 
@@ -381,150 +610,71 @@ FUNCTION make_entry_GUI {
 
 
 	GLOBAL leftbox IS all_box:ADDVLAYOUT().
-	SET leftbox:STYLE:WIDTH TO 220.
+	SET leftbox:STYLE:WIDTH TO 230.
 	all_box:addspacing(30).	
-	GLOBAL rightbox IS all_box:ADDVLAYOUT().
-	SET rightbox:STYLE:WIDTH TO 220.
-	SET rightbox:STYLE:ALIGN TO "center".
+	
+	//GLOBAL switchtxtbox IS leftbox:ADDVLAYOUT().
+	//SET switchbox:STYLE:ALIGN TO "center".
+	//GLOBAL switchtext2 IS switchtxtbox:ADDLABEL("First disable Auto Steer and Guidance").
+	//SET switchtext2:style:padding:h tO -70.
+	//SET switchtext2:STYLE:ALIGN TO "center".
 
-
-		
-	SET main_gui:skin:horizontalsliderthumb:width TO 13.
-	SET main_gui:skin:horizontalsliderthumb:HEIGHT TO 13.
-
-
-	GLOBAL databox IS leftbox:ADDVBOX().
-	SET databox:STYLE:ALIGN TO "left".
-	set databox:style:padding:h to 10.
-	SET databox:STYLE:WIDTH TO 230.
-	SET databox:STYLE:HEIGHT TO 165.
-
-	GLOBAL text0 IS databox:ADDLABEL("      Mach       : ").
-	GLOBAL text1 IS databox:ADDLABEL(" Azimuth Error   : ").
-	GLOBAL text2 IS databox:ADDLABEL("Distance to TGT  : ").
-	GLOBAL text3 IS databox:ADDLABEL("Downrange error  : ").
-	GLOBAL text4 IS databox:ADDLABEL("Reference Roll   : ").
-	GLOBAL text5 IS databox:ADDLABEL("Reference Pitch   : ").
-
-	SET text0:STYLE:ALIGN TO "left".
-	SET text1:STYLE:ALIGN TO "left".
-	SET text2:STYLE:ALIGN TO "left".
-	SET text3:STYLE:ALIGN TO "left".
-	SET text4:STYLE:ALIGN TO "left".
-	SET text5:STYLE:ALIGN TO "left".
-
-
-	leftbox:addspacing(6).	
-	GLOBAL switchbox IS leftbox:ADDVLAYOUT().
-	GLOBAL switchtext1 IS switchbox:ADDLABEL("        Disable SAS and Guidance").
-	GLOBAL switchtext2 IS switchbox:ADDLABEL("              prior to switching   ").
-	GLOBAL buttonbox IS switchbox:ADDHLAYOUT().
-	buttonbox:addspacing(40).	
-
-
-	GLOBAL exitb IS  buttonbox:ADDBUTTON("<Size=16>Switch to Approach</Size>").
-	set exitb:style:width to 170.
-	set exitb:style:height to 30.
+	//leftbox:addspacing(5).	
+	GLOBAL switchbtbox IS leftbox:ADDHLAYOUT().
+	
+	SET switchbtbox:STYLE:ALIGN TO "center".
+	GLOBAL exitb IS  switchbtbox:ADDBUTTON("<Size=16>  Switch to Approach         </Size><Size=10>First disable Auto Steer and Guidance</Size>").
+	set exitb:style:wordwrap to true.
+	set exitb:style:width to 220.
+	set exitb:style:height to 67.
+	SET exitb:style:margin:left to 15.
+	
 	function exitcheck {
 		IF (NOT sasb:PRESSED) AND (NOT guidb:PRESSED) { 
 			SET stop_entry_flag TO TRUE.
 		}
 	}
 	SET exitb:ONCLICK TO exitcheck@.
+	
+	
 
 
-
+	GLOBAL rightbox IS all_box:ADDVLAYOUT().
+	SET rightbox:STYLE:WIDTH TO 220.
+	SET rightbox:STYLE:ALIGN TO "center".
+	
+	
 	GLOBAL sasbox IS rightbox:ADDHLAYOUT().
 	SET sasbox:STYLE:ALIGN TO "center".
-	GLOBAL sasb IS  sasbox:ADDCHECKBOX("Enable SAS",false).
+	
+	GLOBAL sasb IS  sasbox:ADDCHECKBOX("Auto Steering",false).
 	SET sasb:ONTOGGLE TO {
 		parameter b. 
-		IF b {
-			SAS OFF.
-			LOCK STEERING TO P_att.
-		}
-		ELSE {
-			UNLOCK STEERING.
-			SAS ON.
-		}
-
+		//IF b {
+		//	SAS OFF.
+		//	LOCK STEERING TO P_att.
+		//}
+		//ELSE {
+		//	UNLOCK STEERING.
+		//	SAS ON.
+		//}
+	
 	}.
 
 
 
-	GLOBAL guidb IS  sasbox:ADDCHECKBOX("Enable Guidance",false).
+	GLOBAL guidb IS  sasbox:ADDCHECKBOX("Guidance",false).
 	SET guidb:ONTOGGLE TO {
 		PARAMETER val.
 		SET reset_entry_flag TO TRUE.
 	}.
 
-
-	GLOBAL sliderbox IS rightbox:ADDVLAYOUT().
-	SET sliderbox:STYLE:ALIGN TO "center".
-	GLOBAL rollslider IS sliderbox:ADDVLAYOUT().
-	SET rollslider:STYLE:ALIGN TO "center".
-	GLOBAL rolltext IS rollslider:ADDLABEL("Roll:" + ROUND(initial_roll,0)).
-	SET rolltext:STYLE:ALIGN TO "center".
-	GLOBAL roll_slider IS rollslider:ADDHLAYOUT().
-	SET roll_slider:STYLE:ALIGN TO "center".
-	GLOBAL rollmin IS roll_slider:ADDBUTTON("<size=18>-</size>").
-	GLOBAL slider1 is roll_slider:addhslider(initial_roll,-120,120).
-	GLOBAL rollplus IS roll_slider:ADDBUTTON("<size=18>+</size>").
-	SET slider1:STYLE:WIDTH TO 210.
-	SET slider1:STYLE:HEIGHT TO 13.
-	set slider1:onchange to { parameter val.  SET rolltext:TEXT TO "Roll:" + ROUND(val,0). }.
-
-
-	SET rollmin:STYLE:ALIGN TO "center".
-	SET rollmin:STYLE:WIDTH TO 20.
-	SET rollmin:STYLE:HEIGHT TO 20.
-	SET rollplus:STYLE:ALIGN TO "center".
-	SET rollplus:STYLE:WIDTH TO 20.
-	SET rollplus:STYLE:HEIGHT TO 20.
-	SET rollmin:ONCLICK TO {SET slider1:VALUE TO slider1:VALUE - 1.}.
-	SET rollplus:ONCLICK TO {SET slider1:VALUE TO slider1:VALUE + 1.}.
-
-
-
-	GLOBAL pchslider IS sliderbox:ADDVLAYOUT().
-	SET pchslider:STYLE:ALIGN TO "center".
-	GLOBAL pchtext IS pchslider:ADDLABEL("Pitch:" + ROUND(initial_pitch,0)).
-	SET pchtext:STYLE:ALIGN TO "center".
-
-	GLOBAL pch_slider IS pchslider:ADDHLAYOUT().
-	SET pch_slider:STYLE:ALIGN TO "center".
-	GLOBAL pchmin IS pch_slider:ADDBUTTON("<size=18>-</size>").
-	GLOBAL slider2 is pch_slider:addhslider(initial_pitch,0,90).
-	GLOBAL pchplus IS pch_slider:ADDBUTTON("<size=18>+</size>").
-	SET slider2:STYLE:WIDTH TO 210.
-	SET slider2:STYLE:HEIGHT TO 13.
-	set slider2:onchange to { 
-		parameter val.
-		//SET pitchv TO val.
-		//IF update_reference {
-		//	SET pitch_ref TO val.
-		//}
-		SET pchtext:TEXT TO "Pitch:" + ROUND(val,0). 
-	}.
-
-
-	SET pchmin:STYLE:ALIGN TO "center".
-	SET pchmin:STYLE:WIDTH TO 20.
-	SET pchmin:STYLE:HEIGHT TO 20.
-	SET pchplus:STYLE:ALIGN TO "center".
-	SET pchplus:STYLE:WIDTH TO 20.
-	SET pchplus:STYLE:HEIGHT TO 20.
-	SET pchmin:ONCLICK TO {SET slider2:VALUE TO slider2:VALUE - 1.}.
-	SET pchplus:ONCLICK TO {SET slider2:VALUE TO slider2:VALUE + 1.}.
-
-
-
-	rightbox:addspacing(30).	
+	
 	GLOBAL gainsbox IS rightbox:ADDHLAYOUT().
 	//SET gainsbox:STYLE:WIDTH TO 300.
 	//SET gainsbox:STYLE:HEIGHT TO 50.
 	SET gainsbox:STYLE:ALIGN TO "Center".
-	gainsbox:addspacing(30).	
+	//gainsbox:addspacing(30).	
 	GLOBAL gains_but IS  gainsbox:ADDBUTTON("<size=16>Modify Controller Gains</size>").
 	SET gains_but:STYLE:WIDTH TO 230.
 	SET gains_but:STYLE:ALIGN TO "Center".
@@ -683,6 +833,30 @@ FUNCTION make_entry_GUI {
 		gains_gui:SHOW().
 	}
 	SET gains_but:ONCLICK TO gainsgui@.
+	
+	
+	make_hud_gui().
+	
+	LOCAL minflapdefl IS 0.
+	LOCAL maxflapdefl IS 0.
+	
+	
+	FOR f in flap_control["parts"] {
+		IF f["min_defl"] < minflapdefl {
+			SET minflapdefl TO f["min_defl"].
+		}
+		IF f["max_defl"] > maxflapdefl {
+			SET maxflapdefl TO f["max_defl"].
+		}
+	
+	}
+	
+	SET flaptrim_slider:MIN TO maxflapdefl.
+	SET flaptrim_slider:MAX TO minflapdefl.
+	
+	
+	SET vspd_slider:MIN TO -200.
+	SET vspd_slider:MAX TO +200.
 
 
 }
@@ -699,44 +873,101 @@ FUNCTION is_auto_steering {
 }
 
 
-FUNCTION get_roll_slider {
-	RETURN slider1:VALUE.
-}
+//FUNCTION get_roll_slider {
+//	RETURN slider1:VALUE.
+//}
+//
+//FUNCTION get_pitch_slider {
+//	RETURN slider2:VALUE.
+//}
 
-FUNCTION get_pitch_slider {
-	RETURN slider2:VALUE.
+
+
+//scales the deltas by the right amount for display
+//accounting for the diamond window width
+FUNCTION diamond_deviation_entry {
+	PARAMETER deltas.
+	
+	LOCAL hmargin IS pointbox:STYLe:WIDTH*0.458.
+	LOCAL  vmargin IS pointbox:STYLE:HEIGHT*0.447.
+	
+	LOCAL vdelta IS deltas[1].
+	LOCAL hdelta IS deltas[0].
+	
+	//the vertical multiplier needs to be negative to simulate an ils needle.
+	LOCAL vmult iS -0.07.
+	
+	LOCAL hmult iS 0.03.
+	
+	LOCAL horiz IS hmult*hdelta.
+	LOCAL vert IS  vmult*vdelta.
+
+
+	//transpose the deltas to the interval [0, 1] times the window widths
+	LOCAL diamond_horiz IS hmargin*(1 + horiz).
+	LOCAL diamond_vert IS vmargin*(1 + vert).
+
+	//clamp them 
+	SET diamond_horiz TO CLAMP(diamond_horiz,0,2*hmargin).
+	SET diamond_vert TO CLAMP(diamond_vert,0,2*vmargin). 
+	
+
+	RETURN LIST(diamond_horiz,diamond_vert).
+
 }
 
 
 FUNCTION update_entry_GUI {
-	PARAMETER rollv.
-	PARAMETER pitchv.
+	PARAMETER mode.
+	PARAMETER steer_roll.
+	PARAMETER steer_pitch.
 	PARAMETER az_err.
 	PARAMETER tgt_range.
-	PARAMETER range_err.
-	PARAMETER roll_ref.
-	PARAMETER pitch_ref.
-	PARAMETER isguidance.	
-	PARAMETER update_reference.
-
-	If isguidance {
-		//update the displayed values of roll and pitch
-		SET slider1:VALUE TO  rollv.
-		IF NOT update_reference {
-			SET slider2:VALUE TO  pitchv.
-		}
+	PARAMETER roll_guid.
+	PARAMETER pitch_guid.
+	PARAMETER spdbk_val.
+	PARAMETER flapval.
+	PARAMETER cur_nz.
+	
+	
+	
+	LOCAL pipper_deltas IS LIST(
+								roll_guid - steer_roll, 
+								pitch_guid -  steer_pitch
+	).
+	
+	LOCAL mode_str IS "".
+	IF is_auto_steering() {
+		SET mode_str TO "AUTO".
+	} ELSE {
+		SET mode_str TO "CSS ".
 	}
 	
-	//data output
-	SET text0:text TO "<size=15>      Mach         :  " + ROUND(ADDONS:FAR:MACH,1) + "</size>".
-	SET text1:text TO "<size=15> Azimuth Error    :  " + ROUND(az_err,1) + " °</size>".
-	SET text2:text TO "<size=15>Distance to TGT  :  " + ROUND(tgt_range,1) + " km</size>".
-	SET text3:text TO "<size=15>Downrange error  :  " + ROUND(range_err,1) + " km</size>".
-	SET text4:text TO "<size=15>Reference roll    :  " + ROUND(roll_ref,1) + " °</size>".
-	SET text5:text TO "<size=15>Reference pitch   :  " + ROUND(pitch_ref,1) + " °</size>".
+	update_hud_gui(
+		mode_str,
+		diamond_deviation_entry(pipper_deltas),
+		altitude_format(mode),
+		distance_format(tgt_range,mode),
+		ROUND(az_err,1),
+		"M" + ROUND(ADDONS:FAR:MACH,1),
+		steer_pitch,
+		steer_roll,
+		spdbk_val,
+		flapval,
+		cur_nz
+	).
+
 
 }
 
+
+
+//relatively few modifications to entry gui
+FUNCTION make_TAEM_GUI {
+	//freeze the target site selection 
+	SET select_tgt:ENABLED to FALSE.
+
+}
 
 
 
@@ -762,165 +993,26 @@ FUNCTION make_apch_GUI {
 	//freeze the target site selection 
 	SET select_tgt:ENABLED to FALSE.
 		
-		
+	
 		
 	SET main_gui:STYLe:HEIGHT TO 130.
 	
-	GLOBAL hud_gui is gui(430,320).
-	SET hud_gui:X TO 200.
-	SET hud_gui:Y TO 200.
-	SET hud_gui:STYLe:WIDTH TO 450.
-	SET hud_gui:STYLe:HEIGHT TO 320.
-	SET hud_gui:style:BG to "Shuttle_entrysim/src/gui_images/hudbackground.png".
-	SET hud_gui:skin:LABEL:TEXTCOLOR to guitextgreen.
-	hud_gui:SHOW.
-
-
-	set hud_gui:skin:horizontalslider:BG to "Shuttle_entrysim/src/gui_images/brakeslider.png".
-	set hud_gui:skin:horizontalsliderthumb:BG to "Shuttle_entrysim/src/gui_images/hslider_thumb.png".
-	set hud_gui:skin:horizontalsliderthumb:HEIGHT to 17.
-	set hud_gui:skin:horizontalsliderthumb:WIDTH to 20.
-	set hud_gui:skin:verticalslider:BG to "Shuttle_entrysim/src/gui_images/vspdslider2.png".
-	set hud_gui:skin:verticalsliderthumb:BG to "Shuttle_entrysim/src/gui_images/vslider_thumb.png".
-	set hud_gui:skin:verticalsliderthumb:HEIGHT to 20.
-	set hud_gui:skin:verticalsliderthumb:WIDTH to 17.
-
-
-	GLOBAL hud_container IS main_gui:ADDHLAYOUT().
-	SET hud_container:STYLE:ALIGN TO "Center".
-	SET hud_container:STYLE:WIDTH TO 550.
-	SET hud_container:STYLE:HEIGHT TO 350.
-	SET hud_container:STYLE:MARGIN:top TO 0.
-	hud_container:addspacing(50).
-
-
-	GLOBAL hud IS hud_gui:ADDVLAYOUT().
-
-	GLOBAL hdg IS hud:ADDHLAYOUT().
-	SET hdg:STYLE:ALIGN TO "Center".
-	SET hdg:STYLe:HEIGHT TO 20.
-	hdg:addspacing(162).
-	GLOBAL hdg_box IS hdg:ADDHLAYOUT().
-	SET hdg_box:STYLe:WIDTH TO 60.
-	SET hdg_box:STYLe:HEIGHT TO 20.
-	GLOBAL hdg_text IS hdg_box:ADDLABEL("").
-	SET hdg_text:STYLE:ALIGN TO "Center".
-
-
-
-	GLOBAL hud_main IS hud:ADDHLAYOUT().
-	SET hud_main:STYLe:WIDTH TO 430.
-	SET hud_main:STYLe:HEIGHT TO 240.
-	SET hud_main:STYLE:ALIGN TO "Center".
-	hud_main:addspacing(0).
+	make_hud_gui().
 	
-	GLOBAL flaptrim_sliderbox IS hud_main:ADDVLAYOUT().
-	SET flaptrim_sliderbox:STYLe:WIDTH TO 15.
-	SET flaptrim_sliderbox:STYLE:ALIGN TO "right".
-	flaptrim_sliderbox:addspacing(72).
-	GLOBAL flaptrim_slider is flaptrim_sliderbox:addvslider(0,0.5,-0.5).
-	SET flaptrim_slider:STYLE:ALIGN TO "Center".
-	SET flaptrim_slider:style:vstretch to false.
-	SET flaptrim_slider:style:hstretch to false.
-	SET flaptrim_slider:STYLE:WIDTH TO 20.
-	SET flaptrim_slider:STYLE:HEIGHT TO 100.
-
-
-	GLOBAL hud_spd IS hud_main:ADDVLAYOUT().
-	SET hud_spd:STYLe:WIDTH TO 60.
-	SET hud_spd:STYLE:ALIGN TO "Center".
-	hud_spd:addspacing(105).
-	GLOBAL spdbox IS hud_spd:ADDHLAYOUT().
-	SET spdbox:STYLe:WIDTH TO 60.
-	SET spdbox:STYLe:HEIGHT TO 30.
-	GLOBAL spd_text IS spdbox:ADDLABEL("").
-	SET spd_text:STYLE:ALIGN TO "Center".
+	SET flaptrim_slider:MIN TO -0.5.
+	SET flaptrim_slider:MAX TO +0.5.
 	
-
-	GLOBAL hud_nz IS hud_spd:ADDHLAYOUT().
-	SET hud_nz:STYLe:WIDTH TO 60.
-	SET hud_nz:STYLe:HEIGHT TO 60.
-	hud_nz:addspacing(55).
-	GLOBAL nz_text IS hud_nz:ADDLABEL("").
-	SET nz_text:STYLe:WIDTH TO 100.
-	SET nz_text:STYLE:ALIGN TO "Right".
-
-
-
-	GLOBAL pointbox IS hud_main:addhbox().
-	SET pointbox:STYLE:ALIGN TO "Center".
-	SET pointbox:STYLe:WIDTH TO 240.
-	SET pointbox:STYLe:HEIGHT TO 240.
-	set pointbox:style:margin:top to 0.
-	set pointbox:style:margin:left to 0.
-	SET  pointbox:style:BG to "Shuttle_entrysim/src/gui_images/bg_marker_square.png".
-
-	GLOBAL diamond IS pointbox:ADDLABEL().
-	SET diamond:IMAGE TO "Shuttle_entrysim/src/gui_images/diamond.png".
-	SET diamond:STYLe:WIDTH TO 25.
-	SET diamond:STYLe:HEIGHT TO 25.
-
-	//GLOBAL diamond_hmargin IS  pointbox:STYLe:WIDTH*0.458 .
-	//GLOBAL diamond_vmargin IS pointbox:STYLE:HEIGHT*0.447.
-	SET diamond:STYLE:margin:h TO pointbox:STYLe:WIDTH*0.458 .
-	SET diamond:STYLE:margin:v TO pointbox:STYLE:HEIGHT*0.447.
-
-
-
-	GLOBAL hud_alt IS hud_main:ADDVLAYOUT().
-	SET hud_alt:STYLe:WIDTH TO 60.
-	SET hud_alt:STYLE:ALIGN TO "Center".
-	hud_alt:addspacing(105).
-	GLOBAL altbox IS hud_alt:ADDHLAYOUT().
-	SET altbox:STYLe:WIDTH TO 60.
-	SET altbox:STYLe:HEIGHT TO 30.
-	GLOBAL alt_text IS altbox:ADDLABEL("").
-	SET alt_text:STYLE:ALIGN TO "Center".
-
-
-	GLOBAL vspd_sliderbox IS hud_main:ADDHLAYOUT().
-	SET vspd_sliderbox:STYLe:WIDTH TO 20.
-	SET vspd_sliderbox:STYLE:ALIGN TO "Center".
-	GLOBAL vspd_slider is vspd_sliderbox:addvslider(0,-20,20).
-	SET vspd_slider:STYLE:ALIGN TO "Center".
-	SET vspd_slider:style:vstretch to false.
-	SET vspd_slider:style:hstretch to false.
-	SET vspd_slider:STYLE:WIDTH TO 20.
-	SET vspd_slider:STYLE:HEIGHT TO 230.
-
-
-
-
-	GLOBAL bottom_box IS hud:ADDHLAYOUT().
-	SET bottom_box:STYLe:WIDTH TO 400.
-	//SET bottom_box:STYLE:ALIGN TO "left".
-
-	bottom_box:addspacing(75).
-
-	GLOBAL bottom_txtbox IS bottom_box:ADDHLAYOUT().
-	SET bottom_txtbox:STYLe:WIDTH TO 185.
-	GLOBAL mode_txt IS bottom_txtbox:ADDLABEL("<size=20> ACQ</size>").
-
-	GLOBAL mode_dist_text IS  bottom_txtbox:ADDLABEL( "<size=18>"+"</size>" ).
-
-	bottom_box:addspacing(0).
-
-	GLOBAL spdbk_slider_box IS bottom_box:ADDHLAYOUT().
-	GLOBAL spdbk_slider is spdbk_slider_box:addhslider(0,0,1).
-	SET spdbk_slider:style:vstretch to false.
-	SET spdbk_slider:style:hstretch to false.
-	SET spdbk_slider:STYLE:WIDTH TO 110.
-	SET spdbk_slider:STYLE:HEIGHT TO 20.
-
-
-
-
+	SET vspd_slider:MIN TO -40.
+	SET vspd_slider:MAX TO +40.
+	
+	
+	
+	
 
 	//gui-related actions for mode switching
 	WHEN mode=4 THEN {
 		SET select_rwy:ENABLED to FALSE.
 		SET select_side:ENABLED to FALSE.
-		SET mode_txt:text TO "<size=20> HDG</size>".
 		
 		
 		WHEN mode=5 THEN {
@@ -941,9 +1033,10 @@ FUNCTION make_apch_GUI {
 }
 
 
+
 //scales the deltas by the right amount for display
 //accounting for the diamond window width
-FUNCTION diamond_deviation {
+FUNCTION diamond_deviation_apch {
 
 	PARAMETER deltas.
 	PARAMETER mode.
@@ -981,36 +1074,96 @@ FUNCTION diamond_deviation {
 
 
 FUNCTION update_apch_GUI {
+	PARAMETER mode.
 	PARAMETER pipper_pos.
 	PARAMETEr modedist.
 	PARAMETER spdbk_val.
 	PARAMETER flapval.
 	PARAMETER cur_nz.
 	
-		// set the pipper to an intermediate position between the desired and the current position so the transition is smoother
-	LOCAL smooth_fac IS 0.3.
+	LOCAL mode_str IS "".
+	IF (mode=3) {
+		SET mode_str TO "ACQ ".
+	} ELSE IF (mode=4) {
+		SET mode_str TO "HDG ".
+	} ELSE IF (mode=5) {
+		SET mode_str TO "OGS ".
+	} ELSE IF (mode=6) {
+		IF (ALT:RADAR>200) {
+			SET mode_str TO "FLARE".
+		}
+	}
 	
-	LOCAL pipper_pos_cur IS LIST(diamond:STYLE:margin:h, diamond:STYLE:margin:v).
-	
-	SET diamond:STYLE:margin:h TO pipper_pos_cur[0] + smooth_fac*(pipper_pos[0] - pipper_pos_cur[0]).
-	SET diamond:STYLE:margin:v TO pipper_pos_cur[1] + smooth_fac*(pipper_pos[1] - pipper_pos_cur[1]).
-	
-	SET vspd_slider:VALUE TO CLAMP(-SHIP:VERTICALSPEED/2,vspd_slider:MIN,vspd_slider:MAX).
-	
-	SET hdg_text:text TO "<size=18>" + ROUND(compass_for(SHIP:SRFPROGRADE:VECTOR,SHIP:GEOPOSITION),0) + "</size>".
-	SET spd_text:text TO "<size=18>" + ROUND(ADDONS:FAR:IAS,0) + "</size>".
-	IF SHIP:ALTITUDE>1000 {
-		SET alt_text:text TO "<size=18>" + ROUND(SHIP:ALTITUDE/1000,1) + "</size>".
-	} ELSE {
-		SET alt_text:text TO "<size=18>" + ROUND(SHIP:ALTITUDE,0) + "</size>".
-	}	
-	
-	SET nz_text:text TO "<size=18>" + ROUND(cur_nz,1) + "G</size>".
-	
-	SET mode_dist_text:text TO "<size=18>" + ROUND(modedist,1) + "</size>".
-		
-	SET spdbk_slider:VALUE TO spdbk_val.
-	
-	SET flaptrim_slider:VALUE TO flapval.
+	update_hud_gui(
+		mode_str,
+		pipper_pos,
+		altitude_format(mode),
+		distance_format(modedist,mode),
+		ROUND(compass_for(SHIP:SRFPROGRADE:VECTOR,SHIP:GEOPOSITION),0),
+		ROUND(ADDONS:FAR:IAS,0),
+		get_pitch_lvlh(),
+		get_roll_lvlh(),
+		spdbk_val,
+		flapval,
+		cur_nz
+	).
 
 }
+
+
+FUNCTION altitude_format {
+	PARAMETER mode.
+	
+	//always use altitude above landing site 
+	LOCAL altt IS runway_alt(SHIP:ALTITUDE).
+	
+	//also calculate in km 
+	LOCAL alttkm IS altt/1000.
+	
+	//accurate to 0.5 km
+	IF (mode <= 4) {
+		LOCAL altout IS FLOOR(alttkm).
+		LOCAL dec IS alttkm - altout.
+		IF (dec > 0.5) {
+			SET altout TO altout + 0.5.
+		}
+		RETURN altout.
+	} ELSE {
+		//show full digits, floored to nearest ten or hundred depending
+		LOCAL altout IS altt.
+		//accurate to 100m
+		IF (altt >= 1000 ) {
+			SET altout TO FLOOR(altt/100)*100.
+		//accurate to 10m
+		} ELSE IF (altt >= 100) {
+			SET altout TO FLOOR(altt/10)*10.
+		} ELSE {
+			SET altout TO ROUND(altout,0).
+		}
+		RETURN altout.
+	}
+}
+
+
+FUNCTION distance_format {
+	PARAMETER dist.	//expected in km
+	PARAMETER mode.
+	
+	IF (mode>=3) {
+		//simply round to the single decimal point
+		RETURN ROUND(dist,1).
+	} ELSE {
+		IF (dist > 100) {
+			//floor down to 10km
+			LOCAL distout IS 10*ROUND(dist/10,0).
+			RETURN distout.
+		} ELSE {
+			//floor down to the unit
+			RETURN FLOOR(dist).
+		}
+	}
+
+}
+
+
+

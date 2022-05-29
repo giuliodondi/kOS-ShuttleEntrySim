@@ -137,13 +137,13 @@ DECLARE FUNCTION rk2 {
 	//RK2
 	LOCAL p1 IS pos.
 	LOCAL v1 IS vel.
-	SET out TO accel(p1, v1, refbody, attitude).
+	SET out TO accel(p1, v1, attitude).
 	LOCAL a1 IS out[0].
 	SET state["aero"] TO out[1].
 	 
 	LOCAL  p2 IS  pos + 0.5 * v1 * dt.
 	LOCAL  v2 IS vel + 0.5 * a1 * dt.
-	SET out TO accel(p2, v2, refbody, attitude).
+	SET out TO accel(p2, v2, attitude).
 	LOCAL  a2 IS out[0].
 
 	 

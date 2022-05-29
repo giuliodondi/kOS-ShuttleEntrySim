@@ -249,8 +249,9 @@ FUNCTION pitch_modulation {
 	//the pitch correction should have the same sign as the range error
 	//i.e. negative if we're short and positive if we're long
 	//the correction is scaled to be between 0 and 1 when the range error is between 0.5x and 1.5x the range_band
+	// maximum +- 3 degrees either way
 	IF ABS(range_err) > range_band {
-		SET pitch_corr TO SIGN(range_err) * CLAMP((ABS(range_err/range_band) - 1),0,1) * pitchv *  gains["pchmod"].
+		SET pitch_corr TO SIGN(range_err) * MIN(3, CLAMP((ABS(range_err/range_band) - 1),0,1) * pitchv *  gains["pchmod"]).
 	}
 		
 	RETURN pitchv + pitch_corr.
@@ -275,7 +276,7 @@ FUNCTION roll_profile {
 	//not too much since it reduces range a lot
 	//this effect decays with velocity
 	LOCAL refvel IS 6500.
-	LOCAL gain IS gains["Khdot"]*(state["surfvel"]:MAG/refvel)^4.
+	LOCAL gain IS gains["Khdot"]*(state["surfvel"]:MAG/refvel)^3.
 	LOCAL newroll IS roll0 + gain*hddot.
 	
 	//let the base roll value decrease linearly with velocity
@@ -341,19 +342,18 @@ declare function simulate_reentry {
 	LOCAL tgtpos IS tgt_rwy["position"].
 	LOCAL tgtalt IS tgt_rwy["elevation"] + end_conditions["altitude"].
 
+	//sample initial values for proper termination conditions check
+	SET simstate["altitude"] TO bodyalt(simstate["position"]).
+	SET simstate["surfvel"] TO surfacevel(simstate["velocity"],simstate["position"]).
 
 	LOCAL hdotp IS 0.
 	LOCAL hddot IS 0.
 	
-	LOCAL pitch_prof IS 0.
+	LOCAL pitch_prof IS pitch_profile(pitchprof_segments[pitchprof_segments:LENGTH-1][1],simstate["surfvel"]:MAG).
 	LOCAL roll_prof IS 0.
 	
 	
 	LOCAL poslist IS LIST().
-	
-	//sample initial values for proper termination conditions check
-	SET simstate["altitude"] TO bodyalt(simstate["position"]).
-	SET simstate["surfvel"] TO surfacevel(simstate["velocity"],simstate["position"]).
 
 	
 	//putting the termination conditions here should save an if check per step
@@ -422,6 +422,31 @@ declare function simulate_reentry {
 
 //control functions
 
+
+
+//simulate Control Stick Steering : use pilot input to update steering angles 
+FUNCTION update_css_attitude {
+	PARAMETER rollsteer.
+	PARAMETER pitchsteer.
+	
+	LOCAL rollgain IS 1.2.
+	LOCAL pitchgain IS 0.5.
+	
+	LOCAL deltaroll IS rollgain*(SHIP:CONTROL:PILOTROLL - SHIP:CONTROL:PILOTROLLTRIM).
+	LOCAL deltapitch IS pitchgain*(SHIP:CONTROL:PILOTPITCH - SHIP:CONTROL:PILOTPITCHTRIM).
+	
+	IF ABS(deltaroll)>0.1 {
+		SET rollsteer TO rollsteer + deltaroll.
+	}
+	
+	IF ABS(deltapitch)>0.1 {
+		SET pitchsteer TO pitchsteer + deltapitch.
+	}
+	
+	
+	RETURN LIST(rollsteer,pitchsteer).
+}
+
 //create KSP direction based on AOA and bank angle wrt two specified vectors
 FUNCTION create_steering_dir {
 		PARAMETER refv.
@@ -442,10 +467,6 @@ FUNCTION create_steering_dir {
 
 //handles vehicle attitude
 FUNCTION update_attitude {
-
-	
-
-
 	PARAMETER cmd_dir.
 	PARAMETER tgt_pitch.
 	PARAMETER tgt_roll.
@@ -464,7 +485,7 @@ FUNCTION update_attitude {
 	
 
 	//measure the current ship roll angle 
-	LOCAL ship_roll IS get_roll().
+	LOCAL ship_roll IS get_roll_prograde().
 		
 		
 	//is the current ship direction too far from the target direction in the roll plane?
@@ -529,8 +550,6 @@ FUNCTION  flaptrim_control{
 	LOCAL controlavg IS flap_control["pitch_control"]:average().
 	LOCAL flap_incr IS  FLAPPID:UPDATE(TIME:SECONDS,controlavg).
 	SET flap_control["deflection"] TO  flap_control["deflection"] + flap_incr.
-	
-	print "pitch control: " + controlavg at (0,10).
 	
 	deflect_flaps(flap_control["parts"] , flap_control["deflection"]).
 	
