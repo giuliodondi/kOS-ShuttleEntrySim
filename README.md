@@ -217,6 +217,13 @@ You can also use fine controls to save RCS fuel, but **disengage fine controls d
 
 ### TAEM guidance
 
+### This mode is EXPERIMENTAL and doesn't work as well as I would like, nevertheless I find it useful so I kept it in
+
+Following entry guidance until you're above the landing site will most likely lead you to be very high on energy and 1-2km too high or too low. For this reason, at about 100km and Mach 3 the _Terminal Area Energy Management (TAEM)_ guidance is activated.  
+From the standpoint of you the Pilot hardly anything changes, you still have a HUD to look at and a pipper to follow with your controls. There is still a trajectory simulation done in the background and pitch-roll guidance values sent to the HUD.
+
+The guidance law is now different, though. We want to hit the 
+
 
 
 
