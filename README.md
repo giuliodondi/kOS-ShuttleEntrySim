@@ -219,6 +219,8 @@ You can also use fine controls to save RCS fuel, but **disengage fine controls d
 
 ### This mode is EXPERIMENTAL and doesn't work as well as I would like, nevertheless I find it useful so I kept it in
 
+![hac](https://github.com/giuliodondi/kOS-ShuttleEntrySim/blob/master/hac.png)
+
 Following entry guidance until you're above the landing site will most likely lead you to be very high on energy and 1-2km too high or too low. For this reason, at about 100km and Mach 3 the _Terminal Area Energy Management (TAEM)_ guidance is activated.  
 From the standpoint of you the Pilot hardly anything changes, you still have a HUD to look at and a pipper to follow with your controls. There is still a trajectory simulation done in the background and pitch-roll guidance values sent to the HUD.
 
@@ -245,7 +247,7 @@ Keep in mind that the approach path is completely dumb and oblivious to your ene
 
 The approach GUI will create an undocked HUD thta you can drag wherever you like. Here is a screenshot with labels describing the features:  
 
-![hud_example](https://github.com/giuliodondi/kOS-ShuttleEntrySim/blob/master/hud_example.png)
+![hud_apch](https://github.com/giuliodondi/kOS-ShuttleEntrySim/blob/master/hud_apch.png)
 
 The program will simulate the Shuttle a couple seconds in the future and measure the deviations from the guidance profile. The diamond-shaped pipper displays this deviation in a way that suggests where the nose should be pointed to correct the error.
 Your focus should be on following the pipper diamond around with gentle commands. The pipper will guide you through several approach phases that align the Shuttle with the runway and settle it on the proper glideslope for landing.
