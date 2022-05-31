@@ -207,7 +207,7 @@ You can force Guidance to lower the reference bank angle by increasing drag thro
 After the Shuttle slows down below the first pitch-velocity point, the pitch is locked in place, but if you use manual control you can still fly whatever pitch you want to "nudge" reference roll.  
 The standard pitch profile used by the Shuttle will ramp down to 28° between Mach 22 and 16, and then down to 16° betwene Mach 6 and 3.
 
-Keep an eye on Azimuth Error, it should move towards zero and then pick up on the other side as the Shuttle continues to bank in the same direction. When the absolute value comes close to 15°, a roll reversal is commanded, the pipper will shoot on the opposite side and, if flying manual, you must be ready to adjust attitude quickly.  
+Keep an eye on Azimuth Error, it should move towards zero and then pick up on the other side as the Shuttle continues to bank in the same direction. When the absolute value comes close to 15°, a **roll reversal** is commanded, the pipper will shoot on the opposite side and, if flying manual, you must be ready to adjust attitude quickly.  
 As the Shuttle does the roll reversal it passes through zero bank, meaning all the lift is directed upwards for a few moments. You will see vertical speed shoot up and even go positive. The pipper may command an adjustment in pitch when this happens. This is the Pitch Modulation mechanism which tries to quickly change drag if the calculated range error is too large.  
 The other advantage of flying manual is that you can always modulate AOA and bank a bit to alter the trajectory. Of course you need to have a feel for how the Shuttle flies during hypersonic entry, in doubt stay close to the pipper. 
 
@@ -215,39 +215,50 @@ Below 80km you theoretically only need Yaw RCS, you can use the actuation toggle
 You can also use fine controls to save RCS fuel, but **disengage fine controls during a Roll Reversal or you may lose control.** Below about 18° of pitch, the Rudder is no longer obstructed and becomes effective, you can (and should) disable RCS at this point, unless for some reason the Shuttle is hard to control.
 
 
+### The Heading Alignment Cilindres (HACs)
+
+![hac](https://github.com/giuliodondi/kOS-ShuttleEntrySim/blob/master/hac.png)
+
+When planning TAEM and approach, you need to have a mental image like this one above. A HAC is a cilinder around which your trajectory wraps to align you with the runway. There is one on either side of the runway centerline. Right/Left are intended looking from the HACs towards the runway, NOT from the runway looking towards the HACs. 
+Entry guidance, as stated, selects the runway at random. Then it selects the HAC opposite from your inbound direction, it would be the Right one in the image example. This is to give you margin to manually select a closer HAC if you're low on energy.  
+If you're really low on energy, keep in mind you can manually select the closest runway end and the closest HAC to you. This will reduce the distance to fly by 20-30 km.
+
+Given a HAC, the entrance point is calculated as the point whose tangent crosses your present position. During TAEM and approach this point is continuously updated. The entrance point determines how much you have to "sweep around" the HAC and entails a longer or shorter groundtrack. Since the glideslope is a constant (at least during TAEM) a longer HAC groundtrack means the altitude at HAC entrance is also higher.
+
 ### TAEM guidance
 
 ### This mode is EXPERIMENTAL and doesn't work as well as I would like, nevertheless I find it useful so I kept it in
 
-![hac](https://github.com/giuliodondi/kOS-ShuttleEntrySim/blob/master/hac.png)
+As mentioned, you need to hit the HAC aiming point at the correct altitude, at least within 100m or so. Additionally you need to be subsonic, as the Shuttle cannot turn around a HAC this tight at M1+.
 
-Following entry guidance until you're above the landing site will most likely lead you to be very high on energy and 1-2km too high or too low. For this reason, at about 100km and Mach 3 the _Terminal Area Energy Management (TAEM)_ guidance is activated.  
-From the standpoint of you the Pilot hardly anything changes, you still have a HUD to look at and a pipper to follow with your controls. There is still a trajectory simulation done in the background and pitch-roll guidance values sent to the HUD.
+_Terminal Area Energy Management (TAEM)_ guidance attempts to hit these targets, taking over from Entry guidance which is not accurate enough for this.  
+It is entered automatically from Entry guidance at about 100km and Mach 3. From the standpoint of you the Pilot hardly anything changes, you still have a HUD to look at and a pipper to follow with your controls. A minor difference is that the target site is now frozen, although you can still choose runway and HAC.  
 
-The guidance law is now different, though. We want to hit the 
+There is still a trajectory simulation done in the background and pitch-roll guidance values sent to the HUD, although now the guidance law is different.  
+The script no longer uses bank to control range directly as it assumes it has excess energy. Instead the script now uses pitch to control altitude at the end of simulation to drive it to the HAC entrance altitude. Bank angle is simply used to align the trajectory with the HAC entrance point, with a roll angle that depends on the Az error up to a maximum roll.  
+Guidance also measures the final velocity, if it's too high then there is some energy to dissipate. In this case, the program will not command a steering roll angle that turns towards the HAC entrance point but _away from it_ instead. By doing this, the next simulation pass will take longer to align itself to the HAC and reach the entrance point, giving the simulated Shuttle time to slow down further. When the HAC entrance speed is low enough, we invert the bank and finally start turning towards the HAC. This behaviour is called **S-Turns** because of the shape of the resulting trajectory.  
+TAEM guidance leaves speedbrake on manual control and sets 50% as a default value to generate some more drag. If you see you're not bleeding energy fast enough (say you're 40km away and still going Mach 2) either extend them fully or set them to Auto
 
+This phase is much more iffy than Entry guidance as the more energy there is to dissipate the more likely it is for the Shuttle to do phugoids as the S-turn is started and stopped. In fact I had to use low bank angle limits to prevent Guidance from stalling out the Shuttle. Taking manual control and adjusting pitch and speedbrake a bit suring S-turns helps somewhat.
+
+Assuming everything goes to plan, TAEM will take the Shuttle to a gentle glide, wings level, heading straight towards the HAC entry point at a manageable speed.
+
+If things go bad, remember you have a button to force the program out of TAEM into Approach guidance, remember ot disable auto steer and Guidance or it won't activate.
 
 
 
 ## Approach
 
-There is a button to switch to Approach guidance, you must disengage Guidance and SAS prior to switching.
+Transitioning into Approach guidance will get rid of some now irrelevant items in the main GUI.  
+The HUD is identical to Entry/TAEM but the meaning of some symbols is now different:
 
-Do not switch to approach until you're below 25 km and ~30 km from the target, for three reasons:
-- by that time your pitch will be below 20° and thus the rudder is finally effective
-- if you disconnect far away from the site you will most likely not fly the pitch-roll profile exactly and thus the range calculatons are meaningless
-- when transitioning between entry and approach guidance, the script calculates which landing site you're closest to and locks it . If you transition far away you might be closest to a different landing site than the one you planned.
+![hud_apch](https://github.com/giuliodondi/kOS-ShuttleEntrySim/blob/master/hud_apch.png)
 
-The first thing is to set up the guidance profile.
-Using the buttons up at the top, choose a combination runway/HAC side based on your inbound heading and how far you are from the actual runway. 
-To simulate a real Shuttle approach you should fly over the runway and turn around a HAC on the opposide side of where you came from.
-If you're low on energy pick the runway and HAC side nearest to you to reduce the distance to be travelled.
-
-Keep in mind that the approach path is completely dumb and oblivious to your energy state, contrary to the real Space Shuttle Guidance. 
+Keep in mind that the approach path is completely dumb and oblivious to your energy state, contrary to TAEM guidance or the real Space Shuttle Guidance. 
 
 The approach GUI will create an undocked HUD thta you can drag wherever you like. Here is a screenshot with labels describing the features:  
 
-![hud_apch](https://github.com/giuliodondi/kOS-ShuttleEntrySim/blob/master/hud_apch.png)
+
 
 The program will simulate the Shuttle a couple seconds in the future and measure the deviations from the guidance profile. The diamond-shaped pipper displays this deviation in a way that suggests where the nose should be pointed to correct the error.
 Your focus should be on following the pipper diamond around with gentle commands. The pipper will guide you through several approach phases that align the Shuttle with the runway and settle it on the proper glideslope for landing.
