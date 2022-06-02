@@ -37,6 +37,7 @@ If you decide to modify the code yourself you do so 100% on your own.
 **Mods not required for the script but de-facto needed to use it:**
 - Kerbal Konstructs to place runways to land on, they must be at least 2x longer than the stock KSC runway.
 - Some mod to display the surface-relative trajectory in the map view. I recomment Trajectories or the (awesome but challenging) Principia mod
+- Tweakscale to adjust the size of the A.I.R.B.R.A.K.E.S. you need to add
 
 You will find two folders: 
 - **GameData/kOS-Addons**
@@ -72,8 +73,8 @@ In the VAB adjust the FAR control surface mappings like this:
 
 Still in the VAB, enable all actuation toggles on the Crew Cabin and both OMS pods. This will give you full control on which RCS jets are active for which attitude direction.
 
-You need to place two Stock A.I.R.B.R.A.K.E.S. to control airspeed during landing. The split rudder is utterly useless.
-They must be Stock A.I.R.B.R.A.K.E.S. and nothing else, otherwise you will need to dig into the script and tell it to look for whatever part you want.
+You need to place two Stock A.I.R.B.R.A.K.E.S. re-scaled up to 150% to control airspeed during landing. The split rudder is utterly useless.  
+They must be Stock A.I.R.B.R.A.K.E.S. and nothing else, otherwise you will need to dig into the script and tell it to look for whatever part you want.  
 Place them either on the sides of the OMS pods or on the sides of the Engine block. Place them on the surface, do not tuck them inside or KSP will prevent them from deploying. Do not put them on the tail or on the wings or you will introduce a pitching moment.
 Make sure to add these A.I.R.B.R.A.K.E.S. to the brakes Action Group.
 
