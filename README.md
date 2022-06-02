@@ -29,8 +29,8 @@ If you decide to modify the code yourself you do so 100% on your own.
 **Required mods:**
 - A complete install of RSS/Realism Overhaul with Ferram Aerospace Resarch. Confrmed to work with FAR 0.16.0.1, should now also work with 0.16.0.4
 - Kerbal Operating System
-- Space Shuttle System mod, spceODY's version seems to be the most up-to-date : https://github.com/SpaceODY/Space-Shuttle-System-Expanded
-- RO configs that come with the Realism Overhaul package
+- Space Shuttle System mod, SpaceODY's version seems to be the most up-to-date : https://github.com/SpaceODY/Space-Shuttle-System-Expanded
+- RO configs that come with the Realism Overhaul package, although SpaceODY will overwrite some of them (it's fine)
 
 
 **Mods not required for the script but de-facto needed to use it:**
@@ -40,14 +40,14 @@ If you decide to modify the code yourself you do so 100% on your own.
 
 You will find two folders: 
 - **GameData/kOS-Addons**
-- **Scripts**
+- **Script**
 
 Make sure to put **kOS-Addons** inside your GameData folder. **WITHOUT THIS THE SCRIPTS WILL NEVER WORK.**
 That's the plugin made by me which provides a way for kOS to query aerodynamic data from Ferram Aerospace. 
 Documentation available at https://github.com/giuliodondi/kOS-Ferram
 
 
-Put the contents of the Scripts folder inside Ship/Scripts so that kOS can see all the files.
+Put the contents of the Scripts folder inside Ship/Script so that kOS can see all the files.
 In particular, you will run two scripts:
 - **deorbit.ks** for deorbit targeting
 - **entry.ks** for the actual reentry guidance
