@@ -1,8 +1,7 @@
 
 FUNCTION TAEM_spdbk {
-	SET arbkb:PRESSED TO FALSE.
-	SEt SHIP:CONTROL:PILOTMAINTHROTTLE to 0.8.
-
+	SET arbkb:PRESSED TO TRUE.
+	SEt SHIP:CONTROL:PILOTMAINTHROTTLE to 0.5.
 }
 
 
@@ -11,7 +10,7 @@ FUNCTION TAEM_spdbk {
 FUNCTION TAEM_transition {
 	PARAMETER tgt_dist.
 	
-	IF ((tgt_dist <= 120) AND (SHIP:VELOCITY:SURFACE:MAG <= 950)) {
+	IF ((tgt_dist <= 110) OR (SHIP:VELOCITY:SURFACE:MAG <= 950)) {
 		RETURN TRUE.
 	}
 	
@@ -40,26 +39,31 @@ FUNCTION apch_transition {
 // the bank angle value moves on a fixed profile of velocity
 FUNCTION TAEM_roll_profile {
 	PARAMETER delaz.
+	PARAMETER hdot_err.
 	PARAMETER sturn IS FALSE.
 	
 	//magnify delaz to bank harder
-	LOCAL corr_delaz IS 2*ABS(delaz).
+	LOCAL corr_delaz IS 4*ABS(delaz).
 
 	
 	LOCAL bank_vel_profile IS LIST(
 								LIST(0,40),
-								LIST(300,40),
+								LIST(300,38),
 								LIST(335,35),
-								LIST(500,25)
+								LIST(500,30)
 								).
 	
 	LOCAL maxroll IS ABS(INTPLIN(bank_vel_profile,SHIP:VELOCITY:SURFACE:MAG)).
 	
-	// maxroll IS 40.
+	//correct for the reference hdot error
+	//a positive error means we need to bank more
+	//it's an additive constant to the max bank
+	LOCAL hdotgain IS 1/10.
+	SET maxroll TO maxroll + hdot_err*hdotgain.
 	
 	IF (sturn) {
 		//if doing an s-turn disregard delaz and bank at close to maximum roll
-		RETURN maxroll.
+		RETURN MAx(0,maxroll).
 	} ELSE {
 		//bank proportionallyto delaz but enforce max bank constraint
 		RETURN CLAMP(corr_delaz,0,maxroll).
@@ -74,10 +78,13 @@ FUNCTION TAEM_roll_profile {
 //when the az error is small
 FUNCTION TAEM_bank_angle {
 	PARAMETER delaz.
+	PARAMETER hdot_err.
 	PARAMETER sturn IS FALSE.
 	PARAMETER hac_side IS "".
 	
-	LOCAL bank_angle IS  TAEM_roll_profile(delaz,sturn).
+	LOCAL bank_angle IS  TAEM_roll_profile(delaz,hdot_err,sturn).
+	
+	LOCAL signn is 1.
 
 	IF (sturn) {
 		//each guidance cycle spent in an s-turn increases the groundtrack to fly
@@ -91,6 +98,8 @@ FUNCTION TAEM_bank_angle {
 	} ELSE {
 		RETURN SIGN(delaz)*bank_angle.
 	}
+
+	RETURN signn*ABS(bank_angle).
 	
 }
 
@@ -212,9 +221,11 @@ declare function simulate_TAEM {
 		
 		
 		LOCAL delaz IS az_error(simstate["latlong"], tgt_rwy["hac_entry"], simstate["surfvel"]).
+		
+		LOCAL hdoterr IS hdot - hdot_ref.
 			
-		SET roll0 TO TAEM_roll_profile(delaz).
-		SET pitch_prof TO TAEM_pitch_profile(pitch0,roll_prof,simstate["surfvel"]:MAG, hdot - hdot_ref).
+		SET roll0 TO TAEM_roll_profile(delaz,hdoterr).
+		SET pitch_prof TO TAEM_pitch_profile(pitch0,roll_prof,simstate["surfvel"]:MAG, hdoterr).
 		SET roll_prof TO SIGN(delaz)*roll0.
 		
 

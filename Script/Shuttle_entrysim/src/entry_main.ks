@@ -701,13 +701,15 @@ UNTIL FALSE {
 		IF (is_s_turn_p AND (NOT is_s_turn)) {
 			SET s_turn_tgt_vel TO s_turn_tgt_vel*1.1.
 		}
+		
+		LOCAL hdoterr IS SHIP:VERTICALSPEED - hdot_ref.
 
 		//get updated roll from the profiles
-		SET roll_ref TO TAEM_bank_angle(az_err, is_s_turn, tgtrwy["hac_side"]).
+		SET roll_ref TO TAEM_bank_angle(az_err, hdoterr, is_s_turn, tgtrwy["hac_side"]).
 		SET rollguid TO roll_ref.
 		
 		SET pitchguid TO TAEM_pitch_roll_cor(
-			TAEM_pitch_profile(pitch_ref, roll_ref,SHIP:VELOCITY:SURFACE:MAG,  SHIP:VERTICALSPEED - hdot_ref  ),
+			TAEM_pitch_profile(pitch_ref, roll_ref,SHIP:VELOCITY:SURFACE:MAG,  hdoterr ),
 			get_roll_prograde()
 		).
 		
