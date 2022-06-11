@@ -133,7 +133,7 @@ FUNCTION TAEM_pitch_profile {
 	//correct pitch by a term proportional to the error in hdot
 	//if positive error we must pitch down
 	
-	LOCAL hdotgain IS 1/35.
+	LOCAL hdotgain IS 1/25.
 	SET out_pitch TO out_pitch - hdot_err*hdotgain.
 
 	//clamp to reasonable values.

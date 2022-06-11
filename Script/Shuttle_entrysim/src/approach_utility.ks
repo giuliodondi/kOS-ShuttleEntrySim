@@ -394,10 +394,8 @@ FUNCTION update_hac_angle {
 	PARAMETER entryvec.
 		
 	LOCAL exitvec IS (rwy["hac_exit"]:POSITION - rwy["hac"]:POSITION):NORMALIZED.
-	LOCAL hac_rot_sign IS 1.
-	IF rwy["hac_side"]="right" {SET hac_rot_sign TO -1.}
-	LOCAL old_entryvec IS rodrigues(exitvec,rwy["upvec"],hac_rot_sign*rwy["hac_angle"]).
-	LOCAL delta_hac_angle IS signed_angle(old_entryvec,entryvec,rwy["upvec"],-1).
+	LOCAL old_entryvec IS rodrigues(exitvec,rwy["upvec"],rwy["hac_angle"]).
+	LOCAL delta_hac_angle IS CLAMP(signed_angle(old_entryvec,entryvec,rwy["upvec"],-1),-10,10).
 	
 	SET rwy["hac_angle"] TO rwy["hac_angle"] + delta_hac_angle. 
 	
