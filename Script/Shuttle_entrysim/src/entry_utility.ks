@@ -425,24 +425,30 @@ declare function simulate_reentry {
 
 
 //simulate Control Stick Steering : use pilot input to update steering angles 
-FUNCTION update_css_attitude {
+FUNCTION update_steering_attitude {
 	PARAMETER rollsteer.
 	PARAMETER pitchsteer.
+	PARAMETER rollguid.
+	PARAMETER pitchguid.
 	
-	LOCAL rollgain IS 1.2.
-	LOCAL pitchgain IS 0.5.
-	
-	LOCAL deltaroll IS rollgain*(SHIP:CONTROL:PILOTROLL - SHIP:CONTROL:PILOTROLLTRIM).
-	LOCAL deltapitch IS pitchgain*(SHIP:CONTROL:PILOTPITCH - SHIP:CONTROL:PILOTPITCHTRIM).
-	
-	IF ABS(deltaroll)>0.1 {
-		SET rollsteer TO rollsteer + deltaroll.
+	IF is_auto_steering() {
+		SET rollsteer TO rollsteer + CLAMP(rollguid - rollsteer,-1.5,1.5).
+		SET pitchsteer TO pitchsteer + CLAMP(pitchguid - pitchsteer,-1.5,1.5).
+	} ELSE {
+		LOCAL rollgain IS 1.2.
+		LOCAL pitchgain IS 0.5.
+		
+		LOCAL deltaroll IS rollgain*(SHIP:CONTROL:PILOTROLL - SHIP:CONTROL:PILOTROLLTRIM).
+		LOCAL deltapitch IS pitchgain*(SHIP:CONTROL:PILOTPITCH - SHIP:CONTROL:PILOTPITCHTRIM).
+		
+		IF ABS(deltaroll)>0.1 {
+			SET rollsteer TO rollsteer + deltaroll.
+		}
+		
+		IF ABS(deltapitch)>0.1 {
+			SET pitchsteer TO pitchsteer + deltapitch.
+		}
 	}
-	
-	IF ABS(deltapitch)>0.1 {
-		SET pitchsteer TO pitchsteer + deltapitch.
-	}
-	
 	
 	RETURN LIST(rollsteer,pitchsteer).
 }

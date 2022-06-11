@@ -331,13 +331,10 @@ WHEN TIME:SECONDS>(attitude_time_upd + 0.2) THEN {
 		}
 	}
 	
-	
-	IF NOT is_auto_steering() {
-		//measure CSS attitude
-		LOCAL out IS update_css_attitude(rollsteer,pitchsteer).
-		SET rollsteer TO out[0].
-		SET pitchsteer TO out[1].
-	}
+	//measure CSS attitude
+	LOCAL out IS update_steering_attitude(rollsteer,pitchsteer,rollguid,pitchguid).
+	SET rollsteer TO out[0].
+	SET pitchsteer TO out[1].
 	
 	print "rollsteer : " + ROUND(rollsteer,1) + "    " at (0,6).
 	print "pitchsteer : " + ROUND(pitchsteer,1) + "    " at (0,7).
@@ -497,11 +494,6 @@ UNTIL FALSE {
 		
 		print "rollguid : " + ROUND(rollguid,1) + "    " at (0,11).
 		print "pitchguid : " + ROUND(pitchguid,1) + "    " at (0,12).
-		
-		IF is_auto_steering() {
-			SET rollsteer TO rollguid.
-			SET pitchsteer TO pitchguid.
-		}
 	
 	} ELSE {
 		SET mode TO 1.
