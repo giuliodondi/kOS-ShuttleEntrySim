@@ -17,7 +17,7 @@ FUNCTION pos_arrow {
       stringlabel,
       1,
       TRUE,
-      10
+      0.5
     ).
 
 }
@@ -131,7 +131,7 @@ FUNCTION speed_control {
 		
 		IF (mode=1 OR mode=2) {
 			LOCAL tgt_rng IS greatcircledist(tgtrwy["position"], SHIP:GEOPOSITION).
-			SET tgtspeed TO MAX(250,51.48*tgt_rng^(0.6431)).
+			SET tgtspeed TO MAX(250,51.48*tgt_rng^(0.6)).
 			SET delta_spd TO SHIP:VELOCITy:SURFACE:MAG - tgtspeed.
 		}
 		ELSE {
@@ -257,6 +257,7 @@ FUNCTION refresh_runway_lex {
 							"hac",LATLNG(0,0),
 							"hac_entry",LATLNG(0,0),
 							"hac_exit",LATLNG(0,0),
+							"hac_angle",0,
 							"upvec",V(0,0,0)
 
 	).
@@ -303,6 +304,13 @@ FUNCTION define_hac {
 	
 	update_hac_entry_pt(cur_pos,rwy,params).
 	
+	
+	//initialise the hac angle 
+	
+	LOCAL entryvec IS (rwy["hac_entry"]:POSITION - rwy["hac"]:POSITION):NORMALIZED.
+	LOCAL exitvec IS (rwy["hac_exit"]:POSITION - rwy["hac"]:POSITION):NORMALIZED.
+	SET rwy["hac_angle"] TO signed_angle(exitvec,entryvec,rwy["upvec"],1).
+	
 	//clearvecdraws().
 	//pos_arrow(rwy["position"],"runwaypos").
 	//pos_arrow(rwy["td_pt"],"td_pt").
@@ -346,6 +354,10 @@ FUNCTION update_hac_entry_pt {
 	IF rwy["hac_side"]="left" {SET hac_entry_sign TO -1.}
 	LOCAL entry_bng IS fixangle(ship_bng + hac_entry_sign*beta).
 	SET rwy["hac_entry"] TO  new_position(rwy["hac"],params["hac_radius"],entry_bng).
+	
+	//clearvecdraws().
+	//pos_arrow(rwy["hac_exit"],"hac_exit").
+	//pos_arrow(rwy["hac"],"hac").
 
 }
 
@@ -360,7 +372,7 @@ FUNCTION get_glideslope {
 
 
 //angle between an input entry vector and the HAC exit vector around the HAC centre
-//FUNCTION get_hac_angle {
+//FUNCTION update_hac_angle {
 //	PARAMETER rwy.
 //	PARAMETER entryvec.
 //		
@@ -372,14 +384,24 @@ FUNCTION get_glideslope {
 //}
 
 
-FUNCTION get_hac_angle {
+
+//new strategy to ensure the hac angle is a continuous variable
+//find the hac vector corresponding to the stored hac angle
+//calculate the signed angle bw provided hac entry vector and that one
+//add the result to the stored hac angle
+FUNCTION update_hac_angle {
 	PARAMETER rwy.
 	PARAMETER entryvec.
 		
 	LOCAL exitvec IS (rwy["hac_exit"]:POSITION - rwy["hac"]:POSITION):NORMALIZED.
-	LOCAL hac_angle IS signed_angle(exitvec,entryvec,rwy["upvec"],1).
+	LOCAL hac_rot_sign IS 1.
+	IF rwy["hac_side"]="right" {SET hac_rot_sign TO -1.}
+	LOCAL old_entryvec IS rodrigues(exitvec,rwy["upvec"],hac_rot_sign*rwy["hac_angle"]).
+	LOCAL delta_hac_angle IS signed_angle(old_entryvec,entryvec,rwy["upvec"],-1).
 	
-	LOCAL hac_gndtrk IS get_hac_groundtrack(hac_angle, apch_params).
+	SET rwy["hac_angle"] TO rwy["hac_angle"] + delta_hac_angle. 
+	
+	//LOCAL hac_gndtrk IS get_hac_groundtrack(hac_angle, apch_params).
 	
 	//calculate profile altitude
 	//if we're off by hal a turn's worth of altitude assume that the angle is off by 360° and add another turn around the HAC
@@ -388,7 +410,7 @@ FUNCTION get_hac_angle {
 	//LOCAL alt_tol IS get_hac_groundtrack(180,apch_params)*apch_params["glideslope"]["outer"]*1000.
 	//IF ABS(profile_alt - simstate["altitude"])
 	
-	RETURN hac_angle.
+	//RETURN hac_angle.
 	
 }
 
@@ -420,13 +442,13 @@ function get_hac_profile_alt {
 	PARAMETER apch_params.
 
 	LOCAL entryvec IS (rwy["hac_entry"]:POSITION - rwy["hac"]:POSITION):NORMALIZED.
-	LOCAL theta IS get_hac_angle(rwy,entryvec).
+	update_hac_angle(rwy,entryvec).
 	
-	LOCAL hac_gndtrk IS get_hac_groundtrack(theta, apch_params).
+	LOCAL hac_gndtrk IS get_hac_groundtrack(rwy["hac_angle"], apch_params).
 	
 	LOCAL profile_alt IS ( apch_params["final_dist"] + hac_gndtrk)*apch_params["glideslope"]["outer"].
 	
-	print "theta : " + theta at (0,15).
+	print "hac_angle : " + rwy["hac_angle"] at (0,15).
 	print "hac_gndtrk : " + hac_gndtrk at (0,16).
 	print "profile_alt : " + profile_alt at (0,17).
 	
@@ -450,12 +472,12 @@ FUNCTION mode_dist {
 		//ground-track distance around the hac
 		//find the theta angle
 		LOCAL shipvec IS (simstate["latlong"]:POSITION - rwy["hac"]:POSITION):NORMALIZED.
-		LOCAL theta IS get_hac_angle(rwy,shipvec).
-		print "hac angle:  " + theta at (1,1).
+		update_hac_angle(rwy,shipvec).
+		print "hac angle:  " + rwy["hac_angle"] at (1,1).
 		
 		
 		//find the groundtrack around the hac
-		RETURN get_hac_groundtrack(theta,params).
+		RETURN get_hac_groundtrack(rwy["hac_angle"],params).
 		
 	}
 	ELSE IF mode=5 OR mode=6{
@@ -502,10 +524,10 @@ FUNCTION mode3 {
 	LOCAL entryvec IS (rwy["hac_entry"]:POSITION - rwy["hac"]:POSITION):NORMALIZED.
 
 	//once we have the entry point find the theta angle and hac radius
-	LOCAL theta IS get_hac_angle(rwy,entryvec).
-	print "hac angle:  " + theta at (1,1).
+	update_hac_angle(rwy,entryvec).
+	print "hac angle:  " + rwy["hac_angle"] at (1,1).
 	
-	LOCAL hac_radius IS get_hac_radius(theta, params).
+	LOCAL hac_radius IS get_hac_radius(rwy["hac_angle"], params).
 	
 	
 	//build the vertical profile 
@@ -513,7 +535,7 @@ FUNCTION mode3 {
 	LOCAL final_alt IS params["final_dist"]*params["glideslope"]["outer"].
 	
 	//find the groundtrack around the hac
-	LOCAL hac_gndtrk IS get_hac_groundtrack(theta, params).
+	LOCAL hac_gndtrk IS get_hac_groundtrack(rwy["hac_angle"], params).
 	
 	//find the distance to the entry point
 
@@ -584,16 +606,16 @@ FUNCTION mode4 {
 	
 	//find the theta angle
 	LOCAL shipvec IS (simstate["latlong"]:POSITION - rwy["hac"]:POSITION):NORMALIZED.
-	LOCAL theta IS get_hac_angle(rwy,shipvec).
-	print "hac angle:  " + theta at (1,1).
+	update_hac_angle(rwy,shipvec).
+	print "hac angle:  " + rwy["hac_angle"] at (1,1).
 	
-	LOCAL hac_radius IS get_hac_radius(theta, params).
+	LOCAL hac_radius IS get_hac_radius(rwy["hac_angle"], params).
 	
 	//get the vertical profile value at the predicted point 
 	LOCAL final_alt IS params["final_dist"]*params["glideslope"]["outer"].
 	
 	//find the groundtrack around the hac
-	LOCAL hac_gndtrk IS get_hac_groundtrack(theta, params).
+	LOCAL hac_gndtrk IS get_hac_groundtrack(rwy["hac_angle"], params).
 	
 	
 
