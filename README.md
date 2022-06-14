@@ -244,14 +244,15 @@ It is entered automatically from Entry guidance at about 100km and Mach 3. From 
 
 There is still a trajectory simulation done in the background and pitch-roll guidance values sent to the HUD, although now the guidance law is different.  
 The script no longer uses bank to control range directly as it assumes it has excess energy. Instead the script now uses pitch to control altitude at the end of simulation to drive it to the HAC entrance altitude. Bank angle is simply used to align the trajectory with the HAC entrance point, with a roll angle that depends on the Az error up to a maximum roll.  
-Guidance also measures the final velocity, if it's too high then there is some energy to dissipate. In this case, the program will not command a steering roll angle that turns towards the HAC entrance point but _away from it_ instead. By doing this, the next simulation pass will take longer to align itself to the HAC and reach the entrance point, giving the simulated Shuttle time to slow down further. When the HAC entrance speed is low enough, we invert the bank and finally start turning towards the HAC. This behaviour is called **S-Turns** because of the shape of the resulting trajectory.  
-TAEM guidance leaves speedbrake on manual control and sets 50% as a default value to generate some more drag. If you see you're not bleeding energy fast enough (say you're 40km away and still going Mach 2) either extend them fully or set them to Auto
+Guidance also measures the final velocity, if it's too high then there is some energy to dissipate. In this case, the program will not command a steering roll angle that turns towards the HAC entrance point but _away from it_ instead. By doing this, the next simulation pass will take longer to align itself to the HAC and reach the entrance point, giving the simulated Shuttle time to slow down further. When the HAC entrance speed is low enough, we invert the bank and finally start turning towards the HAC. This behaviour is called **S-Turns** because of the shape of the resulting trajectory.   
 
-This phase is much more iffy than Entry guidance as the more energy there is to dissipate the more likely it is for the Shuttle to do phugoids as the S-turn is started and stopped. In fact I had to use low bank angle limits to prevent Guidance from stalling out the Shuttle. Taking manual control and adjusting pitch and speedbrake a bit suring S-turns helps somewhat.
+TAEM is very sensitive to speed, if you are approaching too fast it tends to command an S-turn way too wide which in turn slows you down too much on the other side of it. For this reason TAEM guidance puts speedbrakes on Auto which **as far as I've tested** slows you down just enough for TAEM to do its thing without going mental.
+The rule of thumb is slowing down to Mach 2 at 50/60 km distance from the HAC entry point. If you're still above Mach 2 closer in you might want to take manual control and dive down into thicker air, which is the fastest way to decelerate.
+ 
+Assuming everything goes to plan, TAEM will take the Shuttle to a gentle glide, wings mostly level, heading straight towards the HAC entry point at a manageable speed. 
 
-Assuming everything goes to plan, TAEM will take the Shuttle to a gentle glide, wings mostly level, heading straight towards the HAC entry point at a manageable speed.
-
-If things go bad, remember you have a button to force the program out of TAEM into Approach guidance, remember ot disable auto steer and Guidance or it won't activate.
+###  At 10km distance it will switch automatically to approach guidance   
+### If things go bad, remember you have a button to force the program out of TAEM into Approach guidance, remember ot disable auto steer and Guidance or it won't activate. Do not switch manually above 20km altitude ot Mach 2
 
 
 
