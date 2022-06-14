@@ -252,7 +252,7 @@ The rule of thumb is slowing down to Mach 2 at 50/60 km distance from the HAC en
 Assuming everything goes to plan, TAEM will take the Shuttle to a gentle glide, wings mostly level, heading straight towards the HAC entry point at a manageable speed. 
 
 ###  At 10km distance it will switch automatically to approach guidance   
-### If things go bad, remember you have a button to force the program out of TAEM into Approach guidance, remember ot disable auto steer and Guidance or it won't activate. Do not switch manually above 20km altitude ot Mach 2
+### If things go bad, remember you have a button to force the program out of TAEM into Approach guidance, remember to disable auto steer and Guidance or it won't activate. Do not switch manually above 20km altitude ot Mach 2
 
 
 
@@ -268,7 +268,7 @@ The HUD is identical to Entry/TAEM but the meaning of some symbols is now differ
 - _ROLL_ is the angle between the lift vector and the local vertical vector. 
 - _PITCH TRIM_ now indicates the KSP pitch trim that you set manually with keyboard controls. **There is no auto trim in this phase**
 - _APCH PHASE_ indicates which segmet of the approash you are in. ACQ for HAC acquisition, HDG for the turn sround the HAC. OGS for the final descent into the runway and FLARE just before the landing flare
-- _PHASE DIST_ is the distance in km to the guidance point for the current approach phase. It is useful to know when the script is abotu to switch phases
+- _PHASE DIST_ is the distance in km to the guidance point for the current approach phase. It is useful to know when the script is about to switch phases
 
 The goald of the approach phase is to guide you around the HAC cilindres (see a couple images above) and align you with the runway on the correct glideslope.
 Keep in mind that the approach path is completely dumb and oblivious to your energy state, contrary to TAEM guidance or the real Space Shuttle Guidance.   
