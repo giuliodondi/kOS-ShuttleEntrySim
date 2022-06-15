@@ -125,142 +125,150 @@ FUNCTION deorbit_main {
 		//just duplicate the code, no need todo fancier things
 	
 		//if there is a manoeuvre node
-		IF HASNODE AND (nextnode:orbit:periapsis<constants["interfalt"]) {
+		IF HASNODE {
+			
+			LOCAL nodeslist IS ALLNODES.
+			
+			SET lastnode TO ALLNODES[ALLNODES:LENGTH - 1].
 		
-			local normvec IS VCRS(-SHIP:ORBIT:BODY:POSITION,SHIP:VELOCITY:ORBIT).
-	
-			//time to the node
-			LOCAL shipvec IS - SHIP:ORBIT:BODY:POSITION.
-			LOCAL t2entry IS  nextnode:ETA.
+			IF (lastnode:orbit:periapsis<constants["interfalt"]) {
 			
-			//position vector of the manoeuvre node
-			LOCAL eta1 IS t_to_eta(SHIP:ORBIT:TRUEANOMALY,t2entry,SHIP:ORBIT:SEMIMAJORAXIS,SHIP:ORBIT:ECCENTRICITY) - SHIP:ORBIT:TRUEANOMALY.
-			
-			SET shipvec TO rodrigues(shipvec,normvec,eta1).
-			
-			//next patch parameters + altitude at the node
-			LOCAL node_radius IS SHIP:ORBIT:SEMIMAJORAXIS*(1-SHIP:ORBIT:ECCENTRICITY^2)/(1 + SHIP:ORBIT:ECCENTRICITY*COS(eta1)).	
-			LOCAL nxtorb_sma IS nextnode:orbit:semimajoraxis.
-			LOCAL nxtorb_ecc IS nextnode:orbit:eccentricity.
-			
-			//true anomalies of node and entry point
-			LOCAL node_eta IS 0.
-			LOCAL entry_eta IS 0.
-			IF nxtorb_ecc>0 {		
-					//set node_eta to (nxtorb_sma*(1-nxtorb_ecc^2)/node_radius - 1)/nxtorb_ecc.
-					//print node_eta at (1,10).
-					//set node_eta to ARCCOS(node_eta).
-					set node_eta to nextnode:orbit:trueanomaly.
-					set entry_eta to (nxtorb_sma*(1-nxtorb_ecc^2)/entry_radius - 1)/nxtorb_ecc.
-					set entry_eta to ARCCOS(limitarg(entry_eta)).
-					//we will cross the target altitude at 2 different points in the orbit
-					//we are interested in the descending one i.e. before periapsis 
-					//therefore compute the eta of the ascending one and subtract tit from 360
-					//exploiting the symmetry of the ellipse
+				local normvec IS VCRS(-SHIP:ORBIT:BODY:POSITION,SHIP:VELOCITY:ORBIT).
+		
+				//time to the node
+				LOCAL shipvec IS - SHIP:ORBIT:BODY:POSITION.
+				LOCAL t2entry IS  lastnode:ETA + burnDT(lastnode:deltav:MAG)/2.
+				
+				//position vector of the manoeuvre node
+				LOCAL eta1 IS t_to_eta(SHIP:ORBIT:TRUEANOMALY,t2entry,SHIP:ORBIT:SEMIMAJORAXIS,SHIP:ORBIT:ECCENTRICITY) - SHIP:ORBIT:TRUEANOMALY.
+				
+				SET shipvec TO rodrigues(shipvec,normvec,eta1).
+				
+				//next patch parameters + altitude at the node
+				LOCAL node_radius IS SHIP:ORBIT:SEMIMAJORAXIS*(1-SHIP:ORBIT:ECCENTRICITY^2)/(1 + SHIP:ORBIT:ECCENTRICITY*COS(eta1)).	
+				LOCAL nxtorb_sma IS lastnode:orbit:semimajoraxis.
+				LOCAL nxtorb_ecc IS lastnode:orbit:eccentricity.
+				
+				//true anomalies of node and entry point
+				LOCAL node_eta IS 0.
+				LOCAL entry_eta IS 0.
+				IF nxtorb_ecc>0 {		
+						//set node_eta to (nxtorb_sma*(1-nxtorb_ecc^2)/node_radius - 1)/nxtorb_ecc.
+						//print node_eta at (1,10).
+						//set node_eta to ARCCOS(node_eta).
+						set node_eta to lastnode:orbit:trueanomaly.
+						set entry_eta to (nxtorb_sma*(1-nxtorb_ecc^2)/entry_radius - 1)/nxtorb_ecc.
+						set entry_eta to ARCCOS(limitarg(entry_eta)).
+						//we will cross the target altitude at 2 different points in the orbit
+						//we are interested in the descending one i.e. before periapsis 
+						//therefore compute the eta of the ascending one and subtract tit from 360
+						//exploiting the symmetry of the ellipse
+						
+						SET entry_eta TO 360- entry_eta.
+				}
+
+				LOCAL eta2 IS fixangle(entry_eta - node_eta).
+				print "node_eta" + node_eta at (1,11).
+				print "entry_eta" + entry_eta at (1,12).
+				//find the vector corresponding to entry interface
+				SET shipvec TO rodrigues(shipvec,normvec,eta2):NORMALIZED*entry_radius.
+				
+				//time from periapsis of next patch to the node true anomaly
+				LOCAL t_node IS eta_to_dt(node_eta,nxtorb_sma,nxtorb_ecc).
+				//time from periapsis of next patch to the entry true anomaly
+				LOCAL t_entry IS eta_to_dt(entry_eta,nxtorb_sma,nxtorb_ecc).
+				//time to entry interface
+				SET t2entry TO t2entry + ( t_entry - t_node).
+				
+				
+				//find flight-path angle at entry interface
+				local phi is nxtorb_ecc*sin(entry_eta)/(1 + nxtorb_ecc*COS(entry_eta)).
+				set phi to ARCTAN(phi).
+				
+				
+				//transform the entry interface to coordinates and
+				//rotate it backwards by the time to entry,
+				LOCAL interfpos IS pos2vec(shift_pos(shipvec,t2entry)):NORMALIZED*entry_radius.
+				
 					
-					SET entry_eta TO 360- entry_eta.
-			}
+				
+				
+				
+				//setup the trajectory simulation
+				
+				
+				
+				//rotate backwards the normal vector as well
+				SET normvec TO pos2vec(shift_pos(normvec,t2entry)):NORMALIZED.
+				
+				//find the orbital velocity vector at entry interface
+				LOCAL interfvel IS VCRS(normvec,interfpos):NORMALIZED.
+				LOCAL orbvmag IS SQRT(  BODY:MU*(2/entry_radius - 1/(nxtorb_sma) ) ).
+				SET interfvel TO interfvel*orbvmag.
+				SET interfvel TO rodrigues(interfvel,-normvec,phi).
+				
 
-			LOCAL eta2 IS fixangle(entry_eta - node_eta).
-			print "node_eta" + node_eta at (1,11).
-			print "entry_eta" + entry_eta at (1,12).
-			//find the vector corresponding to entry interface
-			SET shipvec TO rodrigues(shipvec,normvec,eta2):NORMALIZED*entry_radius.
-			
-			//time from periapsis of next patch to the node true anomaly
-			LOCAL t_node IS eta_to_dt(node_eta,nxtorb_sma,nxtorb_ecc).
-			//time from periapsis of next patch to the entry true anomaly
-			LOCAL t_entry IS eta_to_dt(entry_eta,nxtorb_sma,nxtorb_ecc).
-			//time to entry interface
-			SET t2entry TO t2entry + ( t_entry - t_node).
-			
-			
-			//find flight-path angle at entry interface
-			local phi is nxtorb_ecc*sin(entry_eta)/(1 + nxtorb_ecc*COS(entry_eta)).
-			set phi to ARCTAN(phi).
-			
-			
-			//transform the entry interface to coordinates and
-			//rotate it backwards by the time to entry,
-			LOCAL interfpos IS pos2vec(shift_pos(shipvec,t2entry)):NORMALIZED*entry_radius.
+				//initialise the internal variables
+				LOCAL ICS IS LEXICON(
+								 "position",interfpos,
+								 "velocity",interfvel
+				).
+				
+				LOCAL simstate IS blank_simstate(ICS).
+
+				
+				//run the vehicle simulation
+				
+				SET simstate TO  simulate_reentry(
+								sim_settings,
+								simstate,
+								LEXICON("position",tgtrwy["position"],"elevation",tgtrwy["elevation"]),
+								sim_end_conditions,
+								az_err_band,
+								roll_ref,
+								pitch_ref,
+								pitchroll_profiles_entry@,
+								TRUE
+				).
+				
+
+				//fetch the position list for plotting
+				SET poslist TO simstate["poslist"].
+				
+				//calculate the range error for bank optimisation
+				LOCAL delta_t IS  TIME:SECONDS - last_T.
+				SET last_T TO  TIME:SECONDS.
 			
 				
-			
-			
-			
-			//setup the trajectory simulation
-			
-			
-			
-			//rotate backwards the normal vector as well
-			SET normvec TO pos2vec(shift_pos(normvec,t2entry)):NORMALIZED.
-			
-			//find the orbital velocity vector at entry interface
-			LOCAL interfvel IS VCRS(normvec,interfpos):NORMALIZED.
-			LOCAL orbvmag IS SQRT(  BODY:MU*(2/entry_radius - 1/(nxtorb_sma) ) ).
-			SET interfvel TO interfvel*orbvmag.
-			SET interfvel TO rodrigues(interfvel,-normvec,phi).
-			
-
-			//initialise the internal variables
-			LOCAL ICS IS LEXICON(
-							 "position",interfpos,
-							 "velocity",interfvel
-			).
-			
-			LOCAL simstate IS blank_simstate(ICS).
-
-			
-			//run the vehicle simulation
-			
-			SET simstate TO  simulate_reentry(
-							sim_settings,
-							simstate,
-							LEXICON("position",tgtrwy["position"],"elevation",tgtrwy["elevation"]),
-							sim_end_conditions,
-							az_err_band,
-							roll_ref,
-							pitch_ref,
-							pitchroll_profiles_entry@,
-							TRUE
-			).
-			
-
-			//fetch the position list for plotting
-			SET poslist TO simstate["poslist"].
-			
-			//calculate the range error for bank optimisation
-			LOCAL delta_t IS  TIME:SECONDS - last_T.
-			SET last_T TO  TIME:SECONDS.
-		
-			
-			//calculate range error//difference of dist bw interf and target 
-			//and interf and end point
-			LOCAL tgt_range IS downrangedist(tgtrwy["position"], interfpos).
-			LOCAL end_range IS downrangedist(simstate["latlong"], interfpos).
-			LOCAL range_err_p IS range_err.
-			SET range_err TO end_range - tgt_range. 
-			
-			//adjust the bank with PID
-			
-			//PID stuff
-			LOCAL P IS range_err.
-			LOCAL D IS (range_err - range_err_p)/delta_t.
+				//calculate range error//difference of dist bw interf and target 
+				//and interf and end point
+				LOCAL tgt_range IS downrangedist(tgtrwy["position"], interfpos).
+				LOCAL end_range IS downrangedist(simstate["latlong"], interfpos).
+				LOCAL range_err_p IS range_err.
+				SET range_err TO end_range - tgt_range. 
 				
-			LOCAL delta_roll IS P*gains["rangeKP"] + D*gains["rangeKD"].
-			
-			SET roll_ref TO MAX(0,MIN(120,roll_ref + delta_roll)).
-			
-			update_deorbit_GUI(
-								t2entry,
-								az_error(interfpos,tgtrwy["position"],interfvel),
-								tgt_range,
-								interfvel:MAG,
-								phi,
-								downrangedist(tgtrwy["position"], simstate["latlong"]),
-								range_err,
-								roll_ref
-			).
+				//adjust the bank with PID
+				
+				//PID stuff
+				LOCAL P IS range_err.
+				LOCAL D IS (range_err - range_err_p)/delta_t.
+					
+				LOCAL delta_roll IS P*gains["rangeKP"] + D*gains["rangeKD"].
+				
+				SET roll_ref TO MAX(0,MIN(120,roll_ref + delta_roll)).
+				
+				update_deorbit_GUI(
+									t2entry,
+									az_error(interfpos,tgtrwy["position"],interfvel),
+									tgt_range,
+									interfvel:MAG,
+									phi,
+									downrangedist(tgtrwy["position"], simstate["latlong"]),
+									range_err,
+									roll_ref
+				).
+				
+			}	
 
 		//if there is no manoeuvre
 		} ELSE IF SHIP:orbit:periapsis<constants["interfalt"] {
@@ -404,5 +412,41 @@ FUNCTION deorbit_main {
 	close_global_GUI().
 	clearvecdraws().
 	clearscreen.
+}
+
+
+
+FUNCTION get_thrust_isp {
+
+
+	LOCAL thr is 0.
+	LOCAL iisspp IS 0.		   
+	
+	list ENGINES in all_eng.
+	FOR e IN all_eng {
+		IF e:ISTYPE("engine") {
+			IF e:IGNITION {
+				SET thr TO thr + (e:AVAILABLETHRUST * 1000).
+				SET iisspp TO iisspp + e:vacuumisp*(e:AVAILABLETHRUST * 1000).								
+			}
+		}
+	}	
+	
+	RETURN LIST(thr,iisspp).
+}
+
+FUNCTION burnDT {
+	PARAMETER dV.
+	
+	
+	LOCAL out IS get_thrust_isp().
+	LOCAL iisp IS out[1].
+	LOCAL thr IS out[0].
+	
+	LOCAL vex IS g0*iisp.
+	
+	LOCAL mdot IS thr/vex.
+	
+	RETURN (SHIP:MASS*1000/(mdot))*( 1 - CONSTANT:E^(-dV/vex) ).
 }
 
