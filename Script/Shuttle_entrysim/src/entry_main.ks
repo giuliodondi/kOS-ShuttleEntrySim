@@ -5,15 +5,17 @@
 //main loop
 FUNCTION entry_main_loop {
 
+apch_params:ADD("hac_r2",0).
 
 STEERINGMANAGER:RESETPIDS().
 STEERINGMANAGER:RESETTODEFAULT().
 
 
 SET STEERINGMANAGER:PITCHTS TO 8.0.
-SET STEERINGMANAGER:YAWTS TO 8.0.
-SET STEERINGMANAGER:ROLLTS TO 6.0.
-SET STEERINGMANAGER:PITCHPID:KP TO 0.5.
+SET STEERINGMANAGER:YAWTS TO 3.
+SET STEERINGMANAGER:ROLLTS TO 3.
+SET STEERINGMANAGER:PITCHPID:KP TO 0.3.
+
 
 
 //unset the PIDs that may still be in memory 
@@ -40,6 +42,7 @@ select_random_rwy().
 SET tgtrwy["heading"] TO ldgsiteslex[select_tgt:VALUE]["rwys"][select_rwy:VALUE]["heading"].
 SET tgtrwy["td_pt"] TO ldgsiteslex[select_tgt:VALUE]["rwys"][select_rwy:VALUE]["td_pt"].
 SET tgtrwy["hac_side"] TO select_side:VALUE.
+
 define_hac(SHIP:GEOPOSITION, tgtrwy, apch_params).
 
 
@@ -170,6 +173,7 @@ SET mode TO 3.
 SET CONFIG:IPU TO 600.
 
 
+
 LOCAL closest_out IS get_closest_site(ldgsiteslex).
 SET select_tgt:INDEX TO closest_out[0].
 
@@ -219,9 +223,15 @@ LOCAL pitchguid IS pitch_profile(pitchprof_segments[pitchprof_segments:LENGTH-1]
 LOCAL rollguid IS 0.
 
 
-//initalise pitch and roll steering values to current vessel steering
-LOCAL pitchsteer IS get_pitch_prograde().
-LOCAL rollsteer IS get_roll_lvlh().
+//initalise pitch and roll values to guidance steering
+LOCAL pitchsteer IS pitchguid.
+LOCAL rollsteer IS rollguid.
+
+IF SHIP:ALTITUDE < constants["firstrollalt"] {	
+	//override to current measured attitude
+	SET pitchsteer TO get_pitch_prograde().
+	SET rollsteer TO get_roll_prograde().
+}
 
 
 //SET pitchprof_segments[pitchprof_segments:LENGTH - 1][1] TO pitchguid.
@@ -335,9 +345,10 @@ WHEN TIME:SECONDS>(attitude_time_upd + 0.2) THEN {
 	LOCAL out IS update_steering_attitude(rollsteer,pitchsteer,rollguid,pitchguid).
 	SET rollsteer TO out[0].
 	SET pitchsteer TO out[1].
-	
-	print "rollsteer : " + ROUND(rollsteer,1) + "    " at (0,6).
-	print "pitchsteer : " + ROUND(pitchsteer,1) + "    " at (0,7).
+
+	print "roll_ref : " + ROUND(roll_ref,1) + "    " at (0,4).
+	print "rollguid : " + ROUND(rollguid,1) + "    " at (0,5).
+	print "pitchguid : " + ROUND(pitchguid,1) + "    " at (0,6).
 	
 	//steer to the new pitch and roll 
 	SET P_att TO update_attitude(P_att,pitchsteer,rollsteer).
@@ -359,7 +370,6 @@ WHEN TIME:SECONDS>(attitude_time_upd + 0.2) THEN {
 					
 					)	
 	).
-
 	
 	SET attitude_time_upd TO TIME:SECONDS.
 	IF (preserve_loop) {
@@ -489,11 +499,6 @@ UNTIL FALSE {
 				SET pitchguid TO pitch_modulation(range_err,pitch_ref).
 			}
 		}
-		
-		print "roll_ref : " + ROUND(roll_ref,1) + "    " at (0,9).
-		
-		print "rollguid : " + ROUND(rollguid,1) + "    " at (0,11).
-		print "pitchguid : " + ROUND(pitchguid,1) + "    " at (0,12).
 	
 	} ELSE {
 		SET mode TO 1.
@@ -659,7 +664,7 @@ UNTIL FALSE {
 	
 	print "tgtalt : " + tgtalt at (0,8).
 	print "finalalt : " + finalalt at (0,9).
-	print "hdotref : " + hdot_ref at (0,11).
+	print "hdotref : " + hdot_ref at (0,10).
 	
 	
 	IF is_guidance() {
@@ -672,10 +677,6 @@ UNTIL FALSE {
 		LOCAL D IS (alt_err_p - alt_err)/delta_t.
 
 		LOCAL delta_pitch IS  P*gains["taemKP"] + D*gains["taemKD"].
-		
-		
-		//print "alt err : " + alt_err at (1,6).
-		//print "delta pch : " + delta_pitch at (1,7).
 		
 		SET pitch_ref_p TO pitch_ref.
 		//update the reference roll value and clamp it

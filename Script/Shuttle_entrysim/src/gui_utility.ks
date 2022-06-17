@@ -328,10 +328,9 @@ FUNCTION select_opposite_hac {
 	
 	LOCAL rel_hdg IS unfixangle(shiprwybng - rwyhdg).
 	
-	print "rwyhdg : " + rwyhdg at (0,20).
-	print "shiprwybng : " + shiprwybng at (0,21).
-	
-	print "relativehdg : " + rel_hdg at (0,22).
+	//print "rwyhdg : " + rwyhdg at (0,20).
+	//print "shiprwybng : " + shiprwybng at (0,21).
+	//print "relativehdg : " + rel_hdg at (0,22).
 	
 	//this assumes that option 0 is "right" and option 1 is "left".
 	IF (rel_hdg < 0) {
@@ -448,7 +447,7 @@ FUNCTION make_hud_gui {
 	SET flaptrim_sliderbox:STYLe:WIDTH TO 15.
 	SET flaptrim_sliderbox:STYLE:ALIGN TO "right".
 	flaptrim_sliderbox:addspacing(72).
-	GLOBAL flaptrim_slider is flaptrim_sliderbox:addvslider(0,0.5,-0.5).
+	GLOBAL flaptrim_slider is flaptrim_sliderbox:addvslider(0,1,-1).
 	SET flaptrim_slider:STYLE:ALIGN TO "Center".
 	SET flaptrim_slider:style:vstretch to false.
 	SET flaptrim_slider:style:hstretch to false.
@@ -851,8 +850,8 @@ FUNCTION make_entry_GUI {
 	
 	}
 	
-	SET flaptrim_slider:MIN TO maxflapdefl.
-	SET flaptrim_slider:MAX TO minflapdefl.
+	SET flaptrim_slider:MIN TO maxflapdefl*1.1.
+	SET flaptrim_slider:MAX TO minflapdefl*1.1.
 	
 	
 	SET vspd_slider:MIN TO -200.
@@ -964,6 +963,7 @@ FUNCTION update_entry_GUI {
 
 //relatively few modifications to entry gui
 FUNCTION make_TAEM_GUI {
+	CLEARSCREEN.	//for good measure
 	//freeze the target site selection 
 	SET select_tgt:ENABLED to FALSE.
 
@@ -988,10 +988,13 @@ FUNCTION clean_entry_gui {
 
 FUNCTION make_apch_GUI {
 	
-	
+	CLEARSCREEN.
 	
 	//freeze the target site selection 
 	SET select_tgt:ENABLED to FALSE.
+	
+	//set auto speedbrakes
+	SET arbkb:PRESSED TO TRUE.
 		
 	
 		
@@ -1051,8 +1054,8 @@ FUNCTION diamond_deviation_apch {
 	LOCAL vmult iS -1/320.
 	
 	LOCAL hmult iS 0.04.
-	//IF mode=4 {SET hmult TO 2.}
-	//IF mode>=5 {SET hmult TO 0.10.}
+	IF mode=4 {SET hmult TO 0.02.}
+	IF mode>=5 {SET hmult TO 0.01.}
 	
 	LOCAL horiz IS hmult*hdelta.
 	LOCAL vert IS  vmult*vdelta.
@@ -1101,7 +1104,7 @@ FUNCTION update_apch_GUI {
 		distance_format(modedist,mode),
 		ROUND(compass_for(SHIP:SRFPROGRADE:VECTOR,SHIP:GEOPOSITION),0),
 		ROUND(ADDONS:FAR:IAS,0),
-		get_pitch_lvlh(),
+		get_pitch_prograde(),
 		get_roll_lvlh(),
 		spdbk_val,
 		flapval,

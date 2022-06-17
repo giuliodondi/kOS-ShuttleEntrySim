@@ -1,7 +1,7 @@
 
 FUNCTION TAEM_spdbk {
 	SET arbkb:PRESSED TO TRUE.
-	SEt SHIP:CONTROL:PILOTMAINTHROTTLE to 0.5.
+	//SEt SHIP:CONTROL:PILOTMAINTHROTTLE to 0.5.
 }
 
 
@@ -207,10 +207,11 @@ declare function simulate_TAEM {
 	//UNTIL ( greatcircledist(initialpos,simstate["latlong"]) >= greatcircledist(initialpos,tgt_rwy["hac_entry"]) )  {
 	UNTIL (( (tgtdistp < tgtdist) AND (tgtdist<5) ) OR simstate["altitude"] < 5000 )  {
 			
-		//if target distance is less than 1km we no longer update the entry point 
-		IF (tgtdist>1) {
-			update_hac_entry_pt(simstate["latlong"], tgt_rwy, apch_params). 
-		}
+		//if target distance is less than 1km we no longer update the entry point
+		//probably not necessary, save computations and avoid problems with spiral hac
+		//IF (tgtdist>1) {
+		//	update_hac_entry_pt(simstate["latlong"], tgt_rwy, apch_params). 
+		//}
 		
 	
 		SET simstate["altitude"] TO bodyalt(simstate["position"]).

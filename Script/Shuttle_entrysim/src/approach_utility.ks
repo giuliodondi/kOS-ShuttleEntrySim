@@ -17,7 +17,7 @@ FUNCTION pos_arrow {
       stringlabel,
       1,
       TRUE,
-      0.5
+      3
     ).
 
 }
@@ -300,17 +300,16 @@ FUNCTION define_hac {
 	SET rwy["upvec"] TO (pos2vec(rwy["hac"])):NORMALIZED.
 	IF rwy["hac_side"]="right" { SET rwy["upvec"] TO -rwy["upvec"].}
 	
+	
 	//initialise the hac entry point
-	
 	update_hac_entry_pt(cur_pos,rwy,params).
-	
 	
 	//initialise the hac angle 
 	
 	LOCAL entryvec IS (rwy["hac_entry"]:POSITION - rwy["hac"]:POSITION):NORMALIZED.
 	LOCAL exitvec IS (rwy["hac_exit"]:POSITION - rwy["hac"]:POSITION):NORMALIZED.
 	SET rwy["hac_angle"] TO signed_angle(exitvec,entryvec,rwy["upvec"],1).
-	
+
 	//clearvecdraws().
 	//pos_arrow(rwy["position"],"runwaypos").
 	//pos_arrow(rwy["td_pt"],"td_pt").
@@ -329,6 +328,7 @@ FUNCTION define_hac {
 
 
 //update the entry point to the HAC
+//assumes a circular hac
 FUNCTION update_hac_entry_pt {
 	PARAMETER cur_pos.
 	PARAMETER rwy.
@@ -353,6 +353,10 @@ FUNCTION update_hac_entry_pt {
 	LOCAL hac_entry_sign IS 1.
 	IF rwy["hac_side"]="left" {SET hac_entry_sign TO -1.}
 	LOCAL entry_bng IS fixangle(ship_bng + hac_entry_sign*beta).
+	
+	//the entry point 
+	
+	
 	SET rwy["hac_entry"] TO  new_position(rwy["hac"],params["hac_radius"],entry_bng).
 	
 	//clearvecdraws().
@@ -360,6 +364,7 @@ FUNCTION update_hac_entry_pt {
 	//pos_arrow(rwy["hac"],"hac").
 
 }
+
 
 //update the glideslope based in current altitude and distance to travel
 FUNCTION get_glideslope {
@@ -369,19 +374,6 @@ FUNCTION get_glideslope {
 	RETURN ARCTAN2(altt,(1000*dist)). 
 
 }
-
-
-//angle between an input entry vector and the HAC exit vector around the HAC centre
-//FUNCTION update_hac_angle {
-//	PARAMETER rwy.
-//	PARAMETER entryvec.
-//		
-//	LOCAL exitvec IS (rwy["hac_exit"]:POSITION - rwy["hac"]:POSITION):NORMALIZED.
-//	SET exitvec TO VXCL(rwy["upvec"],exitvec).
-//	SET entryvec TO VXCL(rwy["upvec"],entryvec).
-//	RETURN signed_angle(exitvec,entryvec,rwy["upvec"],1).
-//	
-//}
 
 
 
@@ -397,7 +389,7 @@ FUNCTION update_hac_angle {
 	LOCAL old_entryvec IS rodrigues(exitvec,rwy["upvec"],rwy["hac_angle"]).
 	LOCAL delta_hac_angle IS CLAMP(signed_angle(old_entryvec,entryvec,rwy["upvec"],-1),-10,10).
 	
-	SET rwy["hac_angle"] TO rwy["hac_angle"] + delta_hac_angle. 
+	SET rwy["hac_angle"] TO MAX(0,rwy["hac_angle"] + delta_hac_angle). 
 	
 	//LOCAL hac_gndtrk IS get_hac_groundtrack(hac_angle, apch_params).
 	
@@ -412,24 +404,33 @@ FUNCTION update_hac_angle {
 	
 }
 
+FUNCTION update_hac_spiral {
+	PARAMETER new_radius.
+	PARAMETER ship_hac_angle.
+	PARAMETER params.
+	
+	SET params["hac_r2"] TO (new_radius - params["hac_radius"])/(ship_hac_angle^2).
+}
 
-//for now it's a wrapper, but in the future we might want to do something fancy like a conical HAC
+
+//implement the conical HAC
 FUNCTION get_hac_radius {
 	PARAMETER hac_angle.
 	PARAMETER params.
 	
-	RETURN params["hac_radius"].	// + 0.0000283464*hac_angle^2.
+	RETURN params["hac_radius"] + params["hac_r2"]*hac_angle^2.
 }
 
 
-//for now it's a wrapper, but in the future we might want to do something fancy like a conical HAC
+//implement the conical HAC, distance function is an approximation of the curve integral
 FUNCTION get_hac_groundtrack {
 	PARAMETER hac_angle.
 	PARAMETER params.
 	
-	RETURN params["hac_radius"]*hac_angle*CONSTANT:PI/180.
+	//RETURN params["hac_radius"]*hac_angle*CONSTANT:PI/180.
 	
-	//RETURN (params["hac_radius"] + 0.0000094488*hac_angle^2)*hac_angle/57.
+	
+	RETURN (params["hac_radius"] + (params["hac_r2"]*hac_angle^2)/3)*hac_angle*CONSTANT:PI/180.
 }
 
 
@@ -438,9 +439,6 @@ FUNCTION get_hac_groundtrack {
 function get_hac_profile_alt {
 	PARAMETER rwy.
 	PARAMETER apch_params.
-
-	LOCAL entryvec IS (rwy["hac_entry"]:POSITION - rwy["hac"]:POSITION):NORMALIZED.
-	update_hac_angle(rwy,entryvec).
 	
 	LOCAL hac_gndtrk IS get_hac_groundtrack(rwy["hac_angle"], apch_params).
 	
@@ -470,9 +468,6 @@ FUNCTION mode_dist {
 		//ground-track distance around the hac
 		//find the theta angle
 		LOCAL shipvec IS (simstate["latlong"]:POSITION - rwy["hac"]:POSITION):NORMALIZED.
-		update_hac_angle(rwy,shipvec).
-		print "hac angle:  " + rwy["hac_angle"] at (1,1).
-		
 		
 		//find the groundtrack around the hac
 		RETURN get_hac_groundtrack(rwy["hac_angle"],params).
@@ -518,14 +513,13 @@ FUNCTION mode3 {
 	LOCAL ship_hac_dist IS greatcircledist(rwy["hac_entry"],SHIP:GEOPOSITION).
 	IF (ship_hac_dist>1) { update_hac_entry_pt(SHIP:GEOPOSITION,rwy,params). }
 
-	
-	LOCAL entryvec IS (rwy["hac_entry"]:POSITION - rwy["hac"]:POSITION):NORMALIZED.
-
 	//once we have the entry point find the theta angle and hac radius
+	LOCAL entryvec IS (rwy["hac_entry"]:POSITION - rwy["hac"]:POSITION):NORMALIZED.
 	update_hac_angle(rwy,entryvec).
+	
 	print "hac angle:  " + rwy["hac_angle"] at (1,1).
 	
-	LOCAL hac_radius IS get_hac_radius(rwy["hac_angle"], params).
+	//LOCAL hac_radius IS get_hac_radius(rwy["hac_angle"], params).
 	
 	
 	//build the vertical profile 
@@ -556,7 +550,6 @@ FUNCTION mode3 {
 	
 	LOCAL hac_tangentaz IS bearingg(rwy["hac_entry"],rwy["hac"]).
 	
-	print "horiz err:  " + (greatcircledist(rwy["hac"],SHIP:GEOPOSITION) - hac_radius)*1000 AT (1,3).
 
 	//move the current position on the HAC of the ship HAc radius
 	//along the tangent direction by an arbtrary distance 
@@ -599,25 +592,33 @@ FUNCTION mode4 {
 	PARAMETER rwy.
 	PARAMETER params.
 	
-	
-	//find the vertical profile first
-	
 	//find the theta angle
-	LOCAL shipvec IS (simstate["latlong"]:POSITION - rwy["hac"]:POSITION):NORMALIZED.
-	update_hac_angle(rwy,shipvec).
+	LOCAL ship_pred_vec IS (simstate["latlong"]:POSITION - rwy["hac"]:POSITION):NORMALIZED.
+	update_hac_angle(rwy,ship_pred_vec).
 	print "hac angle:  " + rwy["hac_angle"] at (1,1).
 	
-	LOCAL hac_radius IS get_hac_radius(rwy["hac_angle"], params).
 	
-	//get the vertical profile value at the predicted point 
+	//the hac angle is measured wrt the predicted point 
+	//correct it to find the ship hac angle 
+	LOCAL ship_vec IS (SHIP:GEOPOSITION:POSITION - rwy["hac"]:POSITION):NORMALIZED.
+	LOCAL ship_hac_angle IS rwy["hac_angle"] + signed_angle(ship_vec,ship_pred_vec,-rwy["upvec"],-1).
+	
+	
+	print "ship_hac_angle:  " +  ship_hac_angle at (1,5).	
+	
+	//update the HAC spiral to be tangent to the current ship position 
+	LOCAL new_radius IS greatcircledist(rwy["hac"],SHIP:GEOPOSITION).
+	print "new_radius:  " +  new_radius at (1,6).	
+	update_hac_spiral(new_radius,ship_hac_angle,params).
+	
+	print "hac_r2 : " + params["hac_r2"] at (1,7). 
+	
+	//now build the vertical profile value at the predicted point 
 	LOCAL final_alt IS params["final_dist"]*params["glideslope"]["outer"].
 	
 	//find the groundtrack around the hac
 	LOCAL hac_gndtrk IS get_hac_groundtrack(rwy["hac_angle"], params).
 	
-	
-
-	// buld the vertical profile
 	//use the last calculated runway glideslope
 
 	LOCAL profile_alt IS  final_alt + (hac_gndtrk)*rwy["glideslope"].
@@ -628,10 +629,16 @@ FUNCTION mode4 {
 
 	//build the target point as described
 	//first get the HAC position corresponding to the predicted point
+	
+	LOCAL hac_radius IS get_hac_radius(rwy["hac_angle"], params).
+	
+	print "hac_radius : " + hac_radius at (0,3).
+	
+	
 	LOCAL hac_tangentaz IS bearingg(simstate["latlong"],rwy["hac"]).
 	LOCAL hac_tangentpos IS new_position(rwy["hac"],hac_radius,hac_tangentaz). 
 	
-	print "horiz err:  " + (greatcircledist(rwy["hac"],SHIP:GEOPOSITION) - hac_radius)*1000 AT (1,3).
+	//print "horiz err:  " + (greatcircledist(rwy["hac"],SHIP:GEOPOSITION) - hac_radius)*1000 AT (1,3).
 
 	//move the current position on the HAC of the ship HAc radius
 	//along the tangent direction by an arbtrary distance 
@@ -794,10 +801,10 @@ FUNCTION mode_switch {
 	PARAMETER switch_mode IS FALSE.
 	
 	IF mode=3 {
-			IF (mode_dist(simstate,tgtrwy,apch_params) < 0.1) {SET switch_mode TO TRUE.}
+			IF (mode_dist(simstate,tgtrwy,apch_params) < 0.5) {SET switch_mode TO TRUE.}
 			
 	} ELSE IF mode=4 {
-			IF (mode_dist(simstate,tgtrwy,apch_params) < 0.1) {
+			IF (mode_dist(simstate,tgtrwy,apch_params) < 0.5) {
 				SET switch_mode TO TRUE.
 				//override the previously calculated glideslope value
 				SET rwy["glideslope"] TO params["glideslope"]["outer"].
@@ -817,7 +824,10 @@ FUNCTION mode_switch {
 	
 	}
 	
-	IF switch_mode {SET mode TO mode + 1.}
+	IF switch_mode {
+		SET mode TO mode + 1.
+		CLEARSCREEN.
+	}
 	RETURN mode.
 
 }
