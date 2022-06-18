@@ -74,8 +74,8 @@ or lateral stability all the way down
 
 
 In the VAB adjust the FAR control surface mappings like this: 
-- The tail control surface should have +100% yaw authority and +50% roll authority, 23 deflection and the rest to zero. Flap and Spoiler disabled.
-- The elevons should have +100% pitch authority, +60% roll authority, -25% AOA authority, 20 deflection and the rest to zero. Flaps enabled, spoilers disabled
+- The tail control surface should have +100% yaw authority and +50% roll authority, 20 deflection and the rest to zero. Flap and Spoiler disabled.
+- The elevons should have +100% pitch authority, +60% roll authority, -15% AOA authority, 20 deflection and the rest to zero. Flaps enabled, spoilers disabled
 - The body flap must have zero authority on everything.  Flaps enabled, spoilers disabled.
 
 Still in the VAB, enable all actuation toggles on the Crew Cabin and both OMS pods. This will give you full control on which RCS jets are active for which attitude direction.
