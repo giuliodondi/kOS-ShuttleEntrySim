@@ -12,7 +12,7 @@ GLOBAL flap_control IS LEXICON(
 					"parts", LIST(
 						LEXICON(
 								"flapmod",SHIP:PARTSDUBBED("ShuttleElevonL")[0]:getmodule("FARControllableSurface"),
-								"min_defl",-14,
+								"min_defl",-25,
 								"max_defl",25
 						),
 						LEXICON(
