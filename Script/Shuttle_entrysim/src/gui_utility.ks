@@ -684,7 +684,7 @@ FUNCTION make_entry_GUI {
 	  //create the gains gui
 		GLOBAL gains_gui is gui(180,200).
 		SET gains_gui:X TO main_gui:X.
-		SET gains_gui:Y TO main_gui:Y + 500.
+		SET gains_gui:Y TO main_gui:Y + 100.
 		GLOBAL gainstext IS gains_gui:ADDLABEL("<size=18>Controller Gains</size>").
 		SET gainstext:STYLE:ALIGN TO "center".
 		
@@ -836,22 +836,10 @@ FUNCTION make_entry_GUI {
 	
 	make_hud_gui().
 	
-	LOCAL minflapdefl IS 0.
-	LOCAL maxflapdefl IS 0.
 	
 	
-	FOR f in flap_control["parts"] {
-		IF f["min_defl"] < minflapdefl {
-			SET minflapdefl TO f["min_defl"].
-		}
-		IF f["max_defl"] > maxflapdefl {
-			SET maxflapdefl TO f["max_defl"].
-		}
-	
-	}
-	
-	SET flaptrim_slider:MIN TO maxflapdefl*1.1.
-	SET flaptrim_slider:MAX TO minflapdefl*1.1.
+	SET flaptrim_slider:MIN TO flap_control["max_deflection"].
+	SET flaptrim_slider:MAX TO flap_control["min_deflection"].
 	
 	
 	SET vspd_slider:MIN TO -200.

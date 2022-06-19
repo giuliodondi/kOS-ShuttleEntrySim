@@ -14,7 +14,10 @@ STEERINGMANAGER:RESETTODEFAULT().
 SET STEERINGMANAGER:PITCHTS TO 8.0.
 SET STEERINGMANAGER:YAWTS TO 3.
 SET STEERINGMANAGER:ROLLTS TO 3.
-SET STEERINGMANAGER:PITCHPID:KP TO 0.3.
+
+SET STEERINGMANAGER:PITCHPID:EPSILON TO 0.1.
+SET STEERINGMANAGER:YAWPID:EPSILON TO 0.1.
+SET STEERINGMANAGER:ROLLPID:EPSILON TO 0.1.
 
 
 
@@ -105,6 +108,21 @@ IF NOT (DEFINED gimbals) {
 		}
 	}
 	
+}
+
+//calculate min and max deflection 
+flap_control:ADD("min_deflection",0).
+flap_control:ADD("max_deflection",0).
+
+
+FOR f in flap_control["parts"] {
+	IF f["min_defl"] < flap_control["min_deflection"] {
+		SET flap_control["min_deflection"] TO f["min_defl"].
+	}
+	IF f["max_defl"] > flap_control["max_deflection"] {
+		SET flap_control["max_deflection"] TO f["max_defl"].
+	}
+
 }
 
 
