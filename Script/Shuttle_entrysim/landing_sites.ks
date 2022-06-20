@@ -8,24 +8,24 @@ GLOBAL ldgsiteslex IS LEXICON(
 							"heading",329.9
 						),
 						"Edwards",LEXICON(
-							"position",LATLNG(34.871818,-117.827388),
+							"position",LATLNG(34.898557,-117.9088947),
 							"elevation",1439,
 							"length",6000,
-							"heading",60.3
+							"heading",58.2
 							
 						),
 						"Vandenberg",LEXICON(
 							"position",LATLNG(34.737224,-120.587830),
-							"elevation",236,
+							"elevation",103,
 							"length",5030,
 							"heading",338.8
 							
 						),
 						"Mataveri",LEXICON(
-							"position",LATLNG(-27.13906,-109.42096),
+							"position",LATLNG(-27.1766369,-109.401308),
 							"elevation",130,
 							"length",5030,
-							"heading",175.4
+							"heading",168.4
 							
 						),
 						"Istres",LEXICON(
