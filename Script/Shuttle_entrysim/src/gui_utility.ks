@@ -160,7 +160,7 @@ FUNCTION make_global_entry_GUI {
 	
 
 	//create the GUI.
-	GLOBAL main_gui is gui(530,430).
+	GLOBAL main_gui is gui(530,230).
 	SET main_gui:X TO 550.
 	SET main_gui:Y TO 350.
 	SET main_gui:STYLe:WIDTH TO 530.
@@ -548,6 +548,36 @@ FUNCTION make_hud_gui {
 }
 
 
+//called at mode5 transition
+//removes the load indicator and changes the marker
+FUNCTION hud_declutter5_gui {
+	
+	nz_text:HIDE().
+	SET  pointbox:style:BG to "Shuttle_entrysim/src/gui_images/bg_marker_round.png".
+
+}
+
+//called at 1200 m
+//removes trim indicator, heading, vertical speed and attitude angles
+FUNCTION hud_declutter6_gui {
+	
+	flaptrim_slider:HIDE().
+	vspd_slider:HIDE().
+	hdg_text:HIDE().
+	hudrll_text:HIDE().
+	hudpch_text:HIDE().
+	mode_dist_text:HIDE().
+}
+
+//called at mode7 transition
+//hides the pipper 
+FUNCTION hud_declutter7_gui {
+	
+	SET diamond:IMAGE TO "Shuttle_entrysim/src/gui_images/diamond_empty.png".
+
+}
+
+
 FUNCTION update_hud_gui {
 	PARAMETER mode_str.
 	PARAMETER pipper_pos.
@@ -849,8 +879,6 @@ FUNCTION make_entry_GUI {
 }
 
 
-
-
 FUNCTION is_guidance {
 	RETURN guidb:PRESSED.
 }
@@ -998,26 +1026,28 @@ FUNCTION make_apch_GUI {
 	
 	
 	
-	
-
-	//gui-related actions for mode switching
+	//gui-related actions for mode switching (in case we got here manually)
 	WHEN mode=4 THEN {
 		SET select_rwy:ENABLED to FALSE.
 		SET select_side:ENABLED to FALSE.
 		
-		
 		WHEN mode=5 THEN {
-			SET sim_settings["delta_t"] TO 1.
-			SET  pointbox:style:BG to "Shuttle_entrysim/src/gui_images/bg_marker_round.png".
-			SET mode_txt:text TO "<size=20> OGS</size>".
+			hud_declutter5_gui().
+			
+			WHEN ALT:RADAR < 1200 THEN  {
+				hud_declutter6_gui().
+				
+				WHEN mode=6 THEN {
+					
+				
+					WHEN mode=7 THEN {
+						hud_declutter7_gui().
+					}
+				}
+			
+			}
 		
 			
-			WHEN mode=6 THEN {
-				SET mode_txt:text TO "<size=20>FLARE</size>".
-				WHEN ALT:RADAR<200 THEN {
-					SET mode_txt:text TO "".
-				}
-			}
 		}
 	}
 
@@ -1080,9 +1110,9 @@ FUNCTION update_apch_GUI {
 	} ELSE IF (mode=5) {
 		SET mode_str TO "OGS ".
 	} ELSE IF (mode=6) {
-		IF (ALT:RADAR>200) {
-			SET mode_str TO "FLARE".
-		}
+		SET mode_str TO "FLARE".
+	} ELSE IF (mode=7) {
+		SET mode_str TO "FNLFL".
 	}
 	
 	update_hud_gui(
@@ -1129,7 +1159,7 @@ FUNCTION altitude_format {
 		} ELSE IF (altt >= 100) {
 			SET altout TO FLOOR(altt/10)*10.
 		} ELSE {
-			SET altout TO ROUND(altout,0).
+			SET altout TO FLOOR(altout).
 		}
 		RETURN altout.
 	}

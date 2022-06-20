@@ -620,15 +620,13 @@ UNTIL FALSE {
 		SET pitch_ref TO pitchsteer. 
 	}
 	
+	//check if we should switch to approach 
+	apch_transition(tgt_range).
+	
 	//update HAC entry 
 	update_hac_entry_pt(SHIP:GEOPOSITION, tgtrwy, apch_params). 
 	
-	//check if we should switch to approach 
-	apch_transition(tgt_range).
-		
-	
 	//calculate the target altitude 
-	//do it now instead of after simulation because we don't trust where the hac entry point is at the end
 	LOCAL alt_err_p IS alt_err.
 	LOCAL tgtalt IS get_hac_profile_alt(tgtrwy, apch_params).
 		
@@ -788,7 +786,12 @@ IF quitflag {RETURN.}
 
 clearscreen.
 
+make_apch_GUI().
 
+//for testing only
+//hud_declutter5_gui().
+//hud_declutter6_gui().
+//hud_declutter7_gui().
 
 
 define_flare_circle(apch_params).
@@ -801,26 +804,6 @@ GLOBAL sim_settings IS LEXICON(
 ).
 
 
-
-
-
-
-
-make_apch_GUI().
-
-
-
-
-
-//gear and brakes trigger
-WHEN mode=6 THEN {
-	WHEN ALT:RADAR<200 THEN {
-		GEAR ON.
-	}
-	WHEN SHIP:STATUS = "LANDED" THEN {BRAKES ON.}
-}
-		
-		
 //define the delegate to the integrator function, saves an if check per integration step
 LOCAL integrate IS 0.
 IF sim_settings["integrator"]= "rk2" {
@@ -875,11 +858,11 @@ UNTIL FALSE{
 		SET deltas TO mode4(simstate,tgtrwy,apch_params).
 	}
 	ELSE IF mode=5  {
-		
+		SET sim_settings["delta_t"] TO 1.
 		SET deltas TO mode5(simstate,tgtrwy,apch_params).
 	}
 	ELSE IF mode=6 {
-		
+		SET sim_settings["delta_t"] TO 1.
 		SET deltas TO mode6(simstate,tgtrwy,apch_params).
 	}
 	

@@ -135,14 +135,24 @@ FUNCTION speed_control {
 			SET delta_spd TO SHIP:VELOCITy:SURFACE:MAG - tgtspeed.
 		}
 		ELSE {
-			IF mode=3 {SET tgtspeed TO 220.}
-			ELSE IF mode=4 {SET tgtspeed TO 180.}
-			ELSE IF mode=5 {SET tgtspeed TO 150.}
-			ELSE IF mode=6 {
-				SET tgtspeed TO 150.
-				IF SHIP:STATUS = "LANDED" {SET tgtspeed TO 0.}
+			IF mode=3 {
+				SET delta_spd TO SHIP:AIRSPEED - 220.
 			}
-			SET delta_spd TO SHIP:AIRSPEED - tgtspeed.
+			ELSE IF mode=4 {
+				SET delta_spd TO SHIP:AIRSPEED - 180.
+			}
+			ELSE IF mode=5 {
+				SET delta_spd TO SHIP:AIRSPEED - 145.
+			}
+			ELSE IF mode>=6 {
+				SET delta_spd TO 0.		//this will lock the speedbrake in place
+			
+				IF SHIP:STATUS = "LANDED" {
+					SET delta_spd TO SHIP:AIRSPEED.
+					BRAKES ON.
+				}
+			}
+			
 		}
 
 		//initialise the air brake control pid loop 		
@@ -439,6 +449,9 @@ FUNCTION get_hac_groundtrack {
 function get_hac_profile_alt {
 	PARAMETER rwy.
 	PARAMETER apch_params.
+	
+	LOCAL entryvec IS (rwy["hac_entry"]:POSITION - rwy["hac"]:POSITION):NORMALIZED.
+	update_hac_angle(rwy,entryvec).
 	
 	LOCAL hac_gndtrk IS get_hac_groundtrack(rwy["hac_angle"], apch_params).
 	
@@ -820,8 +833,18 @@ FUNCTION mode_switch {
 			
 			IF altt<=params["preflare_alt"]{
 				SET switch_mode TO TRUE.
+				
+				//gear and brakes trigger
+				WHEN ALT:RADAR<200 THEN {
+					GEAR ON.
+				}
 			}
 	
+	} ELSE IF mode=6 {
+		//transition below 50m
+		IF ALT:RADAR <= 50{
+				SET switch_mode TO TRUE.
+		}
 	}
 	
 	IF switch_mode {
