@@ -238,7 +238,8 @@ Given a HAC, the entrance point is calculated as the point whose tangent crosses
 
 ### TAEM guidance
 
-### This mode is EXPERIMENTAL and doesn't work as well as I would like, nevertheless I find it useful so I kept it in
+### This mode is EXPERIMENTAL. MOST of the time it works MOSTLY correctly, but occasionally it will mess up and dump a bit too much energy, or dump too little energy and overshoot the HAC entry point.
+### I've made a huge 'Switch to Approach' override button for a good reason, don't be afraid to use it if you see a problem
 
 As mentioned, you need to hit the HAC aiming point at the correct altitude, at least within 100m or so. Additionally you need to be subsonic, as the Shuttle cannot turn around a HAC this tight at M1+.
 
