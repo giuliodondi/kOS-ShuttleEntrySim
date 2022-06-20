@@ -198,9 +198,12 @@ Wait until you're below 120km, then enable _Guidance_ and focus on the HUD.
 Even when steering is set to manual, it is never _really_ manual like you may be used to flying planes in KSP. Instead the program implements a sort of Fly-By-Wire mechanism.    
 The Shuttle's attitude during reentry is determined by Bank and AOA angles. AOA will largely follow the pitch profile you specified in **pitch_profile.ks**, while Bank is optimised by the trajectory simulation to control range.  
 
-When Steering is set to manual, the values of bank and AOA calculated by guidance are **NOT** automatically used to steer the Shuttle, the actual steering bank and AOA are controlled by you the Pilot using WASD or your favourite joystick. If you move the controls around you should see the Shuttle changing slowly its attitude using RCS and the HUD angles reflecting the change in attitude. Do NOT look at the control input indicators in the bottom left as the control surfaces are actuated by kOS accoding to its own steering manager. If you see no movement, click repeatedly on the main KSP window as the cursor may be stuck on a GUI or the kOS terminal.  
+When Steering is set to manual, the values of bank and AOA calculated by guidance are **NOT** automatically used to steer the Shuttle, the actual steering bank and AOA are controlled by you the Pilot using WASD or your favourite joystick. If you move the controls around you should see the Shuttle changing slowly its attitude using RCS and the HUD angles reflecting the change in attitude.  
+Do NOT look at the control input indicators in the bottom left as the control surfaces are actuated by kOS accoding to its own steering manager.  
+If you see no movement, click repeatedly on the main KSP window as the cursor may be stuck on a GUI or the kOS terminal.  
 
-When Steering is Automatic, the Shuttle steering angles are wired to the Guidance computed values and so you will see the nose indicator chase the pipper around as it moves. The Manual setting lets you achieve this by hand adjusting the steering to follow the Pipper commands, so you can feel like Joe Engle during STS-2.  
+When Steering is Automatic, the Shuttle steering angles are wired to the Guidance computed values and so you will see the nose indicator chase the pipper around as it moves, adjusting the steering to follow the Pipper command.  
+The Manual setting lets you achieve this by hand, so you can feel like Joe Engle during STS-2.  
 I've seen that there are actually a few benefits to keeping manual control of the Shuttle Steering which I'll explain later on.
 
 ### Reentry guidance
@@ -270,22 +273,26 @@ The HUD is identical to Entry/TAEM but the meaning of some symbols is now differ
 - _APCH PHASE_ indicates which segmet of the approash you are in. ACQ for HAC acquisition, HDG for the turn sround the HAC. OGS for the final descent into the runway and FLARE just before the landing flare
 - _PHASE DIST_ is the distance in km to the guidance point for the current approach phase. It is useful to know when the script is about to switch phases
 
-The goald of the approach phase is to guide you around the HAC cilindres (see a couple images above) and align you with the runway on the correct glideslope.
+The goal of the approach phase is to guide you around the HAC cilindres (see a couple images above) and align you with the runway on the correct glideslope.
 Keep in mind that the approach path is completely dumb and oblivious to your energy state, contrary to TAEM guidance or the real Space Shuttle Guidance.   
 
 The program will simulate the Shuttle a couple seconds in the future and measure the deviations from the guidance profile. The diamond-shaped pipper displays this deviation in a way that suggests where the nose should be pointed to correct the error.
-Your focus should be on following the pipper diamond around with gentle commands. The pipper will guide you through several approach phases that align the Shuttle with the runway and settle it on the proper glideslope for landing.
+Your focus should be on following the pipper diamond around with gentle commands. The pipper will guide you through several approach phases that align the Shuttle with the runway and settle it on the proper glideslope for landing.  
+
+Here's a brief description of the approach phases:
+- **Acquisition (ACQ)** fly straight towards the HAC entry point, the lateral deviation is proportional to the azimuth error and the vertical to the altitude error. At the end of this phase you should bank in the direction of the HAC (left for a left HAC, right for a right HAC).
+- **Hac turn (HDG)** fly around the HAC, an overhead turn (the default case if you go with the HAC selected automatically by the program) usually sweeps 160/270 degrees.  
+The HAC in this phase is not a fixed cilinder but a spiral, adjusted so that you always sit on it regardless of your horizontal error in the radial direction. The spiral HAC will always guide you smoothly to the right exit point, making it much easier to track the pipper compared to a fixed-radius HAC.  
+At the end of this phase you should be nearly on runway centerline.
+-  **Outer Glideslope (OGS)** The final descent, you might need to correct some lateral error and possibly plunge downwards. **The glideslope does NOT aim for the runway but a point a couple km short of it. This is intentional. Follow the pipper and fight your urge to chase the runway.**
+-  **Flare** A smooth transition between the steep Outer Glideslope and a shallow Inner Glideslope. If you followed the OGS guidance correctly, you will find yourself on a shallow 3° descent right on the runway touchdown markings, slowing down gently. Focus less on the pipper in this phase and more on visual cues and the vertical speed indicator.
+
+You will probably need a little pitch trim to help you during approach. The elevons and body flap will deflect according to the pitch trim setting, but there is no automatic trim control in this phase, it's all up to you. If you have excess OMS you might be tail-heavy and might need some down trim.
 
 Speedbrakes are controlled either manually using the throttle slider or automatically by the script. A button lets you switch between the modes.
-Leave them on manual and closed until you are stabilised on the descent profile and the pipper is mostly centered, you don't want to waste energy until you are sure 
-you have plenty to spare.
+By default they are set to AUTO after TAEM, if you switched manually from TAEM because guidance messed up, you might want to switch to manual and close them until you are sure that you'll make the HAC with at least 220 m/s of velocity.
 
-You can (and should) use a little pitch trim to help you during approach. The elevons and body flap will deflect according to the pitch trim setting, you will only need a little.
-
-Needless to say, to fly the shuttle manually it's best to use a flight stick or, at the very least, some kind of gaming controller. 
-Even so, following the pipper around the HAC is hard. The pipper is sensitive to control surface deflections and will jitter around if you're hard on the control inputs, that's why you need to be gentle and trim your controls.
-The pipper doesn't need to be very centered but it should not escape beyond the GUI window. It is especially important to be on profile 
-near the end of the HAC turn since during the final descent on glideslope there is not much time to get back on profile. It takes practice.
+Needless to say, to fly the shuttle manually it's best to use a flight stick or, at the very least, some kind of gaming joystick. If you use a joystick, get a pair of thumb extenders, they work like a charm.
 
 
 
