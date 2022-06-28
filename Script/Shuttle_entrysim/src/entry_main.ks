@@ -6,6 +6,8 @@
 FUNCTION entry_main_loop {
 
 apch_params:ADD("hac_r2",0).
+apch_params:ADD("hac_h_cub1",params["glideslope"]["outer"]).
+apch_params:ADD("hac_h_cub3",0).
 
 STEERINGMANAGER:RESETPIDS().
 STEERINGMANAGER:RESETTODEFAULT().
@@ -630,7 +632,7 @@ UNTIL FALSE {
 	
 	//calculate the target altitude 
 	LOCAL alt_err_p IS alt_err.
-	LOCAL tgtalt IS get_hac_profile_alt(tgtrwy, apch_params).
+	LOCAL tgtalt IS taem_profile_alt(tgtrwy, apch_params).
 		
 	//run the vehicle simulation
 	LOCAL ICS IS LEXICON(
