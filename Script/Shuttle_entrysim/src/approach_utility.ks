@@ -814,31 +814,39 @@ FUNCTION mode_switch {
 	PARAMETER switch_mode IS FALSE.
 	
 	IF mode=3 {
-			IF (mode_dist(simstate,tgtrwy,apch_params) < 0.5) {SET switch_mode TO TRUE.}
+		//IF (mode_dist(simstate,tgtrwy,apch_params) < 0.5) {SET switch_mode TO TRUE.}
+		
+		//new logic taken from the TAEM paper 
+		
+		LOCAL ship_hac_dist IS greatcircledist(rwy["hac"],SHIP:GEOPOSITION).
+		LOCAL hac_radius IS get_hac_radius(rwy["hac_angle"], params).
+		
+		IF (ship_hac_dist < 1.1 * hac_radius) {
+			SET switch_mode TO TRUE.
+		}
 			
 	} ELSE IF mode=4 {
-			IF (mode_dist(simstate,tgtrwy,apch_params) < 0.5) {
-				SET switch_mode TO TRUE.
-				//override the previously calculated glideslope value
-				SET rwy["glideslope"] TO params["glideslope"]["outer"].
-				
-			}
-		
+		IF (mode_dist(simstate,tgtrwy,apch_params) < 0.5) {
+			SET switch_mode TO TRUE.
+			//override the previously calculated glideslope value
+			SET rwy["glideslope"] TO params["glideslope"]["outer"].
+			
+		}
 	
 	} ELSE IF mode=5 {
-			//measure the predicted altitude above the site elevation
-			LOCAL altt IS simstate["altitude"] - rwy["elevation"].
+		//measure the predicted altitude above the site elevation
+		LOCAL altt IS simstate["altitude"] - rwy["elevation"].
+		
+		//below the flare threshold switch
+		
+		IF altt<=params["preflare_alt"]{
+			SET switch_mode TO TRUE.
 			
-			//below the flare threshold switch
-			
-			IF altt<=params["preflare_alt"]{
-				SET switch_mode TO TRUE.
-				
-				//gear and brakes trigger
-				WHEN ALT:RADAR<200 THEN {
-					GEAR ON.
-				}
+			//gear and brakes trigger
+			WHEN ALT:RADAR<200 THEN {
+				GEAR ON.
 			}
+		}
 	
 	} ELSE IF mode=6 {
 		//transition below 50m
