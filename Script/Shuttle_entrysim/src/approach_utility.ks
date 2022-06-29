@@ -629,15 +629,12 @@ FUNCTION mode3 {
 	
 	print "rwy[glideslope]:  " +  rwy["glideslope"] at (1,3).	
 	
-	
-	
 	print "hac_h_cub1:  " +  params["hac_h_cub1"] at (1,4).	
 	print "hac_h_cub2:  " +  params["hac_h_cub2"] at (1,5).	
 	print "hac_h_cub3:  " +  params["hac_h_cub3"] at (1,6).	
 	
 	print "glideslope taem:  " +  params["glideslope"]["taem"] at (1,7).	
 	print "hac entry profile alt:  " +  hacentry_profilealt at (1,8).	
-	
 	
 	//build the target point as described
 	//first get the HAC position corresponding to the predicted point
