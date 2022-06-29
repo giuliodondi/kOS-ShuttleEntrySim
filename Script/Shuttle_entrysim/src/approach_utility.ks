@@ -510,7 +510,7 @@ FUNCTION hac_entry_profile_alt {
 	
 	LOCAL hbar IS (runway_alt(SHIP:ALTITUDE) - mode5_alt)/1000. 
 	
-	update_cubic_coef_hac_acq(ship_hac_dist, hbar, ship_hac_dist, hac_gndtrk, rwy, params).
+	update_cubic_coef_hac_acq(ship_hac_dist, hbar, hac_gndtrk, rwy, params).
 	
 	RETURN mode5_alt + hac_turn_profile_alt(hac_gndtrk, rwy, params).
 
@@ -630,9 +630,11 @@ FUNCTION mode3 {
 	
 	
 	print "hac_h_cub1:  " +  params["hac_h_cub1"] at (1,4).	
-	print "hac_h_cub3:  " +  params["hac_h_cub3"] at (1,5).	
-	print "hac entry profile alt:  " +  hacentry_profilealt at (1,6).	
+	print "hac_h_cub2:  " +  params["hac_h_cub2"] at (1,5).	
+	print "hac_h_cub3:  " +  params["hac_h_cub3"] at (1,6).	
+	
 	print "glideslope taem:  " +  params["glideslope"]["taem"] at (1,7).	
+	print "hac entry profile alt:  " +  hacentry_profilealt at (1,8).	
 	
 	
 	//build the target point as described
