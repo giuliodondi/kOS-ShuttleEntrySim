@@ -9,7 +9,7 @@ GLOBAL ldgsiteslex IS LEXICON(
 						),
 						"Edwards",LEXICON(
 							"position",LATLNG(34.898557,-117.9088947),
-							"elevation",1439,
+							"elevation",821,
 							"length",6000,
 							"heading",58.2
 							
