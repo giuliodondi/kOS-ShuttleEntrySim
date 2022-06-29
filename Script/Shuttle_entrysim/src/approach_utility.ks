@@ -145,7 +145,12 @@ FUNCTION speed_control {
 				SET delta_spd TO SHIP:AIRSPEED - 145.
 			}
 			ELSE IF mode>=6 {
-				SET delta_spd TO 0.		//this will lock the speedbrake in place
+				SET delta_spd TO SHIP:AIRSPEED - 130.		
+				
+				IF ALT:RADAR<200 {
+					SET delta_spd TO  SHIP:AIRSPEED - 110.
+				}
+				
 			
 				IF SHIP:STATUS = "LANDED" {
 					SET delta_spd TO SHIP:AIRSPEED.
@@ -895,16 +900,7 @@ FUNCTION mode_switch {
 	PARAMETER switch_mode IS FALSE.
 	
 	IF mode=3 {
-		//IF (mode_dist(simstate,tgtrwy,apch_params) < 0.5) {SET switch_mode TO TRUE.}
-		
-		//new logic taken from the TAEM paper 
-		
-		LOCAL ship_hac_dist IS greatcircledist(rwy["hac"],SHIP:GEOPOSITION).
-		LOCAL hac_radius IS get_hac_radius(rwy["hac_angle"], params).
-		
-		IF (ship_hac_dist < 1.1 * hac_radius) {
-			SET switch_mode TO TRUE.
-		}
+		IF (mode_dist(simstate,tgtrwy,apch_params) < 0.5) {SET switch_mode TO TRUE.}
 			
 	} ELSE IF mode=4 {
 		IF (mode_dist(simstate,tgtrwy,apch_params) < 0.5) {
