@@ -7,7 +7,6 @@ GLOBAL apch_params IS LEXICON(
 					"final_dist",7.5,
 					"aiming_pt_dist", 2,
 					"glideslope",LEXICON(
-								"taem",TAN(6),
 								"outer",TAN(20),
 								"inner",TAN(3),
 								"middle",0	

@@ -477,7 +477,7 @@ FUNCTION final_profile_alt {
 	PARAMETER rwy.
 	PARAMETER params.
 
-	RETURN rwy["elevation"] + dist*rwy["glideslope"]*1000.
+	RETURN rwy["elevation"] + dist*apch_params["glideslope"]["outer"]*1000.
 
 }
 
@@ -485,11 +485,13 @@ FUNCTION final_profile_alt {
 //profile altitude during mode4 (above mode 5
 //implements cubic altitude profile
 FUNCTION hac_turn_profile_alt {
-	PARAMETER dist.
+	PARAMETER hac_gndtrk.
 	PARAMETER rwy.
 	PARAMETER params.
 	
-	RETURN dist * (rwy["hac_h_cub1"] + rwy["hac_h_cub3"] * dist^2 ).
+	print "hac_gndtrk : " + hac_gndtrk at (0,16).
+	
+	RETURN hac_gndtrk * (params["hac_h_cub1"] + hac_gndtrk * (params["hac_h_cub2"] + hac_gndtrk * params["hac_h_cub3"]) ) * 1000.
 
 }
 
@@ -499,20 +501,18 @@ FUNCTION hac_turn_profile_alt {
 FUNCTION hac_entry_profile_alt {
 	PARAMETER ship_hac_dist.
 	PARAMETER rwy.
-	PARAMETER apch_params.
+	PARAMETER params.
 	
 	LOCAL mode5_alt IS final_profile_alt(params["final_dist"],rwy,params).
 	
 	//find the groundtrack around the hac
 	LOCAL hac_gndtrk IS get_hac_groundtrack(rwy["hac_angle"], params).
 	
-	LOCAL h0 IS runway_alt(SHIP:ALTITUDE) - mode5_alt. 
+	LOCAL hbar IS (runway_alt(SHIP:ALTITUDE) - mode5_alt)/1000. 
 	
-	LOCAL xx IS ship_hac_dist*1000.
+	update_cubic_coef_hac_acq(ship_hac_dist, hbar, ship_hac_dist, hac_gndtrk, rwy, params).
 	
-	update_cubic_coef_hac_acq(h0, xx, hac_gndtrk, rwy, apch_params).
-	
-	RETURN mode5_alt + hac_turn_profile_alt(hac_gndtrk, rwy, apch_params).
+	RETURN mode5_alt + hac_turn_profile_alt(hac_gndtrk, rwy, params).
 
 }
 
@@ -521,7 +521,7 @@ FUNCTION hac_entry_profile_alt {
 //wrapper function to bunch together several operations so we don't clutter the TAEM loop
 function taem_profile_alt {
 	PARAMETER rwy.
-	PARAMETER apch_params.
+	PARAMETER params.
 
 	//update hac turn angle
 	LOCAL entryvec IS (rwy["hac_entry"]:POSITION - rwy["hac"]:POSITION):NORMALIZED.
@@ -530,7 +530,7 @@ function taem_profile_alt {
 	//Calculate distance from the current entry point 
 	LOCAL ship_hac_dist IS greatcircledist(rwy["hac_entry"],SHIP:GEOPOSITION).
 	
-	LOCAL profile_alt IS hac_entry_profile_alt(ship_hac_dist, rwy, apch_params).
+	LOCAL profile_alt IS hac_entry_profile_alt(ship_hac_dist, rwy, params).
 	
 	print "hac_angle : " + rwy["hac_angle"] at (0,15).
 	print "profile_alt : " + profile_alt at (0,16).
@@ -538,38 +538,43 @@ function taem_profile_alt {
 }
 
 
-
-//update cubic profile parameters to match current altitude at the near end and glideslope at the far end
-FUNCTION update_cubic_coef_hac_turn {
+//update taem glideslope so that it intersects the outer glideslope halfway through the hac turn 
+//update cubic parameters so that the cubic hac segment matches the glideslope segment and the first derivative is continuous
+FUNCTION update_cubic_coef_hac_acq {
+	PARAMETER xbar.
+	PARAMETER hbar.
+	PARAMETER hac_gndtrk.
 	PARAMETER rwy.
 	PARAMETER params.
 	
-	//find the groundtrack around the hac
-	LOCAL dist IS get_hac_groundtrack(rwy["hac_angle"], params)*1000.
 	
-	LOCAL hbar IS runway_alt(SHIP:ALTITUDE) - final_profile_alt(params["final_dist"],rwy,params).
+	SET params["glideslope"]["taem"] TO (hbar - params["glideslope"]["outer"]*hac_gndtrk/2)/(xbar + hac_gndtrk/2).
 	
-	SET params["hac_h_cub3"] TO (hbar - params["glideslope"]["outer"] * dist)/(dist^3).
+	LOCAL hstar IS hbar - xbar*params["glideslope"]["taem"].
+	
+	SET params["hac_h_cub3"] TO - (2*hstar - hac_gndtrk*(params["glideslope"]["taem"] + params["hac_h_cub1"]))/(hac_gndtrk^3).
+	
+	SET params["hac_h_cub2"] TO (params["glideslope"]["taem"] - params["hac_h_cub1"] - 3*params["hac_h_cub3"]*(hac_gndtrk^2) )/(2*hac_gndtrk).
 	
 }
 
-
-//update cubic profile parameters and taem glideslope so that the first derivative is continuous at the hac entry point
-//and that the cubic plus linear taem glideslope profile matches the current altitude
-FUNCTION update_cubic_coef_hac_acq {
-	PARAMETER h0.
-	PARAMETER hac_entry_dist.
-	PARAMETER hac_gndtk.
+//update cubic profile parameters so that the profile alt matches current altitude and 
+//the first derivative matches current flight path angle
+FUNCTION update_cubic_coef_hac_turn {
+	PARAMETER hac_gndtrk.
 	PARAMETER rwy.
 	PARAMETER params.
 	
+	print "hac_gndtrk : " + hac_gndtrk at (0,16).
 	
-	LOCAL dh IS hac_gndtk*1000. 
+	LOCAL fpa IS VANG(SHIP:VELOCITY:SURFACE:NORMALIZED,VXCL(-SHIP:ORBIT:BODY:POSITION,SHIP:VELOCITY:SURFACE):NORMALIZED).
+	SET fpa TO TAN(fpa).
 	
-	SET params["glideslope"]["taem"] TO ( h0 - 2*dh*params["glideslope"]["outer"]/3 )/( hac_entry_dist + dh/3 ).
+	LOCAL hstar IS (runway_alt(SHIP:ALTITUDE) - final_profile_alt(params["final_dist"],rwy,params))/1000.
 	
-	SET params["hac_h_cub3"] TO (params["glideslope"]["taem"] - params["glideslope"]["outer"])/(3 * dh^2).
+	SET params["hac_h_cub3"] TO - (2*hstar - hac_gndtrk*(fpa + params["hac_h_cub1"]))/(hac_gndtrk^3).
 	
+	SET params["hac_h_cub2"] TO (fpa - params["hac_h_cub1"] - 3*params["hac_h_cub3"]*(hac_gndtrk^2) )/(2*hac_gndtrk).
 	
 }
 
@@ -616,10 +621,18 @@ FUNCTION mode3 {
 	LOCAL ship_hac_dist_pred IS greatcircledist(rwy["hac_entry"],simstate["latlong"]).
 
 	// no special function here since we use the real entry pt distance to recalculate the cubic parameters 
-	//and the nuse the predicted entry pt distance for vertical guidance
-	LOCAL profile_alt IS hac_entry_profile_alt(ship_hac_dist, rwy, apch_params) + ship_hac_dist_pred*params["glideslope"]["taem"]*1000.
+	//and use the predicted entry pt distance for vertical guidance
+	LOCAL hacentry_profilealt IS hac_entry_profile_alt(ship_hac_dist, rwy, apch_params).
+	LOCAL profile_alt IS hacentry_profilealt + ship_hac_dist_pred*params["glideslope"]["taem"]*1000.
 	
 	print "profile alt:  " +  profile_alt at (1,2).	
+	
+	
+	
+	print "hac_h_cub1:  " +  params["hac_h_cub1"] at (1,4).	
+	print "hac_h_cub3:  " +  params["hac_h_cub3"] at (1,5).	
+	print "hac entry profile alt:  " +  hacentry_profilealt at (1,6).	
+	print "glideslope taem:  " +  params["glideslope"]["taem"] at (1,7).	
 	
 	
 	//build the target point as described
@@ -690,11 +703,16 @@ FUNCTION mode4 {
 	
 	print "hac_r2 : " + params["hac_r2"] at (1,7). 
 	
+	//find the groundtrack around the hac at the ship current point
+	LOCAL ship_hac_gndtrk IS get_hac_groundtrack(ship_hac_angle, params).
+	
+	//update the cubic coefficients so that the profile matches the current altitude 
+	update_cubic_coef_hac_turn(ship_hac_gndtrk, rwy, apch_params).
 	
 	//now build the vertical profile value at the predicted point 
 	
 	//find the groundtrack around the hac at the predicted point
-	LOCAL hac_gndtrk IS get_hac_groundtrack(ship_hac_angle, params).
+	LOCAL hac_gndtrk IS get_hac_groundtrack(rwy["hac_angle"], params).
 	
 	LOCAL profile_alt IS final_profile_alt(params["final_dist"],rwy,params) + hac_turn_profile_alt(hac_gndtrk, rwy, apch_params).
 

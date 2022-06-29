@@ -6,8 +6,9 @@
 FUNCTION entry_main_loop {
 
 apch_params:ADD("hac_r2",0).
-apch_params:ADD("hac_h_cub1",params["glideslope"]["outer"]).
+apch_params:ADD("hac_h_cub1",apch_params["glideslope"]["outer"]).
 apch_params:ADD("hac_h_cub3",0).
+apch_params["glideslope"]:ADD("taem",0).
 
 STEERINGMANAGER:RESETPIDS().
 STEERINGMANAGER:RESETTODEFAULT().
@@ -17,7 +18,7 @@ SET STEERINGMANAGER:PITCHTS TO 8.0.
 SET STEERINGMANAGER:YAWTS TO 3.
 SET STEERINGMANAGER:ROLLTS TO 3.
 
-IF (STEERINGMANAGER:PITCHPID.HASSUFFIX("epsilon")) {
+IF (STEERINGMANAGER:PITCHPID:HASSUFFIX("epsilon")) {
 	SET STEERINGMANAGER:PITCHPID:EPSILON TO 0.1.
 	SET STEERINGMANAGER:YAWPID:EPSILON TO 0.1.
 	SET STEERINGMANAGER:ROLLPID:EPSILON TO 0.1.
