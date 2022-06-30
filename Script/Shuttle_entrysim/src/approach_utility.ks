@@ -146,11 +146,6 @@ FUNCTION speed_control {
 			}
 			ELSE IF mode>=6 {
 				SET delta_spd TO SHIP:AIRSPEED - 130.		
-				
-				IF ALT:RADAR<200 {
-					SET delta_spd TO  SHIP:AIRSPEED - 110.
-				}
-				
 			
 				IF SHIP:STATUS = "LANDED" {
 					SET delta_spd TO SHIP:AIRSPEED.
@@ -561,6 +556,8 @@ FUNCTION mode3 {
 	SET profile_alt TO rwy["elevation"] +  profile_alt*1000.
 	
 	print "profile alt:  " +  profile_alt at (1,2).	
+	
+	print "rwy[glideslope]:  " +  rwy["glideslope"] at (1,3).	
 	
 	
 	//build the target point as described
