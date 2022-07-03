@@ -503,12 +503,12 @@ FUNCTION hac_entry_profile_alt {
 	PARAMETER rwy.
 	PARAMETER params.
 	
-	LOCAL mode5_alt IS final_profile_alt(params["final_dist"],rwy,params).
+	LOCAL mode5_alt IS final_profile_alt(params["final_dist"] + 0.5,rwy,params).
 	
 	//find the groundtrack around the hac
 	LOCAL hac_gndtrk IS get_hac_groundtrack(rwy["hac_angle"], params).
 	
-	LOCAL hbar IS (runway_alt(SHIP:ALTITUDE) - mode5_alt)/1000. 
+	LOCAL hbar IS (SHIP:ALTITUDE - mode5_alt)/1000. 
 	
 	update_cubic_coef_hac_acq(ship_hac_dist, hbar, hac_gndtrk, rwy, params).
 	
@@ -534,6 +534,8 @@ function taem_profile_alt {
 	
 	print "hac_angle : " + rwy["hac_angle"] at (0,15).
 	print "profile_alt : " + profile_alt at (0,16).
+	
+	RETURN profile_alt.
 	
 }
 
@@ -570,7 +572,7 @@ FUNCTION update_cubic_coef_hac_turn {
 	LOCAL fpa IS VANG(SHIP:VELOCITY:SURFACE:NORMALIZED,VXCL(-SHIP:ORBIT:BODY:POSITION,SHIP:VELOCITY:SURFACE):NORMALIZED).
 	SET fpa TO TAN(fpa).
 	
-	LOCAL hstar IS (runway_alt(SHIP:ALTITUDE) - final_profile_alt(params["final_dist"],rwy,params))/1000.
+	LOCAL hstar IS (SHIP:ALTITUDE - final_profile_alt(params["final_dist"] + 0.5,rwy,params))/1000.
 	
 	SET params["hac_h_cub3"] TO - (2*hstar - hac_gndtrk*(fpa + params["hac_h_cub1"]))/(hac_gndtrk^3).
 	
@@ -715,7 +717,7 @@ FUNCTION mode4 {
 	//find the groundtrack around the hac at the predicted point
 	LOCAL hac_gndtrk IS get_hac_groundtrack(rwy["hac_angle"], params).
 	
-	LOCAL profile_alt IS final_profile_alt(params["final_dist"],rwy,params) + hac_turn_profile_alt(hac_gndtrk, rwy, apch_params).
+	LOCAL profile_alt IS final_profile_alt(params["final_dist"] + 0.5,rwy,params) + hac_turn_profile_alt(hac_gndtrk, rwy, apch_params).
 
 	print "profile alt:  " +  profile_alt at (1,2).	
 	
@@ -853,7 +855,7 @@ FUNCTION mode6 {
 	//measure the predicted altitude above the site elevation
 	LOCAL altt IS simstate["altitude"] - rwy["elevation"].
 	IF altt > params["flare_alt"] {
-		SET dist TO greatcircledist(rwy["aiming_pt"] ,simstate["latlong"])*1000.
+		SET dist TO greatcircledist(rwy["aiming_pt"] ,simstate["latlong"]).
 	}
 	
 	LOCAL profile_alt IS 0.
@@ -863,6 +865,7 @@ FUNCTION mode6 {
 		//use the outer glideslope 
 		SET profile_alt TO final_profile_alt(dist,rwy,params).
 	} ELSE {
+		SET dist TO dist*1000.
 		IF altt > params["postflare_alt"]  {
 			//use the flare circle equation
 			
