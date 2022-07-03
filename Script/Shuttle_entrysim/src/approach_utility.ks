@@ -484,14 +484,26 @@ FUNCTION final_profile_alt {
 
 //profile altitude during mode4 (above mode 5
 //implements cubic altitude profile
+//correct for the height difference between cubic and ogs profiles at 0.5 km from the hac exit
+//to ensure continuity between the profiles
 FUNCTION hac_turn_profile_alt {
+	FUNCTION cubic_prof {
+		PARAMETER dist.
+		
+		RETURN dist * (params["hac_h_cub1"] + dist * (params["hac_h_cub2"] + dist * params["hac_h_cub3"]) ) * 1000.
+	}
+
 	PARAMETER hac_gndtrk.
 	PARAMETER rwy.
 	PARAMETER params.
 	
 	print "hac_gndtrk : " + hac_gndtrk at (0,16).
 	
-	RETURN hac_gndtrk * (params["hac_h_cub1"] + hac_gndtrk * (params["hac_h_cub2"] + hac_gndtrk * params["hac_h_cub3"]) ) * 1000.
+	LOCAL base_prof IS cubic_prof(hac_gndtrk).
+	
+	LOCAL corr IS apch_params["glideslope"]["outer"]*500 - cubic_prof(0.5).
+	
+	RETURN corr + base_prof.
 
 }
 
@@ -503,7 +515,7 @@ FUNCTION hac_entry_profile_alt {
 	PARAMETER rwy.
 	PARAMETER params.
 	
-	LOCAL mode5_alt IS final_profile_alt(params["final_dist"] + 0.5,rwy,params).
+	LOCAL mode5_alt IS final_profile_alt(params["final_dist"],rwy,params).
 	
 	//find the groundtrack around the hac
 	LOCAL hac_gndtrk IS get_hac_groundtrack(rwy["hac_angle"], params).
@@ -572,7 +584,7 @@ FUNCTION update_cubic_coef_hac_turn {
 	LOCAL fpa IS VANG(SHIP:VELOCITY:SURFACE:NORMALIZED,VXCL(-SHIP:ORBIT:BODY:POSITION,SHIP:VELOCITY:SURFACE):NORMALIZED).
 	SET fpa TO TAN(fpa).
 	
-	LOCAL hstar IS (SHIP:ALTITUDE - final_profile_alt(params["final_dist"] + 0.5,rwy,params))/1000.
+	LOCAL hstar IS (SHIP:ALTITUDE - final_profile_alt(params["final_dist"],rwy,params))/1000.
 	
 	SET params["hac_h_cub3"] TO - (2*hstar - hac_gndtrk*(fpa + params["hac_h_cub1"]))/(hac_gndtrk^3).
 	
@@ -717,7 +729,7 @@ FUNCTION mode4 {
 	//find the groundtrack around the hac at the predicted point
 	LOCAL hac_gndtrk IS get_hac_groundtrack(rwy["hac_angle"], params).
 	
-	LOCAL profile_alt IS final_profile_alt(params["final_dist"] + 0.5,rwy,params) + hac_turn_profile_alt(hac_gndtrk, rwy, apch_params).
+	LOCAL profile_alt IS final_profile_alt(params["final_dist"],rwy,params) + hac_turn_profile_alt(hac_gndtrk, rwy, apch_params).
 
 	print "profile alt:  " +  profile_alt at (1,2).	
 	
@@ -865,7 +877,6 @@ FUNCTION mode6 {
 		//use the outer glideslope 
 		SET profile_alt TO final_profile_alt(dist,rwy,params).
 	} ELSE {
-		SET dist TO dist*1000.
 		IF altt > params["postflare_alt"]  {
 			//use the flare circle equation
 			
