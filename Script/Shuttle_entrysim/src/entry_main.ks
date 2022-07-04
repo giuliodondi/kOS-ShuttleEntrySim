@@ -5,7 +5,6 @@
 //main loop
 FUNCTION entry_main_loop {
 
-apch_params:ADD("hac_r2",0).
 apch_params:ADD("hac_h_cub1",apch_params["glideslope"]["outer"]).
 apch_params:ADD("hac_h_cub3",0).
 apch_params["glideslope"]:ADD("taem",0).
