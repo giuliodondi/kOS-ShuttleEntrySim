@@ -264,6 +264,7 @@ FUNCTION refresh_runway_lex {
 							"glideslope",0,
 							"hac_side","left",	//placeholder choice
 							"aiming_pt",LATLNG(0,0),
+							"acq_guid_pt",LATLNG(0,0),
 							"hac",LATLNG(0,0),
 							"hac_entry",LATLNG(0,0),
 							"hac_entry_angle",0,
@@ -647,18 +648,27 @@ FUNCTION mode3 {
 	//build the target point as described
 	//first get the HAC position corresponding to the predicted point
 	
-	LOCAL hac_tangentaz IS bearingg(rwy["hac_entry"],SHIP:GEOPOSITION).
+	LOCAL hac_tangentaz IS bearingg(rwy["hac_entry"],rwy["hac"]).
 	
 
 	//move the current position on the HAC of the ship HAc radius
 	//along the tangent direction by an arbtrary distance 
+	IF rwy["hac_side"]="left" { 
+		SET hac_tangentaz TO fixangle(hac_tangentaz - 90).
+	}
+	ELSE IF rwy["hac_side"]="right" { 
+		SET hac_tangentaz TO fixangle(hac_tangentaz + 90).
+	}
+
+	//move the current position on the HAC of the ship HAc radius
+	//along the tangent direction by an arbtrary distance 
 	LOCAL x IS 2.
-	LOCAL guid_pt IS new_position(rwy["hac_entry"],x,hac_tangentaz). 
+	SET rwy["acq_guid_pt"] TO new_position(rwy["hac_entry"],x,hac_tangentaz). 
 	
 	//find now the azimuth error 
 	//negative deviation if the vessel azimuth is greater i.e. to the right
 	//of the hac entry relative bearing
-	LOCAL hac_targetaz IS bearingg(guid_pt,simstate["latlong"]).
+	LOCAL hac_targetaz IS bearingg(rwy["acq_guid_pt"],simstate["latlong"]).
 	LOCAL ship_az IS compass_for(simstate["surfvel"],simstate["latlong"]).
 	
 	LOCAL hac_az_error IS unfixangle( hac_targetaz - ship_az ).
@@ -896,10 +906,16 @@ FUNCTION mode_switch {
 	PARAMETER switch_mode IS FALSE.
 	
 	IF mode=3 {
-		IF (mode_dist(simstate,tgtrwy,apch_params) < 0.2) {SET switch_mode TO TRUE.}
+	
+		LOCAL entryvec IS (rwy["hac_entry"]:POSITION - rwy["hac"]:POSITION):NORMALIZED.
+		LOCAL predvec IS (simstate["latlong"]:POSITION - rwy["hac"]:POSITION):NORMALIZED.
+		LOCAL entry_angle IS VANG(predvec,entryvec).
+		IF (entry_angle < 2 OR mode_dist(simstate,tgtrwy,apch_params) < 0.2) {
+			SET switch_mode TO TRUE.
+		}
 			
 	} ELSE IF mode=4 {
-		IF (mode_dist(simstate,tgtrwy,apch_params) < 0.5) {
+		IF (rwy["hac_angle"] < 3 OR mode_dist(simstate,tgtrwy,apch_params) < 0.5) {
 			SET switch_mode TO TRUE.
 			//override the previously calculated glideslope value
 			SET rwy["glideslope"] TO params["glideslope"]["outer"].
