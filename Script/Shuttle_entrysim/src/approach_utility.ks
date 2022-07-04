@@ -431,6 +431,16 @@ FUNCTION get_hac_radius {
 	RETURN params["hac_radius"] + params["hac_r2"]*hac_angle^2.
 }
 
+//polar slope of the HAC spiral
+FUNCTION get_hac_polar_slope {
+	PARAMETER hac_angle.
+	PARAMETER params.
+	
+	LOCAL r IS get_hac_radius(hac_angle,params).
+
+	RETURN ARCTAN(2*params["hac_r2"]*hac_angle*180/(CONSTANT:PI*r)).
+}
+
 
 //implement the conical HAC, distance function is an approximation of the curve integral
 FUNCTION get_hac_groundtrack {
@@ -440,7 +450,7 @@ FUNCTION get_hac_groundtrack {
 	//RETURN params["hac_radius"]*hac_angle*CONSTANT:PI/180.
 	
 	
-	RETURN (params["hac_radius"] + (params["hac_r2"]*hac_angle^2)/3)*hac_angle*CONSTANT:PI/180.
+	RETURN (params["hac_radius"] + 0.344*params["hac_r2"]*hac_angle^2)*hac_angle*CONSTANT:PI/180.
 }
 
 
