@@ -266,6 +266,7 @@ FUNCTION refresh_runway_lex {
 							"aiming_pt",LATLNG(0,0),
 							"hac",LATLNG(0,0),
 							"hac_entry",LATLNG(0,0),
+							"hac_entry_angle",0,
 							"hac_exit",LATLNG(0,0),
 							"hac_angle",0,
 							"upvec",V(0,0,0)
@@ -295,7 +296,8 @@ FUNCTION define_hac {
 	
 	//find the hac exit point, common for left and right
 	SET rwy["hac_exit"] TO new_position(rwy["aiming_pt"],params["final_dist"],bng).
-	LOCAL hac_angle IS ARCTAN2(params["hac_radius"],params["final_dist"]).
+	//shift artificially the hac centres 0.3km further away from centerline than they should be 
+	LOCAL hac_angle IS ARCTAN2(params["hac_radius"] + 0.15,params["final_dist"]).
 	LOCAL hac_dist IS params["final_dist"]/COS(hac_angle).
 	
 	//find the hac centre
@@ -338,7 +340,7 @@ FUNCTION define_hac {
 
 
 //update the entry point to the HAC
-//assumes a circular hac
+//assumes a circular hac with radius corresponding to the hac radius at the old hac angle
 FUNCTION update_hac_entry_pt {
 	PARAMETER cur_pos.
 	PARAMETER rwy.
@@ -348,6 +350,7 @@ FUNCTION update_hac_entry_pt {
 	//a left hac always entails the entry point is to the right of the ship bearing to the hac centre 
 	//and for a right hac the reverse is true 
 	
+	LOCAL rho IS get_hac_radius(rwy["hac_angle"],params).
 	
 	//we need to make the entry point a geoposition,not a vector
 	//find the bearing from the hac centre to the ship,
@@ -355,7 +358,7 @@ FUNCTION update_hac_entry_pt {
 	//then get the geoposition from the hac given that bearing and the hac radius
 	
 	LOCAL d IS greatcircledist(rwy["hac"],cur_pos).
-	LOCAL alpha IS ARCSIN(LIMITARG(params["hac_radius"]/d)).
+	LOCAL alpha IS ARCSIN(LIMITARG(rho/d)).
 	LOCAL beta IS 90 - alpha.
 	
 	//same calculations as the hac definition routine 
@@ -367,21 +370,12 @@ FUNCTION update_hac_entry_pt {
 	//the entry point 
 	
 	
-	SET rwy["hac_entry"] TO  new_position(rwy["hac"],params["hac_radius"],entry_bng).
+	SET rwy["hac_entry"] TO  new_position(rwy["hac"],rho,entry_bng).
 	
 	//clearvecdraws().
 	//pos_arrow(rwy["hac_exit"],"hac_exit").
 	//pos_arrow(rwy["hac"],"hac").
-
-}
-
-
-//update the glideslope based in current altitude and distance to travel
-FUNCTION get_glideslope {
-	PARAMETER altt.
-	PARAMETER dist.
-	
-	RETURN ARCTAN2(altt,(1000*dist)). 
+	//pos_arrow(rwy["hac_entry"],"hac_entry").
 
 }
 
@@ -429,16 +423,6 @@ FUNCTION get_hac_radius {
 	PARAMETER params.
 	
 	RETURN params["hac_radius"] + params["hac_r2"]*hac_angle^2.
-}
-
-//polar slope of the HAC spiral
-FUNCTION get_hac_polar_slope {
-	PARAMETER hac_angle.
-	PARAMETER params.
-	
-	LOCAL r IS get_hac_radius(hac_angle,params).
-
-	RETURN ARCTAN(2*params["hac_r2"]*hac_angle*180/(CONSTANT:PI*r)).
 }
 
 
@@ -663,18 +647,12 @@ FUNCTION mode3 {
 	//build the target point as described
 	//first get the HAC position corresponding to the predicted point
 	
-	LOCAL hac_tangentaz IS bearingg(rwy["hac_entry"],rwy["hac"]).
+	LOCAL hac_tangentaz IS bearingg(rwy["hac_entry"],SHIP:GEOPOSITION).
 	
 
 	//move the current position on the HAC of the ship HAc radius
 	//along the tangent direction by an arbtrary distance 
-	IF rwy["hac_side"]="left" { 
-		SET hac_tangentaz TO fixangle(hac_tangentaz - 90).
-	}
-	ELSE IF rwy["hac_side"]="right" { 
-		SET hac_tangentaz TO fixangle(hac_tangentaz + 90).
-	}
-	LOCAL x IS 0.5.
+	LOCAL x IS 2.
 	LOCAL guid_pt IS new_position(rwy["hac_entry"],x,hac_tangentaz). 
 	
 	//find now the azimuth error 
@@ -918,7 +896,7 @@ FUNCTION mode_switch {
 	PARAMETER switch_mode IS FALSE.
 	
 	IF mode=3 {
-		IF (mode_dist(simstate,tgtrwy,apch_params) < 0.5) {SET switch_mode TO TRUE.}
+		IF (mode_dist(simstate,tgtrwy,apch_params) < 0.2) {SET switch_mode TO TRUE.}
 			
 	} ELSE IF mode=4 {
 		IF (mode_dist(simstate,tgtrwy,apch_params) < 0.5) {
