@@ -638,15 +638,12 @@ FUNCTION mode3 {
 	
 	print "rwy[glideslope]:  " +  rwy["glideslope"] at (1,3).	
 	
-<<<<<<< HEAD
-=======
 	print "hac_h_cub1:  " +  params["hac_h_cub1"] at (1,4).	
 	print "hac_h_cub2:  " +  params["hac_h_cub2"] at (1,5).	
 	print "hac_h_cub3:  " +  params["hac_h_cub3"] at (1,6).	
 	
 	print "glideslope taem:  " +  params["glideslope"]["taem"] at (1,7).	
 	print "hac entry profile alt:  " +  hacentry_profilealt at (1,8).	
->>>>>>> apch_cubic_height
 	
 	//build the target point as described
 	//first get the HAC position corresponding to the predicted point
@@ -909,18 +906,12 @@ FUNCTION mode_switch {
 	PARAMETER switch_mode IS FALSE.
 	
 	IF mode=3 {
-<<<<<<< HEAD
-		IF (mode_dist(simstate,tgtrwy,apch_params) < 0.5) {SET switch_mode TO TRUE.}
-=======
-	
 		LOCAL entryvec IS (rwy["hac_entry"]:POSITION - rwy["hac"]:POSITION):NORMALIZED.
 		LOCAL predvec IS (simstate["latlong"]:POSITION - rwy["hac"]:POSITION):NORMALIZED.
 		LOCAL entry_angle IS VANG(predvec,entryvec).
-		IF (entry_angle < 2 OR mode_dist(simstate,tgtrwy,apch_params) < 0.2) {
+		IF (entry_angle < 2 OR mode_dist(simstate,tgtrwy,apch_params) < 0.5) {
 			SET switch_mode TO TRUE.
-		}
->>>>>>> apch_cubic_height
-			
+		}	
 	} ELSE IF mode=4 {
 		IF (rwy["hac_angle"] < 3 OR mode_dist(simstate,tgtrwy,apch_params) < 0.5) {
 			SET switch_mode TO TRUE.
