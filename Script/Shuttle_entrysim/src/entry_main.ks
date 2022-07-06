@@ -5,7 +5,9 @@
 //main loop
 FUNCTION entry_main_loop {
 
-apch_params:ADD("hac_r2",0).
+apch_params:ADD("hac_h_cub1",apch_params["glideslope"]["outer"]).
+apch_params:ADD("hac_h_cub3",0).
+apch_params["glideslope"]:ADD("taem",0).
 
 STEERINGMANAGER:RESETPIDS().
 STEERINGMANAGER:RESETTODEFAULT().
@@ -223,6 +225,8 @@ FUNCTION entry_loop{
 
 IF quitflag {RETURN.}
 
+SAS OFF.
+
 //this flag signals if entry guidance was halted automatically bc of taem transition
 //or because approach guidance was called manually, in which case skip TAEM
 LOCAL TAEM_flag IS FALSE.
@@ -247,10 +251,27 @@ LOCAL rollguid IS 0.
 LOCAL pitchsteer IS pitchguid.
 LOCAL rollsteer IS rollguid.
 
+
+//first steering command 
+GLOBAL P_att IS update_attitude(SHIP:FACING,pitchsteer,rollsteer).
+LOCK STEERING TO P_att.
+
 IF SHIP:ALTITUDE < constants["firstrollalt"] {	
 	//override to current measured attitude
 	SET pitchsteer TO get_pitch_prograde().
 	SET rollsteer TO get_roll_prograde().
+} ELSE {
+	
+	SET P_att TO create_steering_dir(
+									SHIP:srfprograde:vector:NORMALIZED,
+									-SHIP:ORBIT:BODY:POSITION:NORMALIZED,
+									pitchsteer,
+									rollsteer
+	).
+	
+	UNTIL VANG(SHIP:FACING:VECTOR,P_att:VECTOR)<10 {
+		WAIT 0.1.
+	}
 }
 
 
@@ -328,10 +349,7 @@ LOCAL update_reference IS true.
 SET flap_control["pitch_control"] TO average_value_factory(5).
 
 
-//first steering command 
-SAS OFF.
-GLOBAL P_att IS update_attitude(SHIP:FACING,pitchsteer,rollsteer).
-LOCK STEERING TO P_att.
+
 
 
 
@@ -630,7 +648,7 @@ UNTIL FALSE {
 	
 	//calculate the target altitude 
 	LOCAL alt_err_p IS alt_err.
-	LOCAL tgtalt IS get_hac_profile_alt(tgtrwy, apch_params).
+	LOCAL tgtalt IS taem_profile_alt(tgtrwy, apch_params).
 		
 	//run the vehicle simulation
 	LOCAL ICS IS LEXICON(
@@ -698,7 +716,7 @@ UNTIL FALSE {
 		
 		SET pitch_ref_p TO pitch_ref.
 		//update the reference roll value and clamp it
-		SET pitch_ref TO CLAMP(pitch_ref + delta_pitch,0,20).
+		SET pitch_ref TO CLAMP(pitch_ref + delta_pitch,0.5,20).
 		
 		//determine if s-turn is to be commanded
 		LOCAL is_s_turn_p IS is_s_turn.
@@ -914,7 +932,7 @@ UNTIL FALSE{
 		log_data(loglex,"0:/Shuttle_entrysim/LOGS/entry_log").
 	}
 
-	IF quitflag {BREAK.}
+	IF quitflag OR SHIP:VELOCITY:SURFACE:MAG < 5 {BREAK.}
 	wait 0.
 
 }

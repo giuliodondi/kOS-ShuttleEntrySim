@@ -64,7 +64,7 @@ FUNCTION FPA_reference {
 FUNCTION update_ref_pitch {
 	PARAMETER new_ref_pitch.
 	
-	IF ((SHIP:VELOCITY:SURFACE:MAG >= pitchprof_segments[pitchprof_segments:LENGTH-1][0]) AND (new_ref_pitch >=  pitchprof_segments[pitchprof_segments:LENGTH-2][1]) ) {
+	IF ((NOT is_auto_steering()) AND (SHIP:VELOCITY:SURFACE:MAG >= pitchprof_segments[pitchprof_segments:LENGTH-1][0]) AND (new_ref_pitch >=  pitchprof_segments[pitchprof_segments:LENGTH-2][1]) ) {
 		RETURN TRUE.
 	}
 	RETURN FALSE.

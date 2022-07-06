@@ -137,7 +137,7 @@ FUNCTION TAEM_pitch_profile {
 	SET out_pitch TO out_pitch - hdot_err*hdotgain.
 
 	//clamp to reasonable values.
-	RETURN CLAMP(out_pitch,0,20).
+	RETURN CLAMP(out_pitch,0.5,20).
 }
 
 //put the roll correctin in a separate function so it can be tied to the current roll instead of the roll ref value
@@ -200,12 +200,14 @@ declare function simulate_TAEM {
 	SET simstate["altitude"] TO bodyalt(simstate["position"]).
 	SET simstate["surfvel"] TO surfacevel(simstate["velocity"],simstate["position"]).
 
+	LOCAL pos0 IS simstate["latlong"].
+
 	LOCAL tgtdist IS greatcircledist(tgt_rwy["hac_entry"],simstate["latlong"]).
 	LOCAL tgtdistp IS 2*tgtdist.
 	
 	//putting the termination conditions here should save an if check per step
 	//UNTIL ( greatcircledist(initialpos,simstate["latlong"]) >= greatcircledist(initialpos,tgt_rwy["hac_entry"]) )  {
-	UNTIL (( (tgtdistp < tgtdist) AND (tgtdist<5) ) OR simstate["altitude"] < 5000 )  {
+	UNTIL ( (tgtdist<5) OR ( greatcircledist(simstate["latlong"],pos0) >= greatcircledist(tgt_rwy["hac_entry"],pos0) ) OR simstate["altitude"] < 5000 )  {
 			
 		//if target distance is less than 1km we no longer update the entry point
 		//probably not necessary, save computations and avoid problems with spiral hac

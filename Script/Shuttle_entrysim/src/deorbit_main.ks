@@ -1,7 +1,37 @@
 GLOBAL g0 IS 9.80665.
 
 
+FUNCTION plot_traj_vectors {
+	PARAMETER poslist.
 
+	CLEARVECDRAWS().
+
+	IF poslist:LENGTH>0 {
+	
+		LOCAL oldpos IS poslist[0].
+		
+		FROM {LOCAL k IS 1.} UNTIL k >= poslist:LENGTH STEP { SET k TO k+1.} DO{
+			
+			//LOCAL adjustPos IS simstate["position"] + ((simstate["position"] - SHIP:BODY:POSITION):NORMALIZED * 20) - .
+			//LOCAL adjold_pos IS old_pos + ((old_pos - SHIP:BODY:POSITION):NORMALIZED * 20).
+
+			LOCAL newpos IS poslist[k].
+			LOCAL adjustPos IS newpos   + ((newpos - SHIP:BODY:POSITION):NORMALIZED * 20) .
+			LOCAL adjold_pos IS oldpos  + ((oldpos - SHIP:BODY:POSITION):NORMALIZED * 20).
+			
+			
+			LOCAL vecWidth IS 0.02.//200.
+			//IF MAPVIEW { SET vecWidth TO 0.2. }
+		
+			//changed trajectory colour from red to green to avoid confusion with the Trajectories mod
+			VECDRAW(adjold_pos,(adjustPos - adjold_pos),green,"",1,TRUE,vecWidth).
+
+			SET oldpos TO newpos.
+		
+		}
+	
+	}
+}
 
 
 FUNCTION deorbit_main {
@@ -14,7 +44,7 @@ FUNCTION deorbit_main {
 	//flag to stop the program entirely
 	GLOBAL quitflag IS FALSE.
 
-	
+	GLOBAL plot_trajectory IS TRUE.
 	
 	//flag to reset entry guidance to initial values (e.g. when the target is switched)
 
@@ -68,45 +98,26 @@ FUNCTION deorbit_main {
 	//initialise the position points list
 	//inisialise as zero to avoid plotting the trajecory before at least one pass
 	//through the simulation loop is made
-	LOCAL poslist IS 0.
+	LOCAL poslist IS LIST().
 	
 	//add the faster outer loop plotting the trajectory data
-	LOCAL trajplot_upd IS TIME:SECONDS.
-	WHEN TIME:SECONDS>trajplot_upd + 0.2 THEN {
-		SET trajplot_upd TO TIME:SECONDS.
-		
-		CLEARVECDRAWS().
-
-		IF poslist<>0 {
-		
-			LOCAL oldpos IS poslist[0].
-			
-			FROM {LOCAL k IS 1.} UNTIL k >= poslist:LENGTH STEP { SET k TO k+1.} DO{
-				
-				//LOCAL adjustPos IS simstate["position"] + ((simstate["position"] - SHIP:BODY:POSITION):NORMALIZED * 20) - .
-				//LOCAL adjold_pos IS old_pos + ((old_pos - SHIP:BODY:POSITION):NORMALIZED * 20).
-
-				LOCAL newpos IS poslist[k].
-				LOCAL adjustPos IS newpos   + ((newpos - SHIP:BODY:POSITION):NORMALIZED * 20) .
-				LOCAL adjold_pos IS oldpos  + ((oldpos - SHIP:BODY:POSITION):NORMALIZED * 20).
-				
-				
-				LOCAL vecWidth IS 0.1.//200.
-				//IF MAPVIEW { SET vecWidth TO 0.2. }
-			
-				//changed trajectory colour from red to green to avoid confusion with the Trajectories mod
-				VECDRAW(adjold_pos,(adjustPos - adjold_pos),green,"",1,TRUE,vecWidth).
-
-				SET oldpos TO newpos.
-			
-			}
-		
-		}
-		
-		PRESERVE.
-
-	}
-	
+	//GLOBAL trajplot_upd IS TRUE.
+	//LOCAL i IS 0.
+	//IF plot_trajectory {
+	//	WHEN trajplot_upd THEN {
+	//		SET trajplot_upd TO FALSE.	//so that the plotting will pause until the variable is updated
+	//		
+	//		SET i TO i + 1.
+	//		
+	//		print i at (10,10).
+	//		
+	//		
+	//		
+	//		SET trajplot_upd TO TRUE.
+	//		PRESERVE.
+	//
+	//	}
+	//}
 	
 	
 	
@@ -228,12 +239,15 @@ FUNCTION deorbit_main {
 								roll_ref,
 								pitch_ref,
 								pitchroll_profiles_entry@,
-								TRUE
+								plot_trajectory
 				).
 				
 
 				//fetch the position list for plotting
-				SET poslist TO simstate["poslist"].
+				IF plot_trajectory {
+					SET poslist TO simstate["poslist"].
+					plot_traj_vectors(poslist).
+				}
 				
 				//calculate the range error for bank optimisation
 				LOCAL delta_t IS  TIME:SECONDS - last_T.
