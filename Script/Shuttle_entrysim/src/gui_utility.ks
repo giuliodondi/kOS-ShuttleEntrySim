@@ -396,14 +396,6 @@ FUNCTION make_hud_gui {
 	set hud_gui:skin:verticalsliderthumb:WIDTH to 17.
 
 
-	GLOBAL hud_container IS main_gui:ADDHLAYOUT().
-	SET hud_container:STYLE:ALIGN TO "Center".
-	SET hud_container:STYLE:WIDTH TO 550.
-	SET hud_container:STYLE:HEIGHT TO 350.
-	SET hud_container:STYLE:MARGIN:top TO 0.
-	hud_container:addspacing(50).
-
-
 	GLOBAL hud IS hud_gui:ADDVLAYOUT().
 
 	GLOBAL hdg IS hud:ADDVLAYOUT().
@@ -417,16 +409,46 @@ FUNCTION make_hud_gui {
 	GLOBAL hdg_text IS hdg_box:ADDLABEL("").
 	SET hdg_text:STYLE:ALIGN TO "Center".
 	
-	GLOBAL hudrll IS hdg:ADDVLAYOUT().
+	GLOBAL overlaiddata IS hud:ADDVLAYOUT().
+	SET overlaiddata:STYLE:ALIGN TO "Center".
+	SET overlaiddata:STYLe:WIDTH TO 360.
+	SET overlaiddata:STYLe:HEIGHT TO 1.
+	
+	GLOBAL spdaltbox IS overlaiddata:ADDHLAYOUT().
+	SET spdaltbox:STYLe:WIDTH TO 360.
+	SET spdaltbox:STYLe:HEIGHT TO 30.
+	
+	GLOBAL spdbox IS spdaltbox:ADDHLAYOUT().
+	SET spdbox:STYLe:WIDTH TO 70.
+	SET spdbox:STYLe:HEIGHT TO 30.
+	SET spdbox:STYLe:MARGIN:left TO 0.
+	SET spdbox:STYLe:MARGIN:top TO 87.
+	GLOBAL spd_text IS spdbox:ADDLABEL("<size=18>100</size>").
+	SET spd_text:STYLE:ALIGN TO "Right".
+	
+	
+	GLOBAL altbox IS spdaltbox:ADDHLAYOUT().
+	SET altbox:STYLe:WIDTH TO 70.
+	SET altbox:STYLe:HEIGHT TO 30.
+	SET altbox:STYLe:MARGIN:left TO 260.
+	SET altbox:STYLe:MARGIN:top TO 87.
+	GLOBAL alt_text IS altbox:ADDLABEL("<size=18>9000</size>").
+	SET alt_text:STYLE:ALIGN TO "Left".
+	
+	
+	
+	
+	
+	GLOBAL hudrll IS overlaiddata:ADDVLAYOUT().
 	SET hudrll:STYLe:WIDTH TO 20.
 	SET hudrll:STYLe:HEIGHT TO 20.
-	SET hudrll:STYLE:MARGIN:top TO 80.
 	SET hudrll:STYLE:MARGIN:left TO 176.
+	SET hudrll:STYLE:MARGIN:top TO 49.
 	GLOBAL hudrll_text IS hudrll:ADDLABEL("rll").
 	SET hudrll_text:STYLe:WIDTH TO 30.
 	SET hudrll_text:STYLE:ALIGN TO "Center".
 	
-	GLOBAL hudpch IS hdg:ADDVLAYOUT().
+	GLOBAL hudpch IS overlaiddata:ADDVLAYOUT().
 	SET hudpch:STYLe:WIDTH TO 20.
 	SET hudpch:STYLe:HEIGHT TO 20.
 	SET hudpch:STYLE:MARGIN:top TO 4.
@@ -436,6 +458,14 @@ FUNCTION make_hud_gui {
 	SET hudpch_text:STYLE:ALIGN TO "Left".
 
 
+	GLOBAL hud_nz IS overlaiddata:ADDHLAYOUT().
+	SET hud_nz:STYLe:WIDTH TO 70.
+	SET hud_nz:STYLe:HEIGHT TO 30.
+	SET hud_nz:STYLE:MARGIN:top TO 13.
+	SET hud_nz:STYLE:MARGIN:left TO 75.
+	GLOBAL nz_text IS hud_nz:ADDLABEL("").
+	SET nz_text:STYLe:WIDTH TO 100.
+	SET nz_text:STYLE:ALIGN TO "Right".
 
 	GLOBAL hud_main IS hud:ADDHLAYOUT().
 	SET hud_main:STYLe:WIDTH TO 430.
@@ -455,33 +485,18 @@ FUNCTION make_hud_gui {
 	SET flaptrim_slider:STYLE:HEIGHT TO 100.
 
 
-	GLOBAL hud_spd IS hud_main:ADDVLAYOUT().
-	SET hud_spd:STYLe:WIDTH TO 60.
-	SET hud_spd:STYLE:ALIGN TO "Center".
-	hud_spd:addspacing(105).
-	GLOBAL spdbox IS hud_spd:ADDHLAYOUT().
-	SET spdbox:STYLe:WIDTH TO 70.
-	SET spdbox:STYLe:HEIGHT TO 30.
-	SET spdbox:STYLe:MARGIN:left TO 10.
-	GLOBAL spd_text IS spdbox:ADDLABEL("").
-	SET spd_text:STYLE:ALIGN TO "Left".
 
-
-	GLOBAL hud_nz IS hud_spd:ADDHLAYOUT().
-	SET hud_nz:STYLe:WIDTH TO 60.
-	SET hud_nz:STYLe:HEIGHT TO 60.
-	hud_nz:addspacing(55).
-	GLOBAL nz_text IS hud_nz:ADDLABEL("").
-	SET nz_text:STYLe:WIDTH TO 100.
-	SET nz_text:STYLE:ALIGN TO "Right".
+	
 
 
 	GLOBAL pointbox IS hud_main:addhbox().
 	SET pointbox:STYLE:ALIGN TO "Center".
-	SET pointbox:STYLe:WIDTH TO 240.
+	SET pointbox:STYLe:WIDTH TO 360.
 	SET pointbox:STYLe:HEIGHT TO 240.
 	set pointbox:style:margin:top to 0.
 	set pointbox:style:margin:left to 0.
+	SET pointbox:style:vstretch to false.
+	SET pointbox:style:hstretch to false.
 	SET  pointbox:style:BG to "Shuttle_entrysim/src/gui_images/bg_marker_square.png".
 	
 	
@@ -494,20 +509,11 @@ FUNCTION make_hud_gui {
 
 	//GLOBAL diamond_hmargin IS  pointbox:STYLe:WIDTH*0.458 .
 	//GLOBAL diamond_vmargin IS pointbox:STYLE:HEIGHT*0.447.
-	SET diamond:STYLE:margin:h TO pointbox:STYLe:WIDTH*0.482 .
-	SET diamond:STYLE:margin:v TO pointbox:STYLE:HEIGHT*0.466.
+	SET diamond:STYLE:margin:h TO pointbox:STYLe:WIDTH*0.4765 .
+	SET diamond:STYLE:margin:v TO pointbox:STYLE:HEIGHT*0.454.
 
 
 
-	GLOBAL hud_alt IS hud_main:ADDVLAYOUT().
-	SET hud_alt:STYLe:WIDTH TO 60.
-	SET hud_alt:STYLE:ALIGN TO "Center".
-	hud_alt:addspacing(105).
-	GLOBAL altbox IS hud_alt:ADDHLAYOUT().
-	SET altbox:STYLe:WIDTH TO 60.
-	SET altbox:STYLe:HEIGHT TO 30.
-	GLOBAL alt_text IS altbox:ADDLABEL("").
-	SET alt_text:STYLE:ALIGN TO "Center".
 
 
 	GLOBAL vspd_sliderbox IS hud_main:ADDHLAYOUT().
@@ -549,24 +555,29 @@ FUNCTION make_hud_gui {
 
 
 //called at mode5 transition
-//removes the load indicator and changes the marker
+//removes the load indicator  and attitude angles
+//also changes the marker
 FUNCTION hud_declutter5_gui {
 	
 	nz_text:HIDE().
+	hudrll_text:HIDE().
+	hudpch_text:HIDE().
 	SET  pointbox:style:BG to "Shuttle_entrysim/src/gui_images/bg_marker_round.png".
 
 }
 
 //called at 1200 m
 //removes trim indicator, heading, vertical speed and attitude angles
+//also modes altitude and speed indicators
 FUNCTION hud_declutter6_gui {
 	
 	flaptrim_slider:HIDE().
 	vspd_slider:HIDE().
 	hdg_text:HIDE().
-	hudrll_text:HIDE().
-	hudpch_text:HIDE().
 	mode_dist_text:HIDE().
+	
+	SET spdbox:STYLe:MARGIN:left TO 80.
+	SET altbox:STYLe:MARGIN:left TO 85.
 }
 
 //called at mode7 transition
@@ -604,8 +615,8 @@ FUNCTION update_hud_gui {
 	SET vspd_slider:VALUE TO CLAMP(-SHIP:VERTICALSPEED,vspd_slider:MIN,vspd_slider:MAX).
 	
 	SET hdg_text:text TO "<size=18>" + hdgval + "</size>".
+	
 	SET spd_text:text TO "<size=18>" + spd + "</size>".
-
 	SET alt_text:text TO "<size=18>" + altt + "</size>".
 	
 	SET nz_text:text TO "<size=18>" + ROUND(cur_nz,1) + "G</size>".
