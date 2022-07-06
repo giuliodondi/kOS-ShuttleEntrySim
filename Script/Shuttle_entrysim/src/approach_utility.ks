@@ -615,7 +615,7 @@ FUNCTION mode3 {
 	//Calculate distance from the current entry point 
 	//if it's less than 1km we no longer update the entry point 
 	LOCAL ship_hac_dist IS greatcircledist(rwy["hac_entry"],SHIP:GEOPOSITION).
-	IF (ship_hac_dist>1) { update_hac_entry_pt(SHIP:GEOPOSITION,rwy,params). }
+	IF (ship_hac_dist>5) { update_hac_entry_pt(SHIP:GEOPOSITION,rwy,params). }
 
 	//once we have the entry point find the theta angle and hac radius
 	LOCAL entryvec IS (rwy["hac_entry"]:POSITION - rwy["hac"]:POSITION):NORMALIZED.
@@ -909,7 +909,7 @@ FUNCTION mode_switch {
 		LOCAL entryvec IS (rwy["hac_entry"]:POSITION - rwy["hac"]:POSITION):NORMALIZED.
 		LOCAL predvec IS (simstate["latlong"]:POSITION - rwy["hac"]:POSITION):NORMALIZED.
 		LOCAL entry_angle IS VANG(predvec,entryvec).
-		IF (entry_angle < 2 OR mode_dist(simstate,tgtrwy,apch_params) < 0.5) {
+		IF (entry_angle < 2 OR mode_dist(simstate,tgtrwy,apch_params) < 0.1) {
 			SET switch_mode TO TRUE.
 		}	
 	} ELSE IF mode=4 {
