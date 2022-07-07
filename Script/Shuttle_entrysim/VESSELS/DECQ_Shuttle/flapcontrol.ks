@@ -22,7 +22,7 @@ GLOBAL flap_control IS LEXICON(
 						),
 						LEXICON(
 								"flapmod",SHIP:PARTSDUBBED("ShuttleBodyFlap")[0]:getmodule("FARControllableSurface"),
-								"min_defl",-22,
+								"min_defl",-28,
 								"max_defl",28
 						)
 					)
