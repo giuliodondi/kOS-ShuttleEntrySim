@@ -9,7 +9,7 @@ FUNCTION make_global_deorbit_GUI {
 	SET main_gui:X TO 550.
 	SET main_gui:Y TO 350.
 	SET main_gui:STYLe:WIDTH TO 400.
-	SET main_gui:STYLe:HEIGHT TO 350.
+	SET main_gui:STYLe:HEIGHT TO 400.
 
 	set main_gui:skin:LABEL:TEXTCOLOR to guitextgreen.
 
@@ -42,7 +42,7 @@ FUNCTION make_global_deorbit_GUI {
 
 	//top popup menus,
 	//tgt selection, rwy selection, hac placement
-	GLOBAL popup_box IS main_gui:ADDHLAYOUT().
+	GLOBAL popup_box IS main_gui:ADDVLAYOUT().
 	SET popup_box:STYLE:ALIGN TO "center".
 	SET popup_box:STYLE:WIDTH TO 200.	
 	set popup_box:style:margin:h to 100.
@@ -60,7 +60,19 @@ FUNCTION make_global_deorbit_GUI {
 		PARAMETER lex_key.	
 		SET tgtrwy TO ldgsiteslex[lex_key].		
 		SET reset_entry_flag TO TRUE.
-	}.		
+	}.
+
+	GLOBAL force_roll IS popup_box:addhlayout().
+	SET force_roll:STYLE:ALIGN TO "center".
+	GLOBAL force_roll_text IS force_roll:addlabel("Force Roll ref. : ").
+	GLOBAL force_roll_box is force_roll:addtextfield(constants["rollguess"]:tostring).
+	set force_roll_box:style:width to 65.
+	set force_roll_box:style:height to 18.
+		
+	set force_roll_box:onconfirm to { 
+		parameter val.
+		SET roll_ref tO val:tonumber(constants["rollguess"]).
+	}.
 
 
 	GLOBAL all_box IS main_gui:ADDVLAYOUT().
@@ -749,7 +761,7 @@ FUNCTION make_entry_GUI {
 		set Khdot_box:style:height to 18.
 		GLOBAL rollramp_gain IS gainsbox:addhlayout().
 		GLOBAL rollramp_gain_text IS rollramp_gain:addlabel("Roll ramp Gain: ").
-		GLOBAL rollramp_box is rollramp_gain:addtextfield(gains["Khdot"]:tostring).
+		GLOBAL rollramp_box is rollramp_gain:addtextfield(gains["Roll_ramp"]:tostring).
 		set rollramp_box:style:width to 65.
 		set rollramp_box:style:height to 18.
 		GLOBAL pchmod_gain IS gainsbox:addhlayout().
