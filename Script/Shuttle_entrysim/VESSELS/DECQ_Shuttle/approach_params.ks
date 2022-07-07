@@ -13,7 +13,7 @@ GLOBAL apch_params IS LEXICON(
 								"middle",0	
 					),
 					"flare_circle",LEXICON(
-									"radius",8000,
+									"radius",7000,
 									"dist",0,
 									"alt",0
 					),
