@@ -433,18 +433,18 @@ FUNCTION make_hud_gui {
 	GLOBAL spdbox IS spdaltbox:ADDHLAYOUT().
 	SET spdbox:STYLe:WIDTH TO 70.
 	SET spdbox:STYLe:HEIGHT TO 30.
-	SET spdbox:STYLe:MARGIN:left TO 0.
+	SET spdbox:STYLe:MARGIN:left TO 20.
 	SET spdbox:STYLe:MARGIN:top TO 87.
-	GLOBAL spd_text IS spdbox:ADDLABEL("<size=18>100</size>").
+	GLOBAL spd_text IS spdbox:ADDLABEL("<size=18>M26.5</size>").
 	SET spd_text:STYLE:ALIGN TO "Right".
 	
 	
 	GLOBAL altbox IS spdaltbox:ADDHLAYOUT().
 	SET altbox:STYLe:WIDTH TO 70.
 	SET altbox:STYLe:HEIGHT TO 30.
-	SET altbox:STYLe:MARGIN:left TO 260.
+	SET altbox:STYLe:MARGIN:left TO 230.
 	SET altbox:STYLe:MARGIN:top TO 87.
-	GLOBAL alt_text IS altbox:ADDLABEL("<size=18>9000</size>").
+	GLOBAL alt_text IS altbox:ADDLABEL("<size=18>100.5</size>").
 	SET alt_text:STYLE:ALIGN TO "Left".
 	
 	
@@ -521,10 +521,13 @@ FUNCTION make_hud_gui {
 
 	//GLOBAL diamond_hmargin IS  pointbox:STYLe:WIDTH*0.458 .
 	//GLOBAL diamond_vmargin IS pointbox:STYLE:HEIGHT*0.447.
-	SET diamond:STYLE:margin:h TO pointbox:STYLe:WIDTH*0.4765 .
-	SET diamond:STYLE:margin:v TO pointbox:STYLE:HEIGHT*0.454.
-
-
+	
+	//define central position as global constants.
+	GLOBAL diamond_central_x IS pointbox:STYLe:WIDTH*0.4785.
+	GLOBAL diamond_central_y IS pointbox:STYLE:HEIGHT*0.450.
+	
+	SET diamond:STYLE:margin:h TO diamond_central_x.
+	SET diamond:STYLE:margin:v TO diamond_central_y.
 
 
 
@@ -589,7 +592,7 @@ FUNCTION hud_declutter6_gui {
 	mode_dist_text:HIDE().
 	
 	SET spdbox:STYLe:MARGIN:left TO 80.
-	SET altbox:STYLe:MARGIN:left TO 85.
+	SET altbox:STYLe:MARGIN:left TO 88.
 }
 
 //called at mode7 transition
@@ -619,6 +622,9 @@ FUNCTION update_hud_gui {
 	// set the pipper to an intermediate position between the desired and the current position so the transition is smoother
 	LOCAL smooth_fac IS 0.3.
 	
+	//for debug only
+	//SET pipper_pos TO diamond_deviation_debug().
+	
 	LOCAL pipper_pos_cur IS LIST(diamond:STYLE:margin:h, diamond:STYLE:margin:v).
 	
 	SET diamond:STYLE:margin:h TO pipper_pos_cur[0] + smooth_fac*(pipper_pos[0] - pipper_pos_cur[0]).
@@ -644,6 +650,30 @@ FUNCTION update_hud_gui {
 
 }
 
+
+//scales the deltas by the right amount for display
+//accounting for the diamond window width
+FUNCTION diamond_deviation_debug {
+	
+	LOCAL hmargin IS diamond_central_x.
+	LOCAL vmargin IS diamond_central_y.
+	
+	LOCAL horiz IS SHIP:CONTROL:PILOTROLL.
+	LOCAL vert IS -SHIP:CONTROL:PILOTPITCH.
+
+
+	//transpose the deltas to the interval [0, 1] times the window widths
+	LOCAL diamond_horiz IS hmargin*(1 + horiz).
+	LOCAL diamond_vert IS vmargin*(1 + vert).
+
+	//clamp them 
+	SET diamond_horiz TO CLAMP(diamond_horiz,0,2*hmargin).
+	SET diamond_vert TO CLAMP(diamond_vert,0,2*vmargin). 
+	
+
+	RETURN LIST(diamond_horiz,diamond_vert).
+
+}
 
 
 
@@ -938,8 +968,8 @@ FUNCTION is_auto_steering {
 FUNCTION diamond_deviation_entry {
 	PARAMETER deltas.
 	
-	LOCAL hmargin IS pointbox:STYLe:WIDTH*0.458.
-	LOCAL  vmargin IS pointbox:STYLE:HEIGHT*0.447.
+	LOCAL hmargin IS diamond_central_x.
+	LOCAL vmargin IS diamond_central_y.
 	
 	LOCAL vdelta IS deltas[1].
 	LOCAL hdelta IS deltas[0].
@@ -1097,8 +1127,8 @@ FUNCTION diamond_deviation_apch {
 	PARAMETER deltas.
 	PARAMETER mode.
 	
-	LOCAL hmargin IS pointbox:STYLe:WIDTH*0.458.
-	LOCAL  vmargin IS pointbox:STYLE:HEIGHT*0.447.
+	LOCAL hmargin IS diamond_central_x.
+	LOCAL vmargin IS diamond_central_y.
 	
 	LOCAL vdelta IS deltas[1].
 	LOCAL hdelta IS deltas[0].
