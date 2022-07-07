@@ -280,7 +280,7 @@ FUNCTION roll_profile {
 	LOCAL newroll IS roll0 + gain*hddot.
 	
 	//let the base roll value decrease linearly with velocity
-	SET newroll TO MIN(newroll,(roll0/2)*(state["surfvel"]:MAG + 2500 - 500)/(2500 - 250)).
+	SET newroll TO MIN(newroll,(roll0/gains["Roll_ramp"])*(state["surfvel"]:MAG + 2500 - 500)/(2500 - 250)).
 	
 	LOCAL roll_min IS 0.
 	//heuristic minimum roll taken from the training manuals
@@ -544,9 +544,9 @@ FUNCTION  flaptrim_control{
 	
 	//initialise the flap control pid loop 
 	IF NOT (DEFINED FLAPPID) {
-		LOCAL Kp IS -2.5.
+		LOCAL Kp IS -1.05.
 		LOCAL Ki IS 0.
-		LOCAL Kd IS 0.8.
+		LOCAL Kd IS 0.6.
 
 		GLOBAL FLAPPID IS PIDLOOP(Kp,Ki,Kd).
 		SET FLAPPID:SETPOINT TO 0.

@@ -284,6 +284,7 @@ IF EXISTS(gains_log_path) {RUNPATH(gains_log_path).}
 ELSE {GLOBAL gains IS LEXICON(	"rangeKP",0.008,
 								"rangeKD",0.001,
 								"Khdot",2,
+								"Roll_ramp",3,
 								"pchmod",0.1,
 								"strmgr",60,
 								"pitchKD",0.05,

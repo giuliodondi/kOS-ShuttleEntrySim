@@ -747,6 +747,11 @@ FUNCTION make_entry_GUI {
 		GLOBAL Khdot_box is hdot_gain:addtextfield(gains["Khdot"]:tostring).
 		set Khdot_box:style:width to 65.
 		set Khdot_box:style:height to 18.
+		GLOBAL rollramp_gain IS gainsbox:addhlayout().
+		GLOBAL rollramp_gain_text IS rollramp_gain:addlabel("Roll ramp Gain: ").
+		GLOBAL rollramp_box is rollramp_gain:addtextfield(gains["Khdot"]:tostring).
+		set rollramp_box:style:width to 65.
+		set rollramp_box:style:height to 18.
 		GLOBAL pchmod_gain IS gainsbox:addhlayout().
 		GLOBAL pchmod_gain_text IS pchmod_gain:addlabel("Pitch mod Gain: ").
 		GLOBAL pchmod_box is pchmod_gain:addtextfield(gains["pchmod"]:tostring).
@@ -803,6 +808,13 @@ FUNCTION make_entry_GUI {
 			set val to val:tonumber(gains["Khdot"]).
 			if val < 0 set val to 0.
 			set gains["Khdot"] to val.
+			log_gains(gains,gains_log_path).
+		}.
+		set rollramp_box:onconfirm to { 
+			parameter val.
+			set val to val:tonumber(gains["Roll_ramp"]).
+			if val < 0 set val to 0.
+			set gains["Roll_ramp"] to val.
 			log_gains(gains,gains_log_path).
 		}.
 		set pchmod_box:onconfirm to { 
