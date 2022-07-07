@@ -30,7 +30,7 @@ If you decide to modify the code yourself you do so 100% on your own.
 **Required mods:**
 - A complete install of RSS/Realism Overhaul with Ferram Aerospace Resarch. Confrmed to work with FAR 0.16.0.1, should now also work with 0.16.0.4
 - Kerbal Operating System
-- Space Shuttle System mod, SpaceODY's version seems to be the most up-to-date : https://github.com/SpaceODY/Space-Shuttle-System-Expanded.  
+- Space Shuttle System mod, I recommend my own fork of SpaceODY's version : [https://github.com/SpaceODY/Space-Shuttle-System-Expanded. ](https://github.com/giuliodondi/Space-Shuttle-System-Expanded) 
   The script is configurable to work with SOCK too and in principle it should work just as well, but I don't fly it often so **YMMV**
 - RO configs that come with the Realism Overhaul package, although SpaceODY will overwrite some of them (it's fine)
 
