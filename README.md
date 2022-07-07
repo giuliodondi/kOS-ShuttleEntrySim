@@ -11,12 +11,13 @@
 
 # Remarks
 
-These scripts have been tested in Kerbal Space Program 1.8.1 and 1.9.1.
-They are designed to provide deorbit and reentry guidance for the Space Shuttle System in RSS/Realism Overhaul.
-The script was originally engineered for DECQ's Shuttle. Support was added for different spacecraft by means of configuration files in the **Scripts/Shuttle_entrysim/VESSELS** directory.
+**These scripts are not intended to be used in stock KSP or in a non-RO install. I do not play stock and do not plan to make a version for it.**
 
-The scripts are not calibrated to work in stock KSP or with anything other than Space Shuttle-like vehicles.
-I'm fairly sure they can be modified accordingly but it's not a trivial task. I do not play stock KSP and do not plan on ever releasing a version of these scripts for it. 
+These scripts have been tested in Kerbal Space Program 1.10.1.  
+A legacy branch with the old KSP 1.8-1.9 version is still present, it lacks some kOS PID-loop settings that make control much smoother and also a number of micro-features I added since.
+
+The scripts are designed to provide deorbit and reentry guidance for the Space Shuttle System in RSS/Realism Overhaul. The script was originally engineered for DECQ's Shuttle.  
+Support was added for different spacecraft by means of configuration files in the **Scripts/Shuttle_entrysim/VESSELS** directory. Bear in mind the scripts are mainly calibrated for the DECQ Shuttle, specifically my own fork for it with custom aero configs.
 
 This code is provided as is, it is not the most elegant or efficient way to implement this functionality and it is not as robust as I'd like, meaning your mileage will vary depending on how you set everything up. Even I occasionally see some surprises
 
