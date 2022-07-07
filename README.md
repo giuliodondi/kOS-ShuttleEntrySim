@@ -80,7 +80,7 @@ In the VAB adjust the FAR control surface mappings like this:
 
 Still in the VAB, enable all actuation toggles on the Crew Cabin and both OMS pods. This will give you full control on which RCS jets are active for which attitude direction.
 
-You need to place two Stock A.I.R.B.R.A.K.E.S. re-scaled up to 150% to control airspeed during landing. The split rudder is utterly useless.  
+You need to place two Stock A.I.R.B.R.A.K.E.S. re-scaled up to 200% to control airspeed during landing. The split rudder is utterly useless.  
 They must be Stock A.I.R.B.R.A.K.E.S. and nothing else, otherwise you will need to dig into the script and tell it to look for whatever part you want.  
 Place them either on the sides of the OMS pods or on the sides of the Engine block. Place them on the surface, do not tuck them inside or KSP will prevent them from deploying. Do not put them on the tail or on the wings or you will introduce a pitching moment.
 Make sure to add these A.I.R.B.R.A.K.E.S. to the brakes Action Group.
