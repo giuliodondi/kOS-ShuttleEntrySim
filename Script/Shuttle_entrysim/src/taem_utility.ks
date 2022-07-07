@@ -22,7 +22,7 @@ FUNCTION TAEM_transition {
 FUNCTION apch_transition {
 	PARAMETER hac_entry_dist.
 	
-	IF hac_entry_dist < 10 {
+	IF hac_entry_dist < 15 {
 		SET arbkb:PRESSED TO TRUE.
 		SET guidb:PRESSED TO FALSE.
 		SET sasb:PRESSED TO FALSE.
