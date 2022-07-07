@@ -14,13 +14,13 @@
 //								).
 //
 
-//	35/25	//higher l/d
+//	35/20	//higher l/d
 IF NOT (DEFINEd pitchprof_segments) {
 	GLOBAL pitchprof_segments IS LIST(
 								LIST(250,3),
-								LIST(2100,25),
-								LIST(5300,25),
-								LIST(6340,35)
+								LIST(1800,20),
+								LIST(5300,20),
+								LIST(6500,35)
 								).
 }
 
