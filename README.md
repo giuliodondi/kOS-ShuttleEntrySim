@@ -4,7 +4,7 @@
 
 # Kerbal Space Program Shuttle Entry and Approach Guidance
 
-## updated June 13th 2022
+## updated July 7th 2022
 
 **PLEASE Read along with watching the demonstration videos at https://youtu.be/5VkAmHpXwn8 and https://youtu.be/oMyd0d86eV4 and https://www.youtube.com/watch?v=sIiksBwYEZI&t=2s**
 
@@ -30,7 +30,7 @@ If you decide to modify the code yourself you do so 100% on your own.
 **Required mods:**
 - A complete install of RSS/Realism Overhaul with the latest Ferram Aerospace Resarch.
 - kOS version 1.3 at least
-- Space Shuttle System mod, I recommend my own fork of SpaceODY's version : [https://github.com/SpaceODY/Space-Shuttle-System-Expanded. ](https://github.com/giuliodondi/Space-Shuttle-System-Expanded)  
+- Space Shuttle System mod, [Use my own fork of SpaceODY's Shuttle System so that the RO configs will be identical to what I use](https://github.com/giuliodondi/Space-Shuttle-System-Expanded). 
   The script is configurable to work with SOCK too and in principle it should also work, but I don't fly that one so **YMMV**
 
 
@@ -65,6 +65,8 @@ Modify the control mappings in this way:
 - yaw axis controlled by Q-E
 
 ## Setting up the Space Shuttle in the VAB
+
+### IF you use my fork of Space Shuttle System, beware that I will soon implement aerodynamic modifications for extra crossrange. This section will soon change.
 
 **IMPORTANT**  
 These scripts are not magic and rely on the Shuttle being easy to control. I can give you hints on what to look out for but ultimately it will be
