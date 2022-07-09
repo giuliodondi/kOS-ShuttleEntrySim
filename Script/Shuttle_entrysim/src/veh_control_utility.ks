@@ -274,6 +274,8 @@ FUNCTION  flaptrim_control{
 	
 	
 	If auto_flag {
+		//read off the gimbal angle to get the pitch control input 
+		flap_control["pitch_control"]:update(-gimbals:PITCHANGLE).
 	
 		//initialise the flap control pid loop 
 		IF NOT (DEFINED FLAPPID) {

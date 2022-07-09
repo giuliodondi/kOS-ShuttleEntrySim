@@ -210,6 +210,20 @@ SET loglex["roll_ref"] TO 0.
 
 
 
+//for testing 
+GLOBAL gains_log_path IS "0:/Shuttle_entrysim/VESSELS/" + vessel_dir + "/gains.ks".
+IF EXISTS(gains_log_path) {RUNPATH(gains_log_path).}
+make_entry_GUI().
+until 	false{
+	IF quitflag {
+		BREAK.
+	}
+}
+
+clean_entry_gui().
+
+until false{}
+
 approach_loop().
 
 close_all_GUIs().
@@ -367,15 +381,11 @@ WHEN TIME:SECONDS>(attitude_time_upd + 0.2) THEN {
 	
 	//distance to target
 	set tgt_range to greatcircledist(tgtrwy["hac_entry"], SHIP:GEOPOSITION).
-	
-	//calculate trim deflection and speedbrake deflection
-	//read off the gimbal angle to get the pitch control input 
-	flap_control["pitch_control"]:update(-gimbals:PITCHANGLE).
 
 	//update the flaps trim setting and airbrakes IF WE'RE BELOW FIRST ROLL ALT
 	IF SHIP:ALTITUDE < constants["firstrollalt"] {	
-		SET flap_control TO flaptrim_control( flap_control).
-		SET airbrake_control["spdbk_val"] TO speed_control(arbkb:PRESSED,airbrake_control["spdbk_val"],mode).
+		SET flap_control TO flaptrim_control(flptrm:PRESSED, flap_control).
+		SET airbrake_control["spdbk_val"] TO speed_control(arbkb:PRESSED, airbrake_control["spdbk_val"], mode).
 		FOR b IN airbrakes {
 			b:SETFIELD("Deploy Angle",50*airbrake_control["spdbk_val"]). 
 		}
@@ -890,7 +900,7 @@ UNTIL FALSE{
 	
 	SET airbrake_control["spdbk_val"] TO speed_control(is_autoairbk(),airbrake_control["spdbk_val"],mode).
 	
-	SET flap_control TO flaptrim_control_apch( flap_control).
+	SET flap_control TO flaptrim_control(flptrm:PRESSED, flap_control).
 	
 	FOR b IN airbrakes {
 		b:SETFIELD("Deploy Angle",50*airbrake_control["spdbk_val"]). 
