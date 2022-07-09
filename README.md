@@ -4,7 +4,7 @@
 
 # Kerbal Space Program Shuttle Entry and Approach Guidance
 
-## updated June 13th 2022
+## updated July 7th 2022
 
 **PLEASE Read along with watching the demonstration videos at https://youtu.be/5VkAmHpXwn8 and https://youtu.be/oMyd0d86eV4 and https://www.youtube.com/watch?v=sIiksBwYEZI&t=2s**
 
@@ -30,7 +30,7 @@ If you decide to modify the code yourself you do so 100% on your own.
 **Required mods:**
 - A complete install of RSS/Realism Overhaul with the latest Ferram Aerospace Resarch.
 - kOS version 1.3 at least
-- Space Shuttle System mod, I recommend my own fork of SpaceODY's version : [https://github.com/SpaceODY/Space-Shuttle-System-Expanded. ](https://github.com/giuliodondi/Space-Shuttle-System-Expanded)  
+- Space Shuttle System mod, [Use my own fork of SpaceODY's Shuttle System so that the RO configs will be identical to what I use](https://github.com/giuliodondi/Space-Shuttle-System-Expanded). 
   The script is configurable to work with SOCK too and in principle it should also work, but I don't fly that one so **YMMV**
 
 
@@ -65,6 +65,8 @@ Modify the control mappings in this way:
 - yaw axis controlled by Q-E
 
 ## Setting up the Space Shuttle in the VAB
+
+### IF you use my fork of Space Shuttle System, beware that I will soon implement aerodynamic modifications for extra crossrange. This section will soon change.
 
 **IMPORTANT**  
 These scripts are not magic and rely on the Shuttle being easy to control. I can give you hints on what to look out for but ultimately it will be
@@ -288,12 +290,14 @@ At the end of this phase you should be nearly on runway centerline.
 -  **Outer Glideslope (OGS)** The final descent, you might need to correct some lateral error and possibly plunge downwards. **The glideslope does NOT aim for the runway but a point a couple km short of it. This is intentional. Follow the pipper and fight your urge to chase the runway.**
 -  **Flare** A smooth transition between the steep Outer Glideslope and a shallow Inner Glideslope. If you followed the OGS guidance correctly, you will find yourself on a shallow 3° descent right on the runway touchdown markings, slowing down gently. Focus less on the pipper in this phase and more on visual cues and the vertical speed indicator.
 
-You will probably need a little pitch trim to help you during approach. The elevons and body flap will deflect according to the pitch trim setting, but there is no automatic trim control in this phase, it's all up to you. If you have excess OMS you might be tail-heavy and might need some down trim.
+Depending on which SpaceShuttleSystem version you use and your OMS quantity, you may be pitch-too-stable (nose heavy) or pitch-unstable (tail-heavy) at this point. Use flap trim accordingly to maintain stability and controllability.
 
 Speedbrakes are controlled either manually using the throttle slider or automatically by the script. A button lets you switch between the modes.
 By default they are set to AUTO after TAEM, if you switched manually from TAEM because guidance messed up, you might want to switch to manual and close them until you are sure that you'll make the HAC with at least 220 m/s of velocity.
 
-Needless to say, to fly the shuttle manually it's best to use a flight stick or, at the very least, some kind of gaming joystick. If you use a joystick, get a pair of thumb extenders, they work like a charm.
+The HUD implements the realistic de-cluttering logic that the real Space Shuttle used, hiding irrelevant HUD features as you get closer to touchdown to enhance your situational awareness
+
+
 
 
 
