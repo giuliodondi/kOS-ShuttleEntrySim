@@ -19,9 +19,18 @@ If (SHIP:ALTITUDE >= constants["atmalt"]) {
 
 	//load parameters
 	RUNPATH("0:/Shuttle_entrysim/vessel_dir").
-	RUNPATH("0:/Shuttle_entrysim/VESSELS/" + vessel_dir + "/pitch_profile").
 	RUNPATH("0:/Shuttle_entrysim/landing_sites").
 	RUNPATH("0:/Shuttle_entrysim/parameters").
+	
+	//this flag should only ever be defined during GRTLS
+	IF NOT (DEFINEd bypass_pitchprof_def) {
+		//if the global pitch ptofile file is defined, load that one
+		IF EXISTS(pitchprof_log_path) {RUNPATH(pitchprof_log_path).}
+		ELSE {
+			RUNPATH("0:/Shuttle_entrysim/VESSELS/" + vessel_dir + "/pitch_profile").
+		}
+	}
+	
 	RUNPATH("0:/Shuttle_entrysim/VESSELS/" + vessel_dir + "/flapcontrol").
 	RUNPATH("0:/Shuttle_entrysim/VESSELS/" + vessel_dir + "/approach_params").
 
@@ -36,7 +45,7 @@ If (SHIP:ALTITUDE >= constants["atmalt"]) {
 	RUNPATH("0:/Shuttle_entrysim/src/approach_utility").
 	RUNPATH("0:/Shuttle_entrysim/src/taem_utility").
 	
-	//need to place the call here so RTLS bypasses it
+	
 	activate_flaps(flap_control["parts"]).
 			
 

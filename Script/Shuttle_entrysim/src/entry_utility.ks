@@ -1,6 +1,26 @@
 //misc functions
 
 
+//prints the modified pitch profile to a global file
+FUNCTION log_new_pitchprof {
+	PARAMETER logname.
+	
+	IF EXISTS(logname) {DELETEPATH(logname).}
+	
+	LOCAL string IS "GLOBAL pitchprof_segments IS LIST(".
+	
+	FROM {local k is 0.} UNTIL k >= pitchprof_segments:LENGTH STEP {set k to k+1.} DO {
+		LOCAL s IS pitchprof_segments[k].
+		LOCAL addstring IS "LIST(" + s[0] + "," + s[1] + ")".
+		IF k<(pitchprof_segments:LENGTH-1) {SET addstring TO addstring + ",".}
+		SET string TO string + addstring.
+	}
+	
+	SET string TO string + ").".
+	
+	LOG string TO logname.
+}
+
 //prints the PID gains to file
 FUNCTION log_gains {
 	PARAMETER gains_lex.

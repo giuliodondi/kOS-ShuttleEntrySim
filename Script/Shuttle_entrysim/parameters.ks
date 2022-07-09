@@ -30,6 +30,8 @@ IF NOT (DEFINED sim_end_conditions) {
 	).
 }
 
+//path of the global pitch profile file 
+GLOBAL pitchprof_log_path IS "0:/Shuttle_entrysim/global_pitch_profile.ks".
 
 
 
