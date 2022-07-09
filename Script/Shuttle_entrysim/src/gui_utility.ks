@@ -1149,6 +1149,7 @@ FUNCTION make_apch_GUI {
 	//set auto speedbrakes
 	SET arbkb:PRESSED TO TRUE.
 		
+	SET main_gui:STYLe:HEIGHT TO 130.
 	
 	make_hud_gui().
 	
