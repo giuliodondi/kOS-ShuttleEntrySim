@@ -703,7 +703,7 @@ FUNCTION make_entry_GUI {
 	GLOBAL exitb IS  switchbtbox:ADDBUTTON("<Size=16>  Switch to Approach         </Size><Size=10>First disable Auto Steer and Guidance</Size>").
 	set exitb:style:wordwrap to true.
 	set exitb:style:width to 220.
-	set exitb:style:height to 67.
+	set exitb:style:height to 75.
 	SET exitb:style:margin:left to 15.
 	
 	function exitcheck {
@@ -717,11 +717,12 @@ FUNCTION make_entry_GUI {
 
 
 	GLOBAL rightbox IS all_box:ADDVLAYOUT().
-	SET rightbox:STYLE:WIDTH TO 220.
+	SET rightbox:STYLE:WIDTH TO 240.
 	SET rightbox:STYLE:ALIGN TO "center".
 	
 	
 	GLOBAL sasbox IS rightbox:ADDHLAYOUT().
+	SET sasbox:STYLE:HEIGHT TO 30.
 	SET sasbox:STYLE:ALIGN TO "center".
 	
 	GLOBAL sasb IS  sasbox:ADDCHECKBOX("Auto Steering",false).
@@ -737,24 +738,44 @@ FUNCTION make_entry_GUI {
 		//}
 	
 	}.
-
-
+	
+	sasbox:addspacing(20).
 
 	GLOBAL guidb IS  sasbox:ADDCHECKBOX("Guidance",false).
 	SET guidb:ONTOGGLE TO {
 		PARAMETER val.
 		SET reset_entry_flag TO TRUE.
 	}.
-
 	
-	GLOBAL gainsbox IS rightbox:ADDHLAYOUT().
-	//SET gainsbox:STYLE:WIDTH TO 300.
-	//SET gainsbox:STYLE:HEIGHT TO 50.
-	SET gainsbox:STYLE:ALIGN TO "Center".
-	//gainsbox:addspacing(30).	
-	GLOBAL gains_but IS  gainsbox:ADDBUTTON("<size=16>Modify Controller Gains</size>").
-	SET gains_but:STYLE:WIDTH TO 230.
+	GLOBAL pitchngains IS rightbox:ADDHLAYOUT().
+
+
+	//button to override pitch profile
+
+	SET pitchngains:STYLE:ALIGN TO "Center".
+	
+	GLOBAL pchprof_but IS  pitchngains:ADDBUTTON("<size=13>Override               Pitch Profile</size>").
+	SET pchprof_but:STYLE:WIDTH TO 115.
+	SET pchprof_but:STYLE:HEIGHT TO 45.
+	SET pchprof_but:STYLE:ALIGN TO "Center".
+	set pchprof_but:style:wordwrap to true.
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	//button to override controller gains
+	
+
+	GLOBAL gains_but IS  pitchngains:ADDBUTTON("<size=13>Override Controller Gains</size>").
+	SET gains_but:STYLE:WIDTH TO 115.
+	SET gains_but:STYLE:HEIGHT TO 45.
 	SET gains_but:STYLE:ALIGN TO "Center".
+	set gains_but:style:wordwrap to true.
 
 
 
