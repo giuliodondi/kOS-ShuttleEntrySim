@@ -114,20 +114,12 @@ IF NOT (DEFINED gimbals) {
 	
 }
 
-//calculate min and max deflection 
-flap_control:ADD("min_deflection",0).
-flap_control:ADD("max_deflection",0).
 
 
-FOR f in flap_control["parts"] {
-	IF f["min_defl"] < flap_control["min_deflection"] {
-		SET flap_control["min_deflection"] TO f["min_defl"].
-	}
-	IF f["max_defl"] > flap_control["max_deflection"] {
-		SET flap_control["max_deflection"] TO f["max_defl"].
-	}
+//initialise the running average for the pitch control values
+SET flap_control["pitch_control"] TO average_value_factory(5).
 
-}
+
 
 
 
@@ -161,6 +153,9 @@ IF SHIP:ALTITUDE>constants["apchalt"] {
 	gimbals:DOACTION("toggle gimbal roll", TRUE).
 	gimbals:DOACTION("toggle gimbal yaw", TRUE).
 	
+	//activate auto flaps 
+	SET flptrm:PRESSED TO TRUE.
+	
 	
 	//steer towards an initial direction before starting the whole thing
 	//the direction is defined by the first profile pithch value and zero roll
@@ -191,7 +186,6 @@ IF SHIP:ALTITUDE>constants["apchalt"] {
 
 }
 
-deactivate_flaps(flap_control["parts"]).
 
 SET mode TO 3.
 SET CONFIG:IPU TO 600.
@@ -209,22 +203,9 @@ SET loglex["az_err"] TO 0.
 SET loglex["roll_ref"] TO 0. 
 
 
-
-//for testing 
-GLOBAL gains_log_path IS "0:/Shuttle_entrysim/VESSELS/" + vessel_dir + "/gains.ks".
-IF EXISTS(gains_log_path) {RUNPATH(gains_log_path).}
-make_entry_GUI().
-until 	false{
-	IF quitflag {
-		BREAK.
-	}
-}
-
-clean_entry_gui().
-
-until false{}
-
 approach_loop().
+
+null_flap_deflection().
 
 close_all_GUIs().
 SET SHIP:CONTROL:NEUTRALIZE TO TRUE.
@@ -361,10 +342,6 @@ LOCAL pitch_ref IS pitchguid.
 LOCAL update_reference IS true.
 
 
-//initialise the running average for the pitch control values
-SET flap_control["pitch_control"] TO average_value_factory(5).
-
-
 
 
 
@@ -412,7 +389,7 @@ WHEN TIME:SECONDS>(attitude_time_upd + 0.2) THEN {
 					rollguid,
 					pitchguid,
 					airbrake_control["spdbk_val"],
-					-flap_control["deflection"],
+					flap_control["deflection"],
 					update_nz(
 						-SHIP:ORBIT:BODY:POSITION,
 						SHIP:VELOCITY:SURFACE,
@@ -912,7 +889,7 @@ UNTIL FALSE{
 		diamond_deviation_apch(deltas,mode),
 		mode_dist(simstate,tgtrwy,apch_params),
 		airbrake_control["spdbk_val"],
-		-flap_control["deflection"],
+		flap_control["deflection"],
 		update_nz(
 						-SHIP:ORBIT:BODY:POSITION,
 						SHIP:VELOCITY:SURFACE,
@@ -944,7 +921,7 @@ UNTIL FALSE{
 		log_data(loglex,"0:/Shuttle_entrysim/LOGS/entry_log").
 	}
 
-	IF quitflag OR SHIP:VELOCITY:SURFACE:MAG < 5 {BREAK.}
+	//IF quitflag OR SHIP:VELOCITY:SURFACE:MAG < 5 {BREAK.}
 	wait 0.
 
 }

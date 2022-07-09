@@ -275,13 +275,13 @@ FUNCTION  flaptrim_control{
 	
 	If auto_flag {
 		//read off the gimbal angle to get the pitch control input 
-		flap_control["pitch_control"]:update(-gimbals:PITCHANGLE).
+		flap_control["pitch_control"]:update(gimbals:PITCHANGLE).
 	
-		//initialise the flap control pid loop 
+		//initialise the flap control pid loop, pid gains rated for deflection as percentage of maximum
 		IF NOT (DEFINED FLAPPID) {
-			LOCAL Kp IS -1.05.
+			LOCAL Kp IS -0.0375.	//-1.05.
 			LOCAL Ki IS 0.
-			LOCAL Kd IS 0.6.
+			LOCAL Kd IS 0.0214.	//0.6.
 
 			GLOBAL FLAPPID IS PIDLOOP(Kp,Ki,Kd).
 			SET FLAPPID:SETPOINT TO 0.
@@ -292,22 +292,28 @@ FUNCTION  flaptrim_control{
 		LOCAL flap_incr IS  FLAPPID:UPDATE(TIME:SECONDS,controlavg).
 		SET flap_control["deflection"] TO CLAMP(
 			flap_control["deflection"] + flap_incr,
-			flap_control["min_deflection"],
-			flap_control["max_deflection"]
+			-1,
+			1
 		).
 
 	} ELSE {
 		SET flap_control["deflection"] TO  SHIP:CONTROL:PILOTPITCHTRIM.
 	}
 	
-	deflect_flaps(flap_control["parts"] , flap_control["deflection"]).
+	deflect_flaps(flap_control["parts"] , -flap_control["deflection"]).
 	
 	RETURN flap_control.
 }
 
+FUNCTION null_flap_deflection {
+
+	SET flap_control["deflection"] TO  0.
+	deflect_flaps(flap_control["parts"] , flap_control["deflection"]).
+
+}
+
 FUNCTION activate_flaps {
 	PARAMETER flap_parts.
-	
 
 	
 	FOR f in flap_parts {
@@ -325,29 +331,17 @@ FUNCTION activate_flaps {
 }
 
 
-FUNCTION deactivate_flaps {
-	PARAMETER flap_parts.
-	
-	deflect_flaps(flap_parts , 0).
-	
-	//leave the flaps enabled to let the user manipulate them manually
-	//FOR f in flap_parts {
-	//	LOCAL fmod IS f["flapmod"].
-	//	fmod:SETFIELD("Flp/Splr dflct",0).
-	//	wait 0.
-	//	LOCAL flapset IS fmod:GETFIELD("Flap Setting").
-	//	FROM {local k is flapset.} UNTIL k=0  STEP {set k to k-1.} DO {
-	//		fmod:DOACTION("Decrease Flap Deflection", TRUE).
-	//	}
-	//}
-}
-
 FUNCTION deflect_flaps{
 	PARAMETER flap_parts.
 	PARAMETER deflection.
 	
 	FOR f in flap_parts {
-		f["flapmod"]:SETFIELD("Flp/Splr dflct",CLAMP(deflection,f["min_defl"],f["max_defl"])).
+		LOCAL defl IS deflection*ABS(f["max_defl"]).
+		IF (deflection<0) {
+			SET defl TO deflection*ABS(f["min_defl"]).
+		}
+	
+		f["flapmod"]:SETFIELD("Flp/Splr dflct",CLAMP(defl,f["min_defl"],f["max_defl"])).
 		
 	}
 

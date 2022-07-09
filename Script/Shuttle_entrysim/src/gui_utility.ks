@@ -303,6 +303,14 @@ FUNCTION make_global_entry_GUI {
 	GLOBAL flptrm IS  toggles_box:ADDCHECKBOX("Auto Flap Trim",false).
 	toggles_box:addspacing(30).	
 	
+	SET flptrm:ONTOGGLE TO {
+		parameter b. 
+		IF NOT b {
+			null_flap_deflection().
+		}
+
+	}.
+	
 	GLOBAL arbkb IS  toggles_box:ADDCHECKBOX("Auto Airbrake",false).
 
 
@@ -1003,9 +1011,6 @@ FUNCTION make_entry_GUI {
 	
 	
 	
-	SET flaptrim_slider:MIN TO flap_control["max_deflection"].
-	SET flaptrim_slider:MAX TO flap_control["min_deflection"].
-	
 	
 	SET vspd_slider:MIN TO -200.
 	SET vspd_slider:MAX TO +200.
@@ -1146,6 +1151,9 @@ FUNCTION make_apch_GUI {
 	//freeze the target site selection 
 	SET select_tgt:ENABLED to FALSE.
 	
+	//set manual flaps 
+	SET flptrm:PRESSED TO FALSE.
+	
 	//set auto speedbrakes
 	SET arbkb:PRESSED TO TRUE.
 		
@@ -1153,8 +1161,6 @@ FUNCTION make_apch_GUI {
 	
 	make_hud_gui().
 	
-	SET flaptrim_slider:MIN TO -0.5.
-	SET flaptrim_slider:MAX TO +0.5.
 	
 	SET vspd_slider:MIN TO -40.
 	SET vspd_slider:MAX TO +40.
