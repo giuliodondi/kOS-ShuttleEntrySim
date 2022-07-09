@@ -5,23 +5,15 @@
 // its vel value and the update_reference flag is true 
 
 //	38/28
-//IF NOT (DEFINEd pitchprof_segments) {
-//	GLOBAL pitchprof_segments IS LIST(
-//								LIST(250,3),
-//								LIST(2100,28),
-//								LIST(5300,28),
-//								LIST(6340,38)
-//								).
-//
 
-//	35/20	//higher l/d
-IF NOT (DEFINEd pitchprof_segments) {
-	GLOBAL pitchprof_segments IS LIST(
-								LIST(250,3),
-								LIST(1800,20),
-								LIST(5300,20),
-								LIST(6500,35)
-								).
-}
+
+GLOBAL pitchprof_segments IS LIST(
+							LIST(250,3),
+							LIST(2100,28),
+							LIST(5400,28),
+							LIST(6400,38)
+							).
+
+
 
 
