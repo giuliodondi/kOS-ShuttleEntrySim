@@ -761,8 +761,8 @@ FUNCTION make_entry_GUI {
 	function gainsgui {
 	  //create the gains gui
 		GLOBAL gains_gui is gui(180,200).
-		SET gains_gui:X TO main_gui:X.
-		SET gains_gui:Y TO main_gui:Y + 100.
+		SET gains_gui:X TO main_gui:X + main_gui:STYLE:WIDTH.
+		SET gains_gui:Y TO main_gui:Y - 250.
 		GLOBAL gainstext IS gains_gui:ADDLABEL("<size=18>Controller Gains</size>").
 		SET gainstext:STYLE:ALIGN TO "center".
 		
@@ -831,49 +831,42 @@ FUNCTION make_entry_GUI {
 			set val to val:tonumber(gains["rangeKP"]).
 			if val < 0 set val to 0.
 			set gains["rangeKP"] to val.
-			log_gains(gains,gains_log_path).
 		}.
 		set Kd_box:onconfirm to { 
 			parameter val.
 			set val to val:tonumber(gains["rangeKD"]).
 			if val < 0 set val to 0.
 			set gains["rangeKD"] to val.
-			log_gains(gains,gains_log_path).
 		}.
 		set Khdot_box:onconfirm to { 
 			parameter val.
 			set val to val:tonumber(gains["Khdot"]).
 			if val < 0 set val to 0.
 			set gains["Khdot"] to val.
-			log_gains(gains,gains_log_path).
 		}.
 		set rollramp_box:onconfirm to { 
 			parameter val.
 			set val to val:tonumber(gains["Roll_ramp"]).
 			if val < 0 set val to 0.
 			set gains["Roll_ramp"] to val.
-			log_gains(gains,gains_log_path).
 		}.
 		set pchmod_box:onconfirm to { 
 			parameter val.
 			set val to val:tonumber(gains["pchmod"]).
 			if val < 0 set val to 0.
 			set gains["pchmod"] to val.
-			log_gains(gains,gains_log_path).
 		}.
 		set taem_Kp_box:onconfirm to { 
 			parameter val.
 			set val to val:tonumber(gains["taemKP"]).
 			if val < 0 set val to 0.
 			set gains["taemKP"] to val.
-			log_gains(gains,gains_log_path).
 		}.
 		set taem_Kd_box:onconfirm to { 
 			parameter val.
 			set val to val:tonumber(gains["taemKD"]).
 			if val < 0 set val to 0.
 			set gains["taemKD"] to val.
-			log_gains(gains,gains_log_path).
 		}.
 		
 		set strmgr_box:onconfirm to { 
@@ -881,7 +874,6 @@ FUNCTION make_entry_GUI {
 			set val to val:tonumber(gains["strmgr"]).
 			if val < 0 set val to 0.
 			set gains["strmgr"] to val.
-			log_gains(gains,gains_log_path).
 			SET STEERINGMANAGER:MAXSTOPPINGTIME TO val.
 		}.
 		
@@ -890,7 +882,6 @@ FUNCTION make_entry_GUI {
 			set val to val:tonumber(gains["pitchKD"]).
 			if val < 0 set val to 0.
 			set gains["pitchKD"] to val.
-			log_gains(gains,gains_log_path).
 			SET STEERINGMANAGER:PITCHPID:KD TO val.
 		}.
 		set yawd_gain_box:onconfirm to { 
@@ -898,7 +889,6 @@ FUNCTION make_entry_GUI {
 			set val to val:tonumber(gains["yawKD"]).
 			if val < 0 set val to 0.
 			set gains["yawKD"] to val.
-			log_gains(gains,gains_log_path).
 			SET STEERINGMANAGER:YAWPID:KD TO val.
 		}.
 		set rolld_gain_box:onconfirm to { 
@@ -906,7 +896,6 @@ FUNCTION make_entry_GUI {
 			set val to val:tonumber(gains["rollKD"]).
 			if val < 0 set val to 0.
 			set gains["rollKD"] to val.
-			log_gains(gains,gains_log_path).
 			SET STEERINGMANAGER:ROLLPID:KD TO val.
 		}.
 		
@@ -916,7 +905,8 @@ FUNCTION make_entry_GUI {
 		SET gains_close:STYLE:ALIGN TO "center".
 		//SET quitb:style:width TO 80.
 		function gainsclosecheck {
-		  gains_gui:HIDE().
+			log_gains(gains,gains_log_path).
+			gains_gui:HIDE().
 		}
 		SET gains_close:ONCLICK TO gainsclosecheck@.
 		gains_gui:SHOW().
