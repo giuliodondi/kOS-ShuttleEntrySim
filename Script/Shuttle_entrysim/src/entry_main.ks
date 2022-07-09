@@ -135,6 +135,8 @@ FOR f in flap_control["parts"] {
 //the flap trim logic is contained within entry guidance block
 IF SHIP:ALTITUDE>constants["apchalt"] {
 
+	make_entry_GUI().
+
 	
 	//SHUTDOWN ALL engines and initalise gimbals parts
 	//don't necessarily want to do this for an alt
@@ -210,9 +212,11 @@ SET loglex["roll_ref"] TO 0.
 
 approach_loop().
 
-close_global_GUI().
+close_all_GUIs().
 SET SHIP:CONTROL:NEUTRALIZE TO TRUE.
 clearscreen.
+//remove the global pitch profile so next time we run entyr guidance we reset to the default one 
+IF EXISTS(pitchprof_log_path) {DELETEPATH(pitchprof_log_path).}
  
 }
 
@@ -296,9 +300,6 @@ SET STEERINGMANAGER:MAXSTOPPINGTIME TO gains["strmgr"].
 SET STEERINGMANAGER:PITCHPID:KD TO gains["pitchKD"].
 SET STEERINGMANAGER:YAWPID:KD TO gains["yawKD"].
 SET STEERINGMANAGER:ROLLPID:KD TO gains["rollKD"].
- 
- 
-make_entry_GUI(pitchguid,rollguid).
 
 
 
