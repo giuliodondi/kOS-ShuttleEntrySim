@@ -173,10 +173,11 @@ FUNCTION make_global_entry_GUI {
 
 	//create the GUI.
 	GLOBAL main_gui is gui(530,230).
-	SET main_gui:X TO 550.
-	SET main_gui:Y TO 350.
+	SET main_gui:X TO 200.
+	SET main_gui:Y TO 750.
 	SET main_gui:STYLe:WIDTH TO 530.
 	SET main_gui:STYLe:HEIGHT TO 220.
+	SET main_gui:STYLE:ALIGN TO "center".
 
 	set main_gui:skin:LABEL:TEXTCOLOR to guitextgreen.
 
@@ -209,13 +210,13 @@ FUNCTION make_global_entry_GUI {
 	//top popup menus,
 	//tgt selection, rwy selection, hac placement
 	GLOBAL popup_box IS main_gui:ADDHLAYOUT().
-	SET popup_box:STYLE:ALIGN TO "center".
-	SET popup_box:STYLE:WIDTH TO 500.	
+	SET popup_box:STYLE:ALIGN TO "center".	
 
 	GLOBAL select_tgtbox IS popup_box:ADDHLAYOUT().
+	SET select_tgtbox:STYLE:WIDTH TO 175.
 	GLOBAL tgt_label IS select_tgtbox:ADDLABEL("<size=15>Target : </size>").
 	GLOBAL select_tgt IS select_tgtbox:addpopupmenu().
-	SET select_tgt:STYLE:WIDTH TO 100.
+	SET select_tgt:STYLE:WIDTH TO 110.
 	SET select_tgt:STYLE:HEIGHT TO 25.
 	SET select_tgt:STYLE:ALIGN TO "center".
 	FOR site IN ldgsiteslex:KEYS {
@@ -223,11 +224,11 @@ FUNCTION make_global_entry_GUI {
 	}		
 		
 		
-
+	popup_box:addspacing(20).
 
 
 	GLOBAL select_rwybox IS popup_box:ADDHLAYOUT().
-	//SET select_rwybox:STYLE:ALIGN TO "left".
+	SET select_rwybox:STYLE:WIDTH TO 125.
 	GLOBAL select_rwy_text IS select_rwybox:ADDLABEL("<size=15>Runway : </size>").
 	GLOBAL select_rwy IS select_rwybox:addpopupmenu().
 	SET select_rwy:STYLE:WIDTH TO 50.
@@ -237,8 +238,13 @@ FUNCTION make_global_entry_GUI {
 	FOR rwy IN ldgsiteslex[select_tgt:VALUE]["rwys"]:KEYS {
 		select_rwy:addoption(rwy).
 	}	
+	
+	popup_box:addspacing(20).
+	
+	
 
 	GLOBAL select_sidebox IS popup_box:ADDHLAYOUT().
+	SET select_sidebox:STYLE:WIDTH TO 175.
 	//SET select_sidebox:STYLE:ALIGN TO "right".
 	GLOBAL select_side_text IS select_sidebox:ADDLABEL("<size=15>HAC Position : </size>").
 	GLOBAL select_side IS select_sidebox:addpopupmenu().
@@ -287,30 +293,17 @@ FUNCTION make_global_entry_GUI {
 	
 	
 	GLOBAL toggles_box IS main_gui:ADDHLAYOUT().
-	toggles_box:addspacing(150).	
+	SET toggles_box:STYLE:WIDTH TO 300.
+	toggles_box:addspacing(75).	
 	SET toggles_box:STYLE:ALIGN TO "center".
-	GLOBAL logb IS  toggles_box:ADDCHECKBOX("Log Data",false).
-	toggles_box:addspacing(20).	
-	GLOBAL arbkb IS  toggles_box:ADDCHECKBOX("Manual Airbrake",false).
-
-
-	//modify the speedbrake button 
-	IF arbkb:PRESSED {
-		SET arbkb:text TO " Auto Airbrake".
-	} ELSE {
-		SET arbkb:text TO "Manual Airbrake".
-	}
 	
-	SET arbkb:ONTOGGLE TO {
-		parameter b. 
-		IF b {
-			SET arbkb:text TO " Auto  Airbrake".
-		}
-		ELSE {
-			SET arbkb:text TO "Manual Airbrake".
-		}
-
-	}.
+	GLOBAL logb IS  toggles_box:ADDCHECKBOX("Log Data",false).
+	toggles_box:addspacing(30).	
+	
+	GLOBAL arbkb IS  toggles_box:ADDCHECKBOX("Auto Flap Trim",false).
+	toggles_box:addspacing(30).	
+	
+	GLOBAL arbkb IS  toggles_box:ADDCHECKBOX("Auto Airbrake",false).
 
 
 	main_gui:SHOW().
@@ -364,6 +357,10 @@ FUNCTION close_global_GUI {
 	}
 }
 
+FUNCTION close_all_GUIs{
+	CLEARGUIS().
+}
+
 //interface functions between the main loops and the GUI
 
 //generic GUI 
@@ -389,8 +386,8 @@ FUNCTION make_hud_gui {
 	}
 
 	GLOBAL hud_gui is gui(430,320).
-	SET hud_gui:X TO 200.
-	SET hud_gui:Y TO 200.
+	SET hud_gui:X TO 700.
+	SET hud_gui:Y TO 150.
 	SET hud_gui:STYLe:WIDTH TO 450.
 	SET hud_gui:STYLe:HEIGHT TO 320.
 	SET hud_gui:style:BG to "Shuttle_entrysim/src/gui_images/hudbackground.png".
@@ -682,8 +679,6 @@ FUNCTION diamond_deviation_debug {
 
 
 FUNCTION make_entry_GUI {
-	PARAMETER initial_pitch.
-	PARAMETER initial_roll.
 
 					   
 	GLOBAL all_box IS main_gui:ADDHLAYOUT().
