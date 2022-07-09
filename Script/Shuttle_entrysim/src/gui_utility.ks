@@ -300,7 +300,7 @@ FUNCTION make_global_entry_GUI {
 	GLOBAL logb IS  toggles_box:ADDCHECKBOX("Log Data",false).
 	toggles_box:addspacing(30).	
 	
-	GLOBAL arbkb IS  toggles_box:ADDCHECKBOX("Auto Flap Trim",false).
+	GLOBAL flptrm IS  toggles_box:ADDCHECKBOX("Auto Flap Trim",false).
 	toggles_box:addspacing(30).	
 	
 	GLOBAL arbkb IS  toggles_box:ADDCHECKBOX("Auto Airbrake",false).
