@@ -9,7 +9,7 @@ FUNCTION make_global_deorbit_GUI {
 	SET main_gui:X TO 550.
 	SET main_gui:Y TO 350.
 	SET main_gui:STYLe:WIDTH TO 400.
-	SET main_gui:STYLe:HEIGHT TO 400.
+	SET main_gui:STYLe:HEIGHT TO 450.
 
 	set main_gui:skin:LABEL:TEXTCOLOR to guitextgreen.
 
@@ -73,6 +73,84 @@ FUNCTION make_global_deorbit_GUI {
 		parameter val.
 		SET roll_ref tO val:tonumber(constants["rollguess"]).
 	}.
+	
+	GLOBAL pchprof_but IS  popup_box:ADDBUTTON("<size=13>Override Pitch Profile</size>").
+	SET pchprof_but:STYLE:WIDTH TO 185.
+	SET pchprof_but:STYLE:HEIGHT TO 30.
+	SET pchprof_but:STYLE:ALIGN TO "Center".
+	set pchprof_but:style:wordwrap to true.
+	
+	
+	function profgui {
+			GLOBAL prof_gui is gui(145,200).
+			SET prof_gui:X TO main_gui:X + + main_gui:STYLE:WIDTH.
+			SET prof_gui:Y TO main_gui:Y.
+			GLOBAL proftext IS prof_gui:ADDLABEL("<size=18>Pitch Profile</size>").
+			SET proftext:STYLE:ALIGN TO "center".
+			
+			
+			GLOBAL profsegs_box IS prof_gui:ADDVLAYOUT().
+			SET profsegs_box:STYLE:ALIGN TO "center".
+			SET profsegs_box:STYLE:WIDTH TO 145.
+			
+			GLOBAL profseg_boxes_list Is LIST().
+			
+			FROM {local k is 0.} UNTIL k >= pitchprof_segments:LENGTH STEP {set k to k+1.} DO {
+			
+				LOCAL s IS pitchprof_segments[k].
+			
+				LOCAL newsegbox IS profsegs_box:addhlayout().
+				LOCAL newsegveltext IS newsegbox:addtextfield(s[0]:tostring).
+				set newsegveltext:style:width to 65.
+				set newsegveltext:style:height to 18.
+				LOCAL newsegpcgtext IS newsegbox:addtextfield(s[1]:tostring).
+				set newsegpcgtext:style:width to 65.
+				set newsegpcgtext:style:height to 18.
+				
+				
+				set newsegveltext:onconfirm to { 
+					parameter val.
+					
+					set val to val:tonumber(0).
+					if val = 0 {RETURN.}
+					
+					SET s[0] TO val.
+					
+				}.
+				
+				set newsegpcgtext:onconfirm to { 
+					parameter val.
+					
+					set val to val:tonumber(0).
+					if val = 0 {RETURN.}
+					
+					SET s[1] TO val.
+					
+				}.
+				
+				profseg_boxes_list:ADD(newsegbox).
+				
+			}
+			
+			
+			GLOBAL prof_close IS  prof_gui:ADDBUTTON("<size=16>Close</size>").
+			SET prof_close:STYLE:WIDTH TO 50.
+			SET prof_close:STYLE:ALIGN TO "center".
+			//SET quitb:style:width TO 80.
+			function profclosecheck {
+				log_new_pitchprof(pitchprof_log_path).
+				prof_gui:HIDE().
+			}
+			SET prof_close:ONCLICK TO profclosecheck@.
+			prof_gui:SHOW().
+	}
+
+	SET pchprof_but:ONCLICK TO profgui@.
+	
+	
+	
+	
+	
 
 
 	GLOBAL all_box IS main_gui:ADDVLAYOUT().
@@ -834,7 +912,6 @@ FUNCTION make_entry_GUI {
 	}
 
 	SET pchprof_but:ONCLICK TO profgui@.
-	
 	
 	
 	
