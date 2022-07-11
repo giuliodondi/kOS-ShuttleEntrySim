@@ -181,6 +181,19 @@ FUNCTION cross_error {
 //guidance functions 
 
 
+//estimate range to be flown around the hac and to the runway
+FUNCTION estimate_range_hac_landing {
+	PARAMETER rwy.
+	PARAMETEr params.
+	
+	//placeholder
+	LOCAL hac_angle IS 360.
+
+	LOCAL range_bias IS params["final_dist"] + get_hac_groundtrack(hac_angle, params).
+
+}
+
+
 //check the pitch profile for negative values
 FUNCTION check_pitch_prof {
 	

@@ -275,7 +275,7 @@ IF SHIP:ALTITUDE < constants["firstrollalt"] {
 
 
 //add prebank constant 
-constants.ADD("prebank_angle",rollsteer).
+constants:ADD("prebank_angle",rollsteer).
 
 //initialise gains for PID
 GLOBAL gains_log_path IS "0:/Shuttle_entrysim/VESSELS/" + vessel_dir + "/gains.ks".

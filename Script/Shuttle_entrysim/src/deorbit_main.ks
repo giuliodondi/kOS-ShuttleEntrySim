@@ -39,6 +39,9 @@ FUNCTION deorbit_main {
 	IF (DEFINED tgtrwy) {UNSET tgtrwy.}
 	GLOBAL tgtrwy IS ldgsiteslex[ldgsiteslex:keys[0]].
 	
+	//add prebank constant 
+	constants:ADD("prebank_angle",0).
+	
 	make_global_deorbit_GUI().
 	
 	//flag to stop the program entirely
