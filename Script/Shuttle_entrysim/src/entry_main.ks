@@ -186,6 +186,8 @@ IF SHIP:ALTITUDE>constants["apchalt"] {
 
 }
 
+flaps_aoa_feedback(flap_control["parts"]).
+
 
 SET mode TO 3.
 SET CONFIG:IPU TO 600.
