@@ -862,7 +862,7 @@ FUNCTION define_flare_circle {
 	////equals the altitude deadband for the diamond cue on the hud.
 	////we use the hard-coded value of 300 metres
 	
-	SET params["preflare_alt"] TO params["flare_alt"] + 100.
+	SET params["preflare_alt"] TO params["flare_alt"] + 30.
 
 }
 
