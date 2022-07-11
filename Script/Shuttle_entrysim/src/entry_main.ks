@@ -248,7 +248,7 @@ LOCAL rollguid IS 0.
 
 //initalise pitch and roll values to guidance steering
 LOCAL pitchsteer IS pitchguid.
-LOCAL rollsteer IS get_roll_lvlh().
+LOCAL rollsteer IS rollguid.
 
 
 //first steering command 
