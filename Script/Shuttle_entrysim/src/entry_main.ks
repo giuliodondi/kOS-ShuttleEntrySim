@@ -248,7 +248,7 @@ LOCAL rollguid IS 0.
 
 //initalise pitch and roll values to guidance steering
 LOCAL pitchsteer IS pitchguid.
-LOCAL rollsteer IS rollguid.
+LOCAL rollsteer IS get_roll_lvlh().
 
 
 //first steering command 
@@ -274,8 +274,8 @@ IF SHIP:ALTITUDE < constants["firstrollalt"] {
 }
 
 
-//SET pitchprof_segments[pitchprof_segments:LENGTH - 1][1] TO pitchguid.
-
+//add prebank constant 
+constants.ADD("prebank_angle",rollsteer).
 
 //initialise gains for PID
 GLOBAL gains_log_path IS "0:/Shuttle_entrysim/VESSELS/" + vessel_dir + "/gains.ks".
@@ -419,17 +419,17 @@ UNTIL FALSE {
 		BREAK.
 	}
 	
-	//wil not command any roll above this altitude
 	IF ( is_auto_steering() AND SHIP:ALTITUDE < constants["firstrollalt"]) AND (SAS) {
 		SAS OFF.
 	}
 	
+	SET constants["prebank_angle"] TO rollsteer.
 	
 	//determine if reference pitch is to be updated
-	SET update_reference TO update_ref_pitch(pitchsteer).
-	IF update_reference {
-		SET pitch_ref TO pitchsteer.
-	}
+	//SET update_reference TO update_ref_pitch(pitchsteer).
+	//IF update_reference {
+	//	SET pitch_ref TO pitchsteer.
+	//}
 	
 		
 	//run the vehicle simulation
