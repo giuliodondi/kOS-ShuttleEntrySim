@@ -245,6 +245,7 @@ FUNCTION update_deorbit_GUI {
 						//GLOBAL ENTRY GUI FUNCTIONS
 
 
+GLOBAL entry_gui_height IS 220.
 
 FUNCTION make_global_entry_GUI {
 	
@@ -254,7 +255,7 @@ FUNCTION make_global_entry_GUI {
 	SET main_gui:X TO 200.
 	SET main_gui:Y TO 750.
 	SET main_gui:STYLe:WIDTH TO 530.
-	SET main_gui:STYLe:HEIGHT TO 220.
+	SET main_gui:STYLe:HEIGHT TO entry_gui_height.
 	SET main_gui:STYLE:ALIGN TO "center".
 
 	set main_gui:skin:LABEL:TEXTCOLOR to guitextgreen.
@@ -269,6 +270,27 @@ FUNCTION make_global_entry_GUI {
 	GLOBAL text0 IS title_box:ADDLABEL("<b><size=20>SHUTTLE ENTRY AND APPROACH ASSISTANT</size></b>").
 	SET text0:STYLE:ALIGN TO "center".
 
+	GLOBAL minb IS  title_box:ADDBUTTON("-").
+	set minb:style:margin:h to 7.
+	set minb:style:margin:v to 7.
+	set minb:style:width to 20.
+	set minb:style:height to 20.
+	set minb:TOGGLE to TRUE.
+	function minimizecheck {
+		PARAMETER pressed.
+		
+		IF pressed {
+			main_gui:SHOWONLY(title_box).
+			SET main_gui:STYLe:HEIGHT TO 50.
+		} ELSE {
+			SET main_gui:STYLe:HEIGHT TO entry_gui_height.
+			for w in main_gui:WIDGETS {
+				w:SHOW().
+			}
+		}
+		
+	}
+	SET minb:ONTOGGLE TO minimizecheck@.
 
 	GLOBAL quitb IS  title_box:ADDBUTTON("X").
 	set quitb:style:margin:h to 7.
@@ -1216,8 +1238,6 @@ FUNCTION clean_entry_gui {
 	rightbox:DISPOSE().
 	all_box:DISPOSE().
 	
-	SET main_gui:STYLe:HEIGHT TO 130.
-	
 }								
 								
 
@@ -1234,7 +1254,8 @@ FUNCTION make_apch_GUI {
 	//set auto speedbrakes
 	SET arbkb:PRESSED TO TRUE.
 		
-	SET main_gui:STYLe:HEIGHT TO 130.
+	SET entry_gui_height TO 130.
+	SET main_gui:STYLe:HEIGHT TO entry_gui_height.
 	
 	make_hud_gui().
 	
