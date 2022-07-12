@@ -1,7 +1,7 @@
 						//DEORBIT GUI FUNCTIONS 
 						
 //GLOBAL guitextgreen IS RGB(167/255,207/255,147/255).
-GLOBAL guitextgreen IS RGB(81/255,255/255,21/255).
+GLOBAL guitextgreen IS RGB(20/255,255/255,21/255).
 
 FUNCTION make_global_deorbit_GUI {
 	//create the GUI.
