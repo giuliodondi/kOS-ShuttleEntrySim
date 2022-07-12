@@ -55,7 +55,7 @@ declare function gravitacc {
 	return -BODY:mu * pos:normalized / pos:sqrmagnitude.
 }
 
-declare function aeroforce {
+declare function aeroforce_ld {
 	parameter pos.
 	parameter surfvel.
 	parameter attitude.
@@ -114,13 +114,70 @@ declare function aeroforce {
 	//rotate the local force vector to the new frame
 	SET out["load"] TO (pred_vesselright*localforce:X + pred_vesseltop*localforce:Y + pred_vesselfore*localforce:Z ).
 	//compute lift asnd drag components
-	SET out["lift"] TO VXCL(velforward,out["load"]):MAG.
-	SET out["drag"] TO localforce:Z .
+	
+	SET out["drag"] TO -VDOT(totalforce,airspeedaoa:NORMALIZED).
+	SET out["lift"] TO VDOT(VXCL(airspeedaoa:NORMALIZED,totalforce),vesseltop:NORMALIZED).
+	
 
 	RETURN out.
 	
-
 }
+
+declare function aeroforce {
+	parameter pos.
+	parameter surfvel.
+	parameter attitude.
+	
+	LOCAL roll IS attitude[1].
+	LOCAL aoa IS attitude[0].
+	
+	LOCAL altt IS pos:mag-BODY:radius.
+	
+	LOCAL vesselfore IS SHIP:FACING:FOREVECTOR:NORMALIZED.
+	LOCAL vesseltop IS SHIP:FACING:TOPVECTOR:NORMALIZED.
+	LOCAL vesselright IS VCRS(vesseltop,vesselfore):NORMALIZED.
+	
+	LOCAL airspeedaoa IS surfvel:MAG*rodrigues(vesselfore,vesselright,aoa):NORMALIZED.
+	
+	LOCAL totalforce IS ADDONS:FAR:AEROFORCEAT(altt,airspeedaoa).
+	
+	
+	
+	//convert the aerodynamic force into the frame defined by the vessel orientation vectors
+	//divide by the ship mass to get acceleration
+	 LOCAL localforce IS V( VDOT(vesselright,totalforce) ,VDOT(vesseltop,totalforce)  , VDOT(vesselfore,totalforce) )/(ship:mass).
+	 
+	//build a frame of reference centered about the survace velocity and the local up direction
+	LOCAL velforward IS surfvel:NORMALIZED.
+	LOCAL velup IS pos:NORMALIZED.
+	LOCAL velright IS VCRS( velup, velforward).
+	IF (velright:MAG < 0.001) {
+		SET velright TO VCRS( vesseltop, velforward).
+		IF (velright:MAG < 0.001) {
+			SET velright TO VCRS( vesselfore, velforward):NORMALIZED.
+		}
+		ELSE {
+			SET velright TO velright:NORMALIZED.
+		}
+	}
+	ELSE {
+		SET velright TO velright:NORMALIZED.
+	}
+	SET velup TO VCRS( velforward, velright):NORMALIZED.
+	
+	//build the pedicted vessel orientation vectors using aoa and roll information
+	LOCAL pred_vesseltop IS rodrigues(velup,velforward,-roll).
+	LOCAL pred_vesselright IS VCRS(pred_vesseltop,velforward):NORMALIZED.
+	LOCAL pred_vesselfore IS rodrigues(velforward,pred_vesselright,-aoa).
+	SET pred_vesseltop TO rodrigues(pred_vesseltop,pred_vesselright,-aoa).
+
+
+	//rotate the local force vector to the new frame
+	RETURN LEXICON("load", (pred_vesselright*localforce:X + pred_vesseltop*localforce:Y + pred_vesselfore*localforce:Z )).
+	
+}
+
+
 
 DECLARE FUNCTION rk2 {
 	PARAMETER dt.
