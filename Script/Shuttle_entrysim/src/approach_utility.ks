@@ -876,9 +876,9 @@ FUNCTION update_nz {
 	LOCAL g0 IS 9.80665.
 	
 	//sample lift force
-	LOCAL outlex IS aeroforce(pos, surfvel, attitude).
+	LOCAL outlex IS aeroforce_ld(pos, surfvel, attitude).
 
-	return outlex["lift"]/g0.
+	return outlex["lift"]/(g0*ship:mass).
 }
 
 
