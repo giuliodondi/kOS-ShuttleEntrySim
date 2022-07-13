@@ -314,16 +314,14 @@ FUNCTION roll_profile {
 	
 	//let the base roll value decrease linearly with velocity
 	SET newroll TO MIN(newroll,(roll0/gains["Roll_ramp"])*(state["surfvel"]:MAG + 2500 - 500)/(2500 - 250)).
-	
-	LOCAL roll_min IS 0.
+
 	//heuristic minimum roll taken from the training manuals
 	//min value to still ensure proper lateral guidance even in low-energy situations
 	//only enable it if the reference roll is too small
-	IF (roll0 < 10) {
-		SET roll_min TO 2*ABS(delaz).
-	}
+	//update: use it in every case
+	LOCAL roll_min IS 2*ABS(delaz).
 	
-	RETURN clamp(newroll,roll_min,120).
+	RETURN clamp(newroll,roll_min,85).
 }
 
 
@@ -387,10 +385,14 @@ declare function simulate_reentry {
 	
 	
 	LOCAL poslist IS LIST().
+	
+	LOCAL next_simstate IS simstate.
 
 	
 	//putting the termination conditions here should save an if check per step
-	UNTIL (( simstate["altitude"]< tgtalt AND simstate["surfvel"]:MAG < end_conditions["surfvel"] ) OR simstate["altitude"]>140000)  {
+	UNTIL (( next_simstate["altitude"]< tgtalt AND next_simstate["surfvel"]:MAG < end_conditions["surfvel"] ) OR next_simstate["altitude"]>140000)  {
+	
+		SET simstate TO next_simstate.
 	
 		SET simstate["altitude"] TO bodyalt(simstate["position"]).
 		
@@ -432,7 +434,7 @@ declare function simulate_reentry {
 			log_data(loglex).
 		}
 		
-		SET simstate TO simsets["integrator"]:CALL(simsets["deltat"],simstate,LIST(pitch_prof,roll_prof)).
+		SET next_simstate TO simsets["integrator"]:CALL(simsets["deltat"],simstate,LIST(pitch_prof,roll_prof)).
 
 	}
 	
