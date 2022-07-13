@@ -358,7 +358,7 @@ FUNCTION flaps_aoa_feedback {
 		wait 0.
 		fmod:SETFIELD("ctrl dflct",20).  	
 		wait 0.
-		fmod:SETFIELD("aoa %",30).  	
+		fmod:SETFIELD("aoa %",80).  	
 	}
 
 }
