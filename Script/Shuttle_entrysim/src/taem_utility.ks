@@ -92,7 +92,7 @@ FUNCTION TAEM_bank_angle {
 		//to avoid overshooting we ramp down the bank angle when delaz is great enough 
 		//want to ramp it to zero and below so that delaz never gets too high 
 		
-		LOCAL bank_factor IS MIN(1, 1 - (ABS(delaz)/30 - 1)).
+		LOCAL bank_factor IS MIN(1, 1 - (ABS(delaz)/20 - 1)).
 		
 		RETURN s_turn_sign(hac_side)*bank_factor*bank_angle.
 	} ELSE {
@@ -159,11 +159,13 @@ FUNCTION TAEM_pitch_roll_cor {
 // determines if the s-turn is to be commanded or not
 FUNCTION s_turn {
 	PARAMETER tgt_range.
+	PARAMETER delaz.
 	PARAMETER tgtvel.
 	PARAMETER srfvel.
 	
-	//disable the s-turn if we're less than 20km 
-	IF (tgt_range < 20) {
+	//disable the s-turn if we're too close
+	//also disable it if delaz is too large
+	IF (tgt_range < 25 OR delaz>45) {
 		RETURN FALSE.
 	}
 	

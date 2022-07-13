@@ -713,6 +713,7 @@ UNTIL FALSE {
 		LOCAL is_s_turn_p IS is_s_turn.
 		SET is_s_turn TO s_turn(
 			tgt_range,
+			az_err,
 			s_turn_tgt_vel,
 			simstate["surfvel"]:MAG
 		).
