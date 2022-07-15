@@ -658,11 +658,11 @@ FUNCTION mode5 {
 	LOCAL guid_pt IS new_position(rwy["td_pt"],abeam_dist - x,runway_bng). 
 	
 	//find the azimuth error between the predicted heading and the bearing to the guidance point
-	//negative deviation if the vessel azimuth is greater i.e. to the right
-	//of the hac entry relative bearing
+	//negative deviation if the vessel azimuth is greater i.e. to the right of the hac entry relative bearing
+	//gain factor to force centreline alignment early on
 	LOCAL hac_targetaz IS bearingg(guid_pt,simstate["latlong"]).
 	LOCAL ship_az IS compass_for(simstate["surfvel"],simstate["latlong"]).
-	LOCAL hac_az_error IS unfixangle( hac_targetaz - ship_az ).
+	LOCAL hac_az_error IS unfixangle( hac_targetaz - ship_az )*1.5.
 	
 	////first calculate the angular deviation given the current distance
 	////the horizontal deviation is calculated relative to the touchdown point 
