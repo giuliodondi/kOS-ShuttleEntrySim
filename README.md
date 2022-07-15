@@ -95,14 +95,13 @@ The folder **Scripts/Shuttle_entrysim/VESSELS** contains the different vehicle c
 There are three vehicle config files:
 - **gains.ks** which I do not advise touching unless you know what you are doing.
 - **pitch_profile.ks** which specifies the pitch versus surface velocity points that the Entry Guidance will follow. The profile I provide you with is taken directly from early Shuttle technical
-documents, therefore it as designed to respect the Shuttle's thermal limits. During flight you can take manual control and adjust the pitch to increase or decrease drag, more on this later.
-Bear in mind that you will be able to adjust the initial pitch value in flight, more about that later.
+documents, therefore it as designed to respect the Shuttle's thermal limits which is not really necessary in KSP. During flight you can edit the profile with a gUI button or take over with manual steering, more about this later.
 - **flapcontrol.ks** which specifies which parts allow for flap control and the angle ranges of motion of each. Here you specify the names of your elevon and body flap parts. The file provided is already good for DECQ shuttle so leave it alone.
 
 In the main folder **Scripts/Shuttle_entrysim** you will see more configuration files. The only one you should pay attention to is **landing_sites.ks**. This contains the definition of the Runways available for targeting by the scripts.
 
 You must create the runways wherever you like on Earth using Kerbal Konstructs. You must then write down the coordinates of its halfway point, its length, elevation and heading
-and fill in the details in the **landing_sites.ks** folloring the formatting inside. Don't forget the name of the landing site, also.
+and fill in the details in the **landing_sites.ks** following the formatting inside. Don't forget the name of the landing site, that's how it will appear in the GUI menu.
 I provide you with my own landing sites definitions for reference, but I strongly suggest you replace the details with your own measured data for better accuracy.
 
 
