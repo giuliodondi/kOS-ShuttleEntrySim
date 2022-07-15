@@ -68,7 +68,7 @@ If you use a controller or flight stick this will not be necessary
 
 ## Setting up the Space Shuttle in the VAB
 
-### IF you use my fork of Space Shuttle System, beware that I will soon implement aerodynamic modifications for extra crossrange. This section will soon change.
+### IF you use my fork of Space Shuttle System the control surfaces will come already configured.
 
 **IMPORTANT**  
 These scripts are not magic and rely on the Shuttle being easy to control. I can give you hints on what to look out for but ultimately it will be
@@ -78,8 +78,8 @@ or lateral stability all the way down
 
 
 In the VAB adjust the FAR control surface mappings like this: 
-- The tail control surface should have +100% yaw authority and +50% roll authority, 20 deflection and the rest to zero. Flap and Spoiler disabled.
-- The elevons should have +100% pitch authority, +60% roll authority, -15% AOA authority, 20 deflection and the rest to zero. Flaps enabled, spoilers disabled
+- The tail control surface should have +100% yaw authority and +50% roll authority, 18 deflection and the rest to zero. Flap and Spoiler disabled.
+- The elevons should have +100% pitch authority, +60% roll authority, 15 deflection and the rest to zero. Flaps enabled, spoilers disabled
 - The body flap must have zero authority on everything.  Flaps enabled, spoilers disabled.
 
 Still in the VAB, enable all actuation toggles on the Crew Cabin and both OMS pods. This will give you full control on which RCS jets are active for which attitude direction.
