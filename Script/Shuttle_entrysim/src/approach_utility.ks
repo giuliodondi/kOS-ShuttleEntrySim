@@ -530,7 +530,8 @@ FUNCTION mode3 {
 	LOCAL hac_targetaz IS bearingg(rwy["acq_guid_pt"],simstate["latlong"]).
 	LOCAL ship_az IS compass_for(simstate["surfvel"],simstate["latlong"]).
 	
-	LOCAL hac_az_error IS unfixangle( hac_targetaz - ship_az ).
+	//limit az error 
+	LOCAL hac_az_error IS MAX(5,unfixangle( hac_targetaz - ship_az )).
 
 	
 	
