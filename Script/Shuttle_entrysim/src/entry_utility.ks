@@ -250,7 +250,7 @@ FUNCTION pitch_profile {
 	LOCAL out IS alpha0.
 
 	IF (vel >= pitchprof_segments[pitchprof_segments:LENGTH-1][0] ) {
-		SET  pitchprof_segments[pitchprof_segments:LENGTH-1][1] TO alpha0.
+		SET out TO pitchprof_segments[pitchprof_segments:LENGTH-1][1].
 	} ELSE {
 		SET out TO INTPLIN(pitchprof_segments,vel).
 	}

@@ -5,7 +5,9 @@
 //main loop
 FUNCTION entry_main_loop {
 
-apch_params:ADD("hac_h_cub1",apch_params["glideslope"]["outer"]).
+apch_params:ADD("hac_h_cub0",0).
+apch_params:ADD("hac_h_cub1",0).
+apch_params:ADD("hac_h_cub2",0).
 apch_params:ADD("hac_h_cub3",0).
 apch_params["glideslope"]:ADD("taem",0).
 
@@ -341,7 +343,8 @@ LOCAL roll_ref IS constants["rollguess"].
 //initialise the roll sign to the azimuth error sign
 LOCAL roll_sign IS SIGN(az_err).
 LOCAL pitch_ref IS pitchguid.
-LOCAL update_reference IS true.
+
+
 
 
 
@@ -426,13 +429,6 @@ UNTIL FALSE {
 	}
 	
 	SET constants["prebank_angle"] TO rollsteer.
-	
-	//determine if reference pitch is to be updated
-	//SET update_reference TO update_ref_pitch(pitchsteer).
-	//IF update_reference {
-	//	SET pitch_ref TO pitchsteer.
-	//}
-	
 		
 	//run the vehicle simulation
 	LOCAL ICS IS LEXICON(
