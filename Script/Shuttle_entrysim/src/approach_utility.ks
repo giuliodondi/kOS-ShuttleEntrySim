@@ -341,7 +341,8 @@ FUNCTION hac_turn_cubic_prof {
 	PARAMETER hac_gndtrk.
 	PARAMETER rwy.
 	PARAMETER params.
-	RETURN hac_gndtrk * (params["hac_h_cub1"] + hac_gndtrk * (params["hac_h_cub2"] + hac_gndtrk * params["hac_h_cub3"]) ) * 1000.
+	LOCAL prof IS params["hac_h_cub0"] + hac_gndtrk*( params["hac_h_cub1"] + hac_gndtrk*( params["hac_h_cub2"] + hac_gndtrk*params["hac_h_cub3"] ) ).
+	RETURN prof*1000.
 }
 
 
@@ -357,14 +358,16 @@ FUNCTION hac_turn_profile_alt{
 	
 	print "hac_gndtrk : " + pred_hac_gndtrk at (0,16).
 	
+	LOCAL x0 IS 0.5.
+	
 	//altitude at the exit
-	LOCAL final_alt IS final_profile_alt(params["final_dist"],rwy,params).
+	LOCAL final_alt IS final_profile_alt(params["final_dist"] + x0,rwy,params).
 	
 	//get the uncorrected altitude at the ship current point
-	LOCAL alt_corr IS (SHIP:ALTITUDE-final_alt)/hac_turn_cubic_prof(ship_hac_gndtrk, rwy, apch_params).
+	LOCAL alt_corr IS (SHIP:ALTITUDE-final_alt)/hac_turn_cubic_prof(ship_hac_gndtrk - x0, rwy, apch_params).
 	
 	//now build the vertical profile value at the predicted point 
-	RETURN final_alt + hac_turn_cubic_prof(pred_hac_gndtrk, rwy, apch_params)*alt_corr.
+	RETURN final_alt + hac_turn_cubic_prof(pred_hac_gndtrk - x0, rwy, apch_params)*alt_corr.
 }
 
 
@@ -386,11 +389,11 @@ FUNCTION hac_entry_profile_alt {
 	
 	SET params["glideslope"]["taem"] TO (hbar - params["glideslope"]["outer"]*hac_gndtrk*0.5)/(ship_hac_dist + hac_gndtrk*0.5).
 	
-	LOCAL hac_turn_alt IS hbar - xbar*params["glideslope"]["taem"].
+	LOCAL hac_turn_alt IS 0.5*hac_gndtrk*(params["glideslope"]["taem"] + params["glideslope"]["outer"]).
 	
 	update_cubic_coef_hac_acq(hac_turn_alt, hac_gndtrk, rwy, params).
 	
-	RETURN mode5_alt + 0.5*hac_gndtrk*(params["glideslope"]["taem"] + params["glideslope"]["outer"])*1000.
+	RETURN mode5_alt + hac_turn_alt*1000.
 }
 
 
@@ -427,9 +430,19 @@ FUNCTION update_cubic_coef_hac_acq {
 	PARAMETER rwy.
 	PARAMETER params.
 	
-	SET params["hac_h_cub3"] TO - (2*hac_alt - hac_gndtrk*(params["glideslope"]["taem"] + params["hac_h_cub1"]))/(hac_gndtrk^3).
+	//SET params["hac_h_cub1"] TO params["glideslope"]["outer"].
+	//SET params["hac_h_cub3"] TO - (2*hac_alt - hac_gndtrk*(params["glideslope"]["taem"] + params["hac_h_cub1"]))/(hac_gndtrk^3).
+	//SET params["hac_h_cub2"] TO (params["glideslope"]["taem"] - params["hac_h_cub1"] - 3*params["hac_h_cub3"]*(hac_gndtrk^2) )/(2*hac_gndtrk).
 	
-	SET params["hac_h_cub2"] TO (params["glideslope"]["taem"] - params["hac_h_cub1"] - 3*params["hac_h_cub3"]*(hac_gndtrk^2) )/(2*hac_gndtrk).
+	LOCAL x0 IS 0.5.
+	LOCAL red_gndtrk IS hac_gndtrk - x0.
+	LOCAL delta_gs IS params["glideslope"]["taem"] - params["glideslope"]["outer"].
+	
+	SET params["hac_h_cub3"] TO ( 2*(hac_gndtrk*params["glideslope"]["outer"] - hac_alt) + delta_gs*red_gndtrk )/(red_gndtrk^3).
+	SET params["hac_h_cub2"] TO (delta_gs - 3*params["hac_h_cub3"]*(hac_gndtrk^2 - x0^2))/(2*red_gndtrk).
+	SET params["hac_h_cub1"] TO params["glideslope"]["outer"] - x0*(2*params["hac_h_cub2"] - 3*x0*params["hac_h_cub3"]).
+	SET params["hac_h_cub0"] TO (x0^2)*(params["hac_h_cub2"] - 2*params["hac_h_cub3"]*x0).
+	
 	
 }
 
