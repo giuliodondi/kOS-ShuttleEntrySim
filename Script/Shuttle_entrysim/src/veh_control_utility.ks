@@ -356,8 +356,6 @@ FUNCTION flaps_aoa_feedback {
 		LOCAL fmod IS f["flapmod"].
 		IF NOT fmod:GETFIELD("std. ctrl"). {fmod:SETFIELD("std. ctrl",TRUE).}
 		wait 0.
-		fmod:SETFIELD("ctrl dflct",20).  	
-		wait 0.
 		fmod:SETFIELD("aoa %",80).  	
 	}
 
