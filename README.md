@@ -59,10 +59,12 @@ In particular, you will run two scripts:
 
 ## KSP settings
 
-Modify the control mappings in this way:
+If using the keyboard modify the control mappings in this way:
 - pitch axis controlled by the W-S keys
 - roll axis controlled with A-D
 - yaw axis controlled by Q-E
+
+If you use a controller or flight stick this will not be necessary
 
 ## Setting up the Space Shuttle in the VAB
 
