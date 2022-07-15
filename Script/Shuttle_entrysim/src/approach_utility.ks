@@ -575,15 +575,19 @@ FUNCTION mode4 {
 	//find the groundtrack around the hac at the ship current point
 	LOCAL ship_hac_gndtrk IS get_hac_groundtrack(ship_hac_angle, params).
 	
-	//update the cubic coefficients so that the profile matches the current altitude 
-	update_cubic_coef_hac_turn(ship_hac_gndtrk, rwy, apch_params).
+	//altitude at the exit
+	LOCAL final_alt IS final_profile_alt(params["final_dist"],rwy,params).
+	
+	//get the uncorrected altitude at the ship current point
+	LOCAL alt_corr IS (SHIP:ALTITUDE-final_alt)/hac_turn_profile_alt(ship_hac_gndtrk, rwy, apch_params).
+	
 	
 	//now build the vertical profile value at the predicted point 
 	
 	//find the groundtrack around the hac at the predicted point
 	LOCAL hac_gndtrk IS get_hac_groundtrack(rwy["hac_angle"], params).
 	
-	LOCAL profile_alt IS final_profile_alt(params["final_dist"],rwy,params) + hac_turn_profile_alt(hac_gndtrk, rwy, apch_params).
+	LOCAL profile_alt IS final_alt + hac_turn_profile_alt(hac_gndtrk, rwy, apch_params)*alt_corr.
 
 	print "profile alt:  " +  profile_alt at (1,2).	
 	
