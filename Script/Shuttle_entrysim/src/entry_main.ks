@@ -511,8 +511,10 @@ UNTIL FALSE {
 		SET pitchguid TO pitch_ref.
 		
 		//see if ref roll has converged 
-		IF (NOT guid_converged_flag AND ABS(roll_ref - roll_ref_p) <constants["rolltol"]) {
+		IF (ABS(roll_ref - roll_ref_p) <constants["rolltol"]) {
 			SET guid_converged_flag TO TRUE.
+		} ELSE {
+			SET guid_converged_flag TO FALSE.
 		}
 		
 		//use it only if the reference roll value is converged
