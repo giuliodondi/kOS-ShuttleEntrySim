@@ -301,7 +301,7 @@ FUNCTION roll_profile {
 	
 	//wil not command any roll above this altitude
 	IF state["altitude"]>constants["firstrollalt"] {
-		RETURN constants["prebank_angle"].
+		RETURN ABS(constants["prebank_angle"]).
 	}
 	
 	//modulate the base roll based on vertical speed 
