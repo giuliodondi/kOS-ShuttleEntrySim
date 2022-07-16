@@ -389,6 +389,8 @@ FUNCTION make_global_entry_GUI {
 		SET tgtrwy["td_pt"] TO newsite["rwys"][select_rwy:VALUE]["td_pt"].
 		SET tgtrwy["hac_side"] TO select_side:VALUE.
 		define_hac(SHIP:GEOPOSITION,tgtrwy,apch_params).
+		
+		reset_hud_bg_brightness().
 	}.	
 	
 	
@@ -498,7 +500,7 @@ FUNCTION make_hud_gui {
 	SET hud_gui:Y TO 150.
 	SET hud_gui:STYLe:WIDTH TO 450.
 	SET hud_gui:STYLe:HEIGHT TO 320.
-	SET hud_gui:style:BG to "Shuttle_entrysim/src/gui_images/hudbackground.png".
+	reset_hud_bg_brightness().
 	SET hud_gui:skin:LABEL:TEXTCOLOR to guitextgreen.
 	hud_gui:SHOW.
 
@@ -671,6 +673,23 @@ FUNCTION make_hud_gui {
 	SET spdbk_slider:STYLE:WIDTH TO 110.
 	SET spdbk_slider:STYLE:HEIGHT TO 20.
 
+}
+
+//sets bright or dark hud background based on the local time at the target
+FUNCTION reset_hud_bg_brightness {
+	IF NOT (DEFINED hud_gui) {RETURN.}
+
+	LOCAL tgt_lng IS tgtrwy["td_pt"]:LNG.
+
+	LOCAL tgt_local_time IS local_time_seconds(tgt_lng).
+	
+	IF (tgt_local_time < 19800 OR tgt_local_time>66000) {
+		SET hud_gui:style:BG to "Shuttle_entrysim/src/gui_images/hudbackground_bright.png".
+	} ELSe {
+		SET hud_gui:style:BG to "Shuttle_entrysim/src/gui_images/hudbackground_dark.png".
+	}
+	
+	
 }
 
 
