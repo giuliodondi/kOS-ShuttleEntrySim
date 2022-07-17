@@ -117,9 +117,6 @@ FUNCTION update_attitude {
 
 
 
-
-
-
 //	DOES NOT WORK - KEEP FOR LEGACY
 //automatic path tracking, using the lateral and vertical deltas
 //pipper deviation must correspond to corrections to the value of angle of attack and bank angle
@@ -271,11 +268,10 @@ FUNCTION speed_control {
 FUNCTION  flaptrim_control{
 	PARAMETER auto_flag.
 	PARAMETER flap_control.
+
 	
 	
 	If auto_flag {
-		//read off the gimbal angle to get the pitch control input 
-		flap_control["pitch_control"]:update(gimbals:PITCHANGLE).
 	
 		//initialise the flap control pid loop, pid gains rated for deflection as percentage of maximum
 		IF NOT (DEFINED FLAPPID) {

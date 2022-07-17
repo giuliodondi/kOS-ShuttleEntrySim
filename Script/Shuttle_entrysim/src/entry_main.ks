@@ -104,6 +104,8 @@ GLOBAL airbrake_control IS LEXICON(
 						"spdbk_val",0
 						).
 
+IF (DEFINED BRAKESPID) {UNSET BRAKESPID.}
+
 
 LISt ENGINES IN englist.
 IF NOT (DEFINED gimbals) {
@@ -113,10 +115,13 @@ IF NOT (DEFINED gimbals) {
 			BREAK.
 		}
 	}
-	
 }
+gimbals:DOACTION("free gimbal", TRUE).
+//gg:DOEVENT("Show actuation toggles").
+gimbals:DOACTION("toggle gimbal roll", TRUE).
+gimbals:DOACTION("toggle gimbal yaw", TRUE).
 
-
+IF (DEFINED FLAPPID) {UNSET FLAPPID.}
 
 //initialise the running average for the pitch control values
 SET flap_control["pitch_control"] TO average_value_factory(5).
@@ -136,9 +141,6 @@ IF SHIP:ALTITUDE>constants["apchalt"] {
 	//don't necessarily want to do this for an alt
 	FOR eng in englist {
 		IF (eng:IGNITION) {
-			IF NOT (DEFINED gimbals) {
-				GLOBAL gimbals IS eng:GIMBAL.
-			}
 			eng:SHUTDOWN.
 		}
 	}
@@ -188,7 +190,7 @@ IF SHIP:ALTITUDE>constants["apchalt"] {
 
 }
 
-flaps_aoa_feedback(flap_control["parts"]).
+//flaps_aoa_feedback(flap_control["parts"]).
 
 
 SET mode TO 3.
@@ -366,6 +368,8 @@ WHEN TIME:SECONDS>(attitude_time_upd + 0.2) THEN {
 
 	//update the flaps trim setting and airbrakes IF WE'RE BELOW FIRST ROLL ALT
 	IF SHIP:ALTITUDE < constants["firstrollalt"] {	
+		//read off the gimbal angle to get the pitch control input 
+		flap_control["pitch_control"]:update(gimbals:PITCHANGLE).
 		SET flap_control TO flaptrim_control(flptrm:PRESSED, flap_control).
 		SET airbrake_control["spdbk_val"] TO speed_control(arbkb:PRESSED, airbrake_control["spdbk_val"], mode).
 		FOR b IN airbrakes {
@@ -827,8 +831,8 @@ ELSE IF sim_settings["integrator"]= "rk4" {
 }
 
 
-LOCAL pitchsteer IS get_pitch_prograde().
-LOCAL rollsteer IS get_roll_prograde().
+LOCAL pitchprog IS get_pitch_prograde().
+LOCAL rollprog IS get_roll_prograde().
 
 UNTIL FALSE{
 	//need this to move the spoilers
@@ -837,8 +841,8 @@ UNTIL FALSE{
 	//distance to target runway
 	LOCAL tgt_range IS greatcircledist(tgtrwy["position"], SHIP:GEOPOSITION).
 	
-	SET pitchsteer TO get_pitch_prograde().
-	SET rollsteer TO get_roll_prograde().
+	SET pitchprog TO get_pitch_prograde().
+	SET rollprog TO get_roll_prograde().
 	
 	
 	//predict vehicle position some time ahead
@@ -848,7 +852,7 @@ UNTIL FALSE{
 	                 "velocity",SHIP:VELOCITY:ORBIT
 	).
 	LOCAL simstate IS blank_simstate(ICS).
-	SET simstate TO rk3(sim_settings["deltat"],simstate,LIST(pitchsteer,rollsteer)).
+	SET simstate TO rk3(sim_settings["deltat"],simstate,LIST(pitchprog,rollprog)).
 	
 	
 	SET simstate["altitude"] TO bodyalt(simstate["position"]).
@@ -878,6 +882,9 @@ UNTIL FALSE{
 	
 	SET airbrake_control["spdbk_val"] TO speed_control(is_autoairbk(),airbrake_control["spdbk_val"],mode).
 	
+	//read off the pilot input, assumes manual control
+	flap_control["pitch_control"]:update(SHIP:CONTROL:PILOTPITCH).
+	
 	SET flap_control TO flaptrim_control(flptrm:PRESSED, flap_control).
 	
 	FOR b IN airbrakes {
@@ -894,7 +901,7 @@ UNTIL FALSE{
 		update_nz(
 						-SHIP:ORBIT:BODY:POSITION,
 						SHIP:VELOCITY:SURFACE,
-						LIST(pitchsteer,rollsteer)
+						LIST(pitchprog,rollprog)
 					
 					)
 	).
