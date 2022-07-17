@@ -853,18 +853,6 @@ FUNCTION make_entry_GUI {
 	SET sasbox:STYLE:ALIGN TO "center".
 	
 	GLOBAL sasb IS  sasbox:ADDCHECKBOX("Auto Steering",false).
-	SET sasb:ONTOGGLE TO {
-		parameter b. 
-		//IF b {
-		//	SAS OFF.
-		//	LOCK STEERING TO P_att.
-		//}
-		//ELSE {
-		//	UNLOCK STEERING.
-		//	SAS ON.
-		//}
-	
-	}.
 	
 	sasbox:addspacing(20).
 
