@@ -14,6 +14,13 @@ GLOBAL ldgsiteslex IS LEXICON(
 							"heading",58.2
 							
 						),
+						"Northrup",LEXICON(
+							"position",LATLNG(32.946760,-106.416492),
+							"elevation",1201,
+							"length",6000,
+							"heading",343.6
+							
+						),
 						"Vandenberg",LEXICON(
 							"position",LATLNG(34.737224,-120.587830),
 							"elevation",103,
