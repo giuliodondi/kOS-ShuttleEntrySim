@@ -190,7 +190,7 @@ IF SHIP:ALTITUDE>constants["apchalt"] {
 
 }
 
-//flaps_aoa_feedback(flap_control["parts"]).
+flaps_aoa_feedback(flap_control["parts"]).
 
 
 SET mode TO 3.
@@ -551,7 +551,7 @@ UNTIL FALSE {
 		SET loglex["alt"] TO SHIP:ALTITUDE/1000.
 		SET loglex["speed"] TO SHIP:VELOCITY:SURFACE:MAG. 
 		SET loglex["hdot"] TO SHIP:VERTICALSPEED.
-		SET loglex["range"] TO tgt_range.
+		SET loglex["range"] TO tgt_range + estimate_range_hac_landing(tgtrwy,apch_params).
 		SET loglex["lat"] TO SHIP:GEOPOSITION:LAT.
 		SET loglex["long"] TO SHIP:GEOPOSITION:LNG.
 		SET loglex["pitch"] TO get_pitch_prograde().
@@ -757,10 +757,10 @@ UNTIL FALSE {
 		
 		SET loglex["mode"] TO mode.
 		SET loglex["time"] TO TIME:SECONDS.
-		SET loglex["alt"] TO SHIP:ALTITUDE/1000.
+		SET loglex["alt"] TO runway_alt(SHIP:ALTITUDE)/1000.
 		SET loglex["speed"] TO SHIP:VELOCITY:SURFACE:MAG. 
 		SET loglex["hdot"] TO SHIP:VERTICALSPEED.
-		SET loglex["range"] TO tgt_range.
+		SET loglex["range"] TO tgt_range + estimate_range_hac_landing(tgtrwy,apch_params).
 		SET loglex["lat"] TO SHIP:GEOPOSITION:LAT.
 		SET loglex["long"] TO SHIP:GEOPOSITION:LNG.
 		SET loglex["pitch"] TO get_pitch_prograde().
@@ -838,8 +838,6 @@ UNTIL FALSE{
 	//need this to move the spoilers
 	BRAKES ON.
 
-	//distance to target runway
-	LOCAL tgt_range IS greatcircledist(tgtrwy["position"], SHIP:GEOPOSITION).
 	
 	SET pitchprog TO get_pitch_prograde().
 	SET rollprog TO get_roll_prograde().
@@ -914,14 +912,14 @@ UNTIL FALSE{
 		
 		SET loglex["mode"] TO mode.
 		SET loglex["time"] TO TIME:SECONDS.
-		SET loglex["alt"] TO SHIP:ALTITUDE/1000.
+		SET loglex["alt"] TO runway_alt(SHIP:ALTITUDE)/1000.
 		SET loglex["speed"] TO SHIP:VELOCITY:SURFACE:MAG. 
 		SET loglex["hdot"] TO SHIP:VERTICALSPEED.
 		SET loglex["lat"] TO SHIP:GEOPOSITION:LAT.
 		SET loglex["long"] TO SHIP:GEOPOSITION:LNG.
 		SET loglex["pitch"] TO get_pitch_lvlh().
 		SET loglex["roll"] TO get_roll_lvlh().
-		SET loglex["tgt_range"] TO tgt_range.
+		SET loglex["range"] TO total_range_hac_landing(tgtrwy,apch_params).
 		
 			
 			
