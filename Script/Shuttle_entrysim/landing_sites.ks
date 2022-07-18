@@ -3,7 +3,7 @@ IF (DEFINED ldgsiteslex) {UNSET ldgsiteslex.}
 GLOBAL ldgsiteslex IS LEXICON(
 						"KSC",LEXICON(
 							"position",LATLNG(28.61938,-80.70092),
-							"elevation",9,
+							"elevation",14,
 							"length",5030,
 							"heading",329.9
 						),
@@ -30,7 +30,7 @@ GLOBAL ldgsiteslex IS LEXICON(
 						),
 						"Mataveri",LEXICON(
 							"position",LATLNG(-27.1766369,-109.401308),
-							"elevation",130,
+							"elevation",102,
 							"length",5030,
 							"heading",168.4
 							
