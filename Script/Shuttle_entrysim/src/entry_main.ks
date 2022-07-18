@@ -919,7 +919,7 @@ UNTIL FALSE{
 		SET loglex["long"] TO SHIP:GEOPOSITION:LNG.
 		SET loglex["pitch"] TO get_pitch_lvlh().
 		SET loglex["roll"] TO get_roll_lvlh().
-		SET loglex["range"] TO total_range_hac_landing(tgtrwy,apch_params).
+		SET loglex["range"] TO total_range_hac_landing(simstate["latlong"],tgtrwy,apch_params).
 		
 			
 			

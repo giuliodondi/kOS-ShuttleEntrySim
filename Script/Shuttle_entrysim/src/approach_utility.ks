@@ -175,7 +175,7 @@ FUNCTION define_hac {
 	SET rwy["hac_exit"] TO new_position(rwy["aiming_pt"],params["final_dist"],bng).
 	
 	//shift artificially the hac centre 0.3km further away from centerline than they should be 
-	define_hac_centre(rwy,params,0.3).
+	define_hac_centre(rwy,params,0.35).
 	
 	//define the reference up vector, pointing up for a right hac and down for a left one
 	SET rwy["upvec"] TO (pos2vec(rwy["hac"])):NORMALIZED.
@@ -309,18 +309,19 @@ FUNCTION get_hac_groundtrack {
 
 //estimate total range to be flown around the hac and to touchdown
 FUNCTION total_range_hac_landing {
+	PARAMETER pred_pos.
 	PARAMETER rwy.
 	PARAMETEr params.
 	
 	LOCAL total_range IS 0.
 	
 	IF mode>=5{
-		SET total_range TO greatcircledist(rwy["position"],SHIP:GEOPOSITION).
+		SET total_range TO greatcircledist(rwy["position"],pred_pos).
 	} ELSE {
-		SET total_range TO rwy["length"]/2000 +  params["aiming_pt_dist"] + params["final_dist"] + get_hac_groundtrack(rwy["hac_angle"], params).
+		SET total_range TO greatcircledist(rwy["position"],rwy["hac_exit"]) + get_hac_groundtrack(rwy["hac_angle"], params).
 		
 		IF mode = 3 {
-			SET total_range TO total_range + greatcircledist(rwy["hac_entry"],SHIP:GEOPOSITION).
+			SET total_range TO total_range + greatcircledist(rwy["hac_entry"],pred_pos).
 		}
 	}
 
@@ -595,8 +596,8 @@ FUNCTION mode4 {
 	print "hac angle:  " + rwy["hac_angle"] at (1,1).
 	
 	//if close to the exit, redraw the hac centre without bias
-	IF rwy["hac_angle"] < 30 {
-		define_hac_centre(rwy,params,0).
+	IF rwy["hac_angle"] < 35 {
+		define_hac_centre(rwy,params,0.1*rwy["hac_angle"]/10).
 	}
 	
 	
