@@ -138,6 +138,24 @@ FUNCTION runway_alt {
 	RETURN altt - tgtrwy["elevation"].
 }
 
+FUNCTION define_hac_centre {
+	PARAMETER rwy.
+	PARAMETER params.
+	PARAMETER dist_shift.
+
+	LOCAL bng IS fixangle(rwy["heading"] - 180).
+	
+	LOCAL hac_dist IS params["hac_radius"] + dist_shift.
+	
+	//find the hac centre
+	IF rwy["hac_side"]="left" {
+		SET bng TO fixangle(bng + hac_angle).
+	} ELSE IF rwy["hac_side"]="right"  {
+		SET bng TO fixangle(bng - hac_angle).
+	}
+	SET rwy["hac"] TO new_position(rwy["aiming_pt"],hac_dist,bng).
+}
+
 
 //called upon changing either the runway or the hac side
 //defined the hac centre, the displaced final point (hac exit) and the reference up vector
@@ -154,17 +172,9 @@ FUNCTION define_hac {
 	
 	//find the hac exit point, common for left and right
 	SET rwy["hac_exit"] TO new_position(rwy["aiming_pt"],params["final_dist"],bng).
-	//shift artificially the hac centres 0.3km further away from centerline than they should be 
-	LOCAL hac_angle IS ARCTAN2(params["hac_radius"] + 0.15,params["final_dist"]).
-	LOCAL hac_dist IS params["final_dist"]/COS(hac_angle).
 	
-	//find the hac centre
-	IF rwy["hac_side"]="left" {
-		SET bng TO fixangle(bng + hac_angle).
-	} ELSE IF rwy["hac_side"]="right"  {
-		SET bng TO fixangle(bng - hac_angle).
-	}
-	SET rwy["hac"] TO new_position(rwy["aiming_pt"],hac_dist,bng).
+	//shift artificially the hac centre 0.3km further away from centerline than they should be 
+	define_hac_centre(rwy,params,0.3).
 	
 	//define the reference up vector, pointing up for a right hac and down for a left one
 	SET rwy["upvec"] TO (pos2vec(rwy["hac"])):NORMALIZED.
