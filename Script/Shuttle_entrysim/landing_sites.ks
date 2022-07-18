@@ -37,7 +37,7 @@ GLOBAL ldgsiteslex IS LEXICON(
 						),
 						"Istres",LEXICON(
 							"position",LATLNG(43.524123,4.953187),
-							"elevation",366,
+							"elevation",106,
 							"length",5030,
 							"heading",152.3
 							
