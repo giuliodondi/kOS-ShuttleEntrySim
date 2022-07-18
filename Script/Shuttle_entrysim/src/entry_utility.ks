@@ -185,11 +185,8 @@ FUNCTION cross_error {
 FUNCTION estimate_range_hac_landing {
 	PARAMETER rwy.
 	PARAMETEr params.
-	
-	//placeholder
-	LOCAL hac_angle IS 360.
 
-	LOCAL range_bias IS params["final_dist"] + get_hac_groundtrack(hac_angle, params).
+	LOCAL range_bias IS rwy["length"]/2 +  params["aiming_pt_dist"] + params["final_dist"] + get_hac_groundtrack(rwy["hac_angle"], params).
 
 }
 

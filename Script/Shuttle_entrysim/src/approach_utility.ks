@@ -116,6 +116,7 @@ FUNCTION refresh_runway_lex {
 							"position",tgtsite["position"],
 							"elevation",tgtsite["elevation"],
 							"heading",tgtsite["heading"],
+							"length",tgtsite["length"],
 							"td_pt",LATLNG(0,0),
 							"glideslope",0,
 							"hac_side","left",	//placeholder choice
@@ -294,6 +295,26 @@ FUNCTION get_hac_groundtrack {
 	RETURN (params["hac_radius"] + 0.344*params["hac_r2"]*hac_angle^2)*hac_angle*CONSTANT:PI/180.
 }
 
+
+//estimate total range to be flown around the hac and to touchdown
+FUNCTION total_range_hac_landing {
+	PARAMETER rwy.
+	PARAMETEr params.
+	
+	LOCAL total_range IS 0.
+	
+	IF mode>=5{
+		SET total_range TO greatcircledist(rwy["position"],SHIP:GEOPOSITION).
+	} ELSE {
+		SET total_range TO (rwy["length"]/2 +  params["aiming_pt_dist"] + params["final_dist"])/1000 + get_hac_groundtrack(rwy["hac_angle"], params).
+		
+		IF mode = 3 {
+			SET total_range TO total_range + greatcircledist(rwy["hac_entry"],SHIP:GEOPOSITION).
+		}
+	}
+
+	RETURN total_range.
+}
 
 
 //give nthe current mode, returns the ground-track distance between the predicted point and 
@@ -558,32 +579,32 @@ FUNCTION mode4 {
 	PARAMETER params.
 	
 	//find the theta angle
-	LOCAL ship_pred_vec IS (simstate["latlong"]:POSITION - rwy["hac"]:POSITION):NORMALIZED.
-	update_hac_angle(rwy,ship_pred_vec).
+	LOCAL ship_vec IS (SHIP:GEOPOSITION:POSITION - rwy["hac"]:POSITION):NORMALIZED.
+	update_hac_angle(rwy,ship_vec).
 	print "hac angle:  " + rwy["hac_angle"] at (1,1).
 	
 	
 	//the hac angle is measured wrt the predicted point 
 	//correct it to find the ship hac angle 
-	LOCAL ship_vec IS (SHIP:GEOPOSITION:POSITION - rwy["hac"]:POSITION):NORMALIZED.
-	LOCAL ship_hac_angle IS rwy["hac_angle"] + signed_angle(ship_vec,ship_pred_vec,-rwy["upvec"],-1).
-	print "ship_hac_angle:  " +  ship_hac_angle at (1,5).	
+	LOCAL ship_pred_vec IS (simstate["latlong"]:POSITION - rwy["hac"]:POSITION):NORMALIZED.
+	LOCAL ship_pred_hac_angle IS rwy["hac_angle"] - signed_angle(ship_vec,ship_pred_vec,-rwy["upvec"],-1).
+	print "ship_pred_hac_angle:  " +  ship_pred_hac_angle at (1,5).	
 	
 
 	//update the HAC spiral to be tangent to the current ship position 
 	LOCAL new_radius IS greatcircledist(rwy["hac"],SHIP:GEOPOSITION).
 	print "new_radius:  " +  new_radius at (1,6).
 	
-	update_hac_spiral(new_radius,ship_hac_angle,params).
+	update_hac_spiral(new_radius,rwy["hac_angle"],params).
 
 	
 	print "hac_r2 : " + params["hac_r2"] at (1,7). 
 	
 	//find the groundtrack around the hac at the ship current point
-	LOCAL ship_hac_gndtrk IS get_hac_groundtrack(ship_hac_angle, params).
+	LOCAL ship_hac_gndtrk IS get_hac_groundtrack(rwy["hac_angle"], params).
 	
 	//find the groundtrack around the hac at the predicted point
-	LOCAL pred_hac_gndtrk IS get_hac_groundtrack(rwy["hac_angle"], params).
+	LOCAL pred_hac_gndtrk IS get_hac_groundtrack(ship_pred_hac_angle, params).
 	
 	//get vertical profile
 	
