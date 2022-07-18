@@ -243,7 +243,7 @@ FUNCTION speed_control {
 			SET BRAKESPID:SETPOINT TO 0.
 		}
 		
-		LOCAL delta_spdbk IS BRAKESPID:UPDATE(TIME:SECONDS,delta_spd).
+		LOCAL delta_spdbk IS CLAMP(BRAKESPID:UPDATE(TIME:SECONDS,delta_spd), -2, 2).
 		
 		SET newval TO newval + delta_spdbk.
 		
@@ -352,7 +352,7 @@ FUNCTION flaps_aoa_feedback {
 		LOCAL fmod IS f["flapmod"].
 		IF NOT fmod:GETFIELD("std. ctrl"). {fmod:SETFIELD("std. ctrl",TRUE).}
 		wait 0.
-		fmod:SETFIELD("aoa %",80).  	
+		fmod:SETFIELD("aoa %",40).  	
 	}
 
 }
