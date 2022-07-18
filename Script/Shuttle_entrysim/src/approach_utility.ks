@@ -467,7 +467,7 @@ FUNCTION update_cubic_coef_hac_acq {
 	//SET params["hac_h_cub3"] TO - (2*hac_alt - hac_gndtrk*(params["glideslope"]["taem"] + params["hac_h_cub1"]))/(hac_gndtrk^3).
 	//SET params["hac_h_cub2"] TO (params["glideslope"]["taem"] - params["hac_h_cub1"] - 3*params["hac_h_cub3"]*(hac_gndtrk^2) )/(2*hac_gndtrk).
 	
-	LOCAL x0 IS 0.5.
+	LOCAL x0 IS params["ogs_preacq_dist"].
 	LOCAL red_gndtrk IS hac_gndtrk - x0.
 	LOCAL delta_gs IS params["glideslope"]["taem"] - params["glideslope"]["outer"].
 	
@@ -806,11 +806,11 @@ FUNCTION mode_switch {
 		LOCAL entryvec IS (rwy["hac_entry"]:POSITION - rwy["hac"]:POSITION):NORMALIZED.
 		LOCAL predvec IS (simstate["latlong"]:POSITION - rwy["hac"]:POSITION):NORMALIZED.
 		LOCAL entry_angle IS VANG(predvec,entryvec).
-		IF (entry_angle < 2 OR mode_dist(simstate,tgtrwy,apch_params) < 0.1) {
+		IF (entry_angle < 2 OR mode_dist(simstate,tgtrwy,params) < 0.1) {
 			SET switch_mode TO TRUE.
 		}	
 	} ELSE IF mode=4 {	
-		IF (rwy["hac_angle"] < 14 OR mode_dist(simstate,tgtrwy,apch_params) < 1.0) {
+		IF (rwy["hac_angle"] < 14 OR mode_dist(simstate,tgtrwy,params) < params["ogs_preacq_dist"]) {
 			SET switch_mode TO TRUE.
 			//override the previously calculated glideslope value
 			SET rwy["glideslope"] TO params["glideslope"]["outer"].
