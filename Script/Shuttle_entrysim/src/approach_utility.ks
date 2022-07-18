@@ -810,7 +810,7 @@ FUNCTION mode_switch {
 			SET switch_mode TO TRUE.
 		}	
 	} ELSE IF mode=4 {	
-		IF (rwy["hac_angle"] < 3 OR mode_dist(simstate,tgtrwy,apch_params) < 0.5) {
+		IF (rwy["hac_angle"] < 14 OR mode_dist(simstate,tgtrwy,apch_params) < 1.0) {
 			SET switch_mode TO TRUE.
 			//override the previously calculated glideslope value
 			SET rwy["glideslope"] TO params["glideslope"]["outer"].
