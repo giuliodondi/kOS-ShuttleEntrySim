@@ -7,9 +7,10 @@ GLOBAL apch_params IS LEXICON(
 					"hac_r2",0.0000283,
 					"final_dist",7.5,
 					"aiming_pt_dist", 2,
+					"ogs_preacq_dist", 1.0,
 					"glideslope",LEXICON(
 								"outer",TAN(20),
-								"inner",TAN(3),
+								"inner",TAN(1.5),
 								"middle",0	
 					),
 					"flare_circle",LEXICON(
