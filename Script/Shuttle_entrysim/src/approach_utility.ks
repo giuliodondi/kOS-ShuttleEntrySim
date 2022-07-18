@@ -145,7 +145,8 @@ FUNCTION define_hac_centre {
 
 	LOCAL bng IS fixangle(rwy["heading"] - 180).
 	
-	LOCAL hac_dist IS params["hac_radius"] + dist_shift.
+	LOCAL hac_angle IS ARCTAN2(params["hac_radius"] + dist_shift,params["final_dist"]).
+	LOCAL hac_dist IS params["final_dist"]/COS(hac_angle).
 	
 	//find the hac centre
 	IF rwy["hac_side"]="left" {
@@ -316,7 +317,7 @@ FUNCTION total_range_hac_landing {
 	IF mode>=5{
 		SET total_range TO greatcircledist(rwy["position"],SHIP:GEOPOSITION).
 	} ELSE {
-		SET total_range TO (rwy["length"]/2 +  params["aiming_pt_dist"] + params["final_dist"])/1000 + get_hac_groundtrack(rwy["hac_angle"], params).
+		SET total_range TO rwy["length"]/2000 +  params["aiming_pt_dist"] + params["final_dist"] + get_hac_groundtrack(rwy["hac_angle"], params).
 		
 		IF mode = 3 {
 			SET total_range TO total_range + greatcircledist(rwy["hac_entry"],SHIP:GEOPOSITION).
@@ -589,32 +590,37 @@ FUNCTION mode4 {
 	PARAMETER params.
 	
 	//find the theta angle
-	LOCAL ship_vec IS (SHIP:GEOPOSITION:POSITION - rwy["hac"]:POSITION):NORMALIZED.
-	update_hac_angle(rwy,ship_vec).
+	LOCAL ship_pred_vec IS (simstate["latlong"]:POSITION - rwy["hac"]:POSITION):NORMALIZED.
+	update_hac_angle(rwy,ship_pred_vec).
 	print "hac angle:  " + rwy["hac_angle"] at (1,1).
+	
+	//if close to the exit, redraw the hac centre without bias
+	IF rwy["hac_angle"] < 30 {
+		define_hac_centre(rwy,params,0).
+	}
 	
 	
 	//the hac angle is measured wrt the predicted point 
 	//correct it to find the ship hac angle 
-	LOCAL ship_pred_vec IS (simstate["latlong"]:POSITION - rwy["hac"]:POSITION):NORMALIZED.
-	LOCAL ship_pred_hac_angle IS rwy["hac_angle"] - signed_angle(ship_vec,ship_pred_vec,-rwy["upvec"],-1).
-	print "ship_pred_hac_angle:  " +  ship_pred_hac_angle at (1,5).	
+	LOCAL ship_vec IS (SHIP:GEOPOSITION:POSITION - rwy["hac"]:POSITION):NORMALIZED.
+	LOCAL ship_hac_angle IS rwy["hac_angle"] + signed_angle(ship_vec,ship_pred_vec,-rwy["upvec"],-1).
+	print "ship_hac_angle:  " +  ship_hac_angle at (1,5).	
 	
 
 	//update the HAC spiral to be tangent to the current ship position 
 	LOCAL new_radius IS greatcircledist(rwy["hac"],SHIP:GEOPOSITION).
 	print "new_radius:  " +  new_radius at (1,6).
 	
-	update_hac_spiral(new_radius,rwy["hac_angle"],params).
+	update_hac_spiral(new_radius,ship_hac_angle,params).
 
 	
 	print "hac_r2 : " + params["hac_r2"] at (1,7). 
 	
 	//find the groundtrack around the hac at the ship current point
-	LOCAL ship_hac_gndtrk IS get_hac_groundtrack(rwy["hac_angle"], params).
+	LOCAL ship_hac_gndtrk IS get_hac_groundtrack(ship_hac_angle, params).
 	
 	//find the groundtrack around the hac at the predicted point
-	LOCAL pred_hac_gndtrk IS get_hac_groundtrack(ship_pred_hac_angle, params).
+	LOCAL pred_hac_gndtrk IS get_hac_groundtrack(rwy["hac_angle"], params).
 	
 	//get vertical profile
 	
@@ -666,7 +672,6 @@ FUNCTION mode4 {
 	
 
 }
-
 
 
 
@@ -803,14 +808,13 @@ FUNCTION mode_switch {
 		IF (entry_angle < 2 OR mode_dist(simstate,tgtrwy,apch_params) < 0.1) {
 			SET switch_mode TO TRUE.
 		}	
-	} ELSE IF mode=4 {
+	} ELSE IF mode=4 {	
 		IF (rwy["hac_angle"] < 3 OR mode_dist(simstate,tgtrwy,apch_params) < 0.5) {
 			SET switch_mode TO TRUE.
 			//override the previously calculated glideslope value
 			SET rwy["glideslope"] TO params["glideslope"]["outer"].
 			
 		}
-	
 	} ELSE IF mode=5 {
 		//measure the predicted altitude above the site elevation
 		LOCAL altt IS simstate["altitude"] - rwy["elevation"].
