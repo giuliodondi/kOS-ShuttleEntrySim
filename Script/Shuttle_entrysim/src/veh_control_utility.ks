@@ -376,12 +376,13 @@ FUNCTION deflect_flaps{
 //activates the ferram aoa feedback
 FUNCTION flaps_aoa_feedback {
 	PARAMETER flap_parts.
+	PARAMETER feedback_percentage.
 	
 	FOR f in flap_parts {
 		LOCAL fmod IS f["flapmod"].
 		IF NOT fmod:GETFIELD("std. ctrl"). {fmod:SETFIELD("std. ctrl",TRUE).}
 		wait 0.
-		fmod:SETFIELD("aoa %",40).  	
+		fmod:SETFIELD("aoa %",feedback_percentage).  	
 	}
 
 }

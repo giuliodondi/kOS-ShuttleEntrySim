@@ -135,6 +135,7 @@ SET flap_control["pitch_control"] TO average_value_factory(5).
 IF SHIP:ALTITUDE>constants["apchalt"] {
 
 	make_entry_GUI().
+	
 
 	
 	//SHUTDOWN ALL engines and initalise gimbals parts
@@ -180,7 +181,8 @@ IF SHIP:ALTITUDE>constants["apchalt"] {
 
 	UNLOCK STEERING.
 	SAS  ON.
-
+	
+	flaps_aoa_feedback(flap_control["parts"],-40).
 
 	entry_loop().
 	
@@ -190,11 +192,11 @@ IF SHIP:ALTITUDE>constants["apchalt"] {
 
 }
 
-flaps_aoa_feedback(flap_control["parts"]).
+flaps_aoa_feedback(flap_control["parts"],+40).
 
 
 SET mode TO 3.
-SET CONFIG:IPU TO 600.
+SET CONFIG:IPU TO 800.
 
 
 
