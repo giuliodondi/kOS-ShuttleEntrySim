@@ -92,15 +92,15 @@ GLOBAL reset_entry_flag Is FALSE.
 
 
 //find the airbrakes parts
-GLOBAL airbrakes IS LIST().
+LOCAL airbrakes IS LIST().
 FOR b IN SHIP:PARTSDUBBED("airbrake1") {
 	LOCAL bmod IS b:getmodule("ModuleAeroSurface").
 	bmod:SETFIELD("Deploy Angle",0). 
-	bmod:DOACTION("EXTEND",TRUE).
 	
 	airbrakes:ADD(bmod).
 }
 GLOBAL airbrake_control IS LEXICON(
+						"parts",airbrakes,
 						"spdbk_val",0
 						).
 
@@ -371,10 +371,7 @@ WHEN TIME:SECONDS>(attitude_time_upd + 0.2) THEN {
 		//read off the gimbal angle to get the pitch control input 
 		flap_control["pitch_control"]:update(gimbals:PITCHANGLE).
 		SET flap_control TO flaptrim_control(flptrm:PRESSED, flap_control).
-		SET airbrake_control["spdbk_val"] TO speed_control(arbkb:PRESSED, airbrake_control["spdbk_val"], mode).
-		FOR b IN airbrakes {
-			b:SETFIELD("Deploy Angle",50*airbrake_control["spdbk_val"]). 
-		}
+		SET airbrake_control TO speed_control(arbkb:PRESSED, airbrake_control, mode).
 	}
 	
 	//measure CSS attitude
@@ -836,7 +833,7 @@ LOCAL rollprog IS get_roll_prograde().
 
 UNTIL FALSE{
 	//need this to move the spoilers
-	BRAKES ON.
+	//BRAKES ON.
 
 	
 	SET pitchprog TO get_pitch_prograde().
@@ -878,16 +875,14 @@ UNTIL FALSE{
 		SET deltas TO mode6(simstate,tgtrwy,apch_params).
 	}
 	
-	SET airbrake_control["spdbk_val"] TO speed_control(is_autoairbk(),airbrake_control["spdbk_val"],mode).
+	SET airbrake_control TO speed_control(is_autoairbk(),airbrake_control,mode).
 	
 	//read off the pilot input, assumes manual control
 	flap_control["pitch_control"]:update(SHIP:CONTROL:PILOTPITCH).
 	
 	SET flap_control TO flaptrim_control(flptrm:PRESSED, flap_control).
 	
-	FOR b IN airbrakes {
-		b:SETFIELD("Deploy Angle",50*airbrake_control["spdbk_val"]). 
-	}
+	
 
 
 	update_apch_GUI(

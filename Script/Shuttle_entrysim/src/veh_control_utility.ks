@@ -188,12 +188,35 @@ FUNCTION autoland {
 }
 
 
+FUNCTION activate_spdbrk {
+	PARAMETER airbrake_control.
+	
+	FOR bmod IN airbrake_control["parts"] {
+		bmod:SETFIELD("deploy",TRUE).
+	}
+}
+
+FUNCTION deflect_spdbrk {
+	PARAMETER airbrake_control.
+	
+	FOR bmod IN airbrake_control["parts"] {
+		bmod:SETFIELD("Deploy Angle",50*airbrake_control["spdbk_val"]). 
+	}
+	
+}
+
 
 //automatic speedbrake control
 FUNCTION speed_control {
 	PARAMETER auto_flag.
-	PARAMETER previous_val.
+	PARAMETER airbrake_control.
 	PARAMETER mode.
+	
+	//do it every time as the airbrakes might be wired to the brakes AG 
+	//which could toggle them closed if pressed prematurely
+	activate_spdbrk(airbrake_control).
+	
+	LOCAL previous_val IS airbrake_control["spdbk_val"].
 	
 	LOCAL newval IS previous_val.
 	
@@ -205,12 +228,12 @@ FUNCTION speed_control {
 
 
 		LOCAL tgtspeed IS 0.
-		LOCAL delta_spd IS 0.
+		LOCAL delta_spd IS 0..
+		LOCAL airspd IS SHIP:VELOCITy:SURFACE:MAG.
 		
 		IF (mode=1 OR mode=2) {
 			LOCAL tgt_rng IS greatcircledist(tgtrwy["position"], SHIP:GEOPOSITION).
 			SET tgtspeed TO MAX(250,51.48*tgt_rng^(0.6)).
-			LOCAL airspd IS SHIP:VELOCITy:SURFACE:MAG.
 			SET delta_spd TO airspd - tgtspeed.
 		}
 		ELSE {
@@ -257,10 +280,12 @@ FUNCTION speed_control {
 
 	}
 	
+	SET airbrake_control["spdbk_val"] TO CLAMP(newval,0,1).
 	
+	deflect_spdbrk(airbrake_control).
 
-
-	RETURN CLAMP(newval,0,1).
+	
+	RETURN airbrake_control.
 	
 }
 
