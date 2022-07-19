@@ -10,7 +10,7 @@ GLOBAL apch_params IS LEXICON(
 					"ogs_preacq_dist", 1.0,
 					"glideslope",LEXICON(
 								"outer",TAN(20),
-								"inner",TAN(1.5),
+								"inner",TAN(2),
 								"middle",0	
 					),
 					"flare_circle",LEXICON(
