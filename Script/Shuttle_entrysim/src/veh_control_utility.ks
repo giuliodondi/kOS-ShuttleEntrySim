@@ -210,24 +210,28 @@ FUNCTION speed_control {
 		IF (mode=1 OR mode=2) {
 			LOCAL tgt_rng IS greatcircledist(tgtrwy["position"], SHIP:GEOPOSITION).
 			SET tgtspeed TO MAX(250,51.48*tgt_rng^(0.6)).
-			SET delta_spd TO SHIP:VELOCITy:SURFACE:MAG - tgtspeed.
+			LOCAL airspd IS SHIP:VELOCITy:SURFACE:MAG.
+			SET delta_spd TO airspd - tgtspeed.
 		}
 		ELSE {
 			IF mode=3 {
-				SET delta_spd TO SHIP:AIRSPEED - 220.
+				SET delta_spd TO airspd - 220.
 			}
 			ELSE IF mode=4 {
-				SET delta_spd TO SHIP:AIRSPEED - 180.
+				SET delta_spd TO airspd - 180.
 			}
 			ELSE IF mode=5 {
-				SET delta_spd TO SHIP:AIRSPEED - 145.
+				SET delta_spd TO airspd - 145.
 			}
 			ELSE IF mode>=6 {
-				SET delta_spd TO SHIP:AIRSPEED - 130.		
+				SET delta_spd TO airspd - 130.		
 			
 				IF SHIP:STATUS = "LANDED" {
-					SET delta_spd TO SHIP:AIRSPEED.
-					BRAKES ON.
+					SET delta_spd TO airspd.
+					
+					IF airspd < 65 {
+						BRAKES ON.
+					}
 				}
 			}
 			
