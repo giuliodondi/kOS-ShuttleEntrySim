@@ -834,9 +834,6 @@ LOCAL pitchprog IS get_pitch_prograde().
 LOCAL rollprog IS get_roll_prograde().
 
 UNTIL FALSE{
-	//need this to move the spoilers
-	//BRAKES ON.
-
 	
 	SET pitchprog TO get_pitch_prograde().
 	SET rollprog TO get_roll_prograde().
