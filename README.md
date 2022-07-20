@@ -86,8 +86,9 @@ Still in the VAB, enable all actuation toggles on the Crew Cabin and both OMS po
 
 You need to place two Stock A.I.R.B.R.A.K.E.S. re-scaled up to 200% to control airspeed during landing. The split rudder is utterly useless.  
 They must be Stock A.I.R.B.R.A.K.E.S. and nothing else, otherwise you will need to dig into the script and tell it to look for whatever part you want.  
-Place them either on the sides of the OMS pods or on the sides of the Engine block. Place them on the surface, do not tuck them inside or KSP will prevent them from deploying. Do not put them on the tail or on the wings or you will introduce a pitching moment.
-Make sure to add these A.I.R.B.R.A.K.E.S. to the brakes Action Group.
+Place them either on the sides of the OMS pods or on the sides of the Engine block. Place them on the surface, do not tuck them inside or KSP will prevent them from deploying. Do not put them on the tail or on the wings or you will introduce a pitching moment.  
+
+**Don't add these A.I.R.B.R.A.K.E.S. to the brakes Action Group**, the program deals with airbrakes independently of wheel brakes.
 
 ## Setting up the script config files and runways
 
@@ -275,6 +276,8 @@ Assuming everything goes to plan, TAEM will take the Shuttle to a gentle glide, 
 
 ### Steering now becomes fully manual without any kOS augmentation, like you are used to flying planes in KSP
 
+### Do not engage the Brakes action group. Nothing catastrophic happens if you do, but the program handles it on its own
+
 Transitioning into Approach guidance will get rid of some now irrelevant items in the main GUI.  
 The HUD is identical to Entry/TAEM but the meaning of some symbols is now different:
 
@@ -305,7 +308,7 @@ Depending on which Space Shuttle mod you use and your OMS quantity, you may be p
 Speedbrakes are controlled either manually using the throttle slider or automatically by the script. A button lets you switch between the modes.
 By default they are set to AUTO after TAEM, if you switched manually from TAEM because guidance messed up, you might want to switch to manual and close them until you are sure that you'll make the HAC with at least 220 m/s of velocity.
 
-The HUD implements the realistic de-cluttering logic that the real Space Shuttle used, hiding irrelevant HUD features as you get closer to touchdown to enhance your situational awareness
+The HUD implements the realistic de-cluttering logic that the real Space Shuttle used, hiding irrelevant HUD features as you get closer to touchdown to enhance your situational awareness.
 
 
 
