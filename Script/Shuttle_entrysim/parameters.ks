@@ -1,12 +1,5 @@
 
 
-
-//bandwidth of azimuth error that triggers a roll reversal
-IF NOT (DEFINED az_err_band) {
-	GLOBAL az_err_band IS 15.
-}
-
-
 //reference timestep value, type of integrator function and flag for logging
 IF (DEFINED sim_settings) {
 	UNSET sim_settings.

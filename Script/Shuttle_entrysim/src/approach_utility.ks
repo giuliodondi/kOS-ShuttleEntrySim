@@ -175,7 +175,7 @@ FUNCTION define_hac {
 	SET rwy["hac_exit"] TO new_position(rwy["aiming_pt"],params["final_dist"],bng).
 	
 	//shift artificially the hac centre 0.3km further away from centerline than they should be 
-	define_hac_centre(rwy,params,0.35).
+	define_hac_centre(rwy,params,0.1).
 	
 	//define the reference up vector, pointing up for a right hac and down for a left one
 	SET rwy["upvec"] TO (pos2vec(rwy["hac"])):NORMALIZED.
@@ -596,9 +596,9 @@ FUNCTION mode4 {
 	print "hac angle:  " + rwy["hac_angle"] at (1,1).
 	
 	//if close to the exit, redraw the hac centre without bias
-	IF rwy["hac_angle"] < 35 {
-		define_hac_centre(rwy,params,0.1*rwy["hac_angle"]/10).
-	}
+	//IF rwy["hac_angle"] < 35 {
+	//	define_hac_centre(rwy,params,0.1*rwy["hac_angle"]/10).
+	//}
 	
 	
 	//the hac angle is measured wrt the predicted point 

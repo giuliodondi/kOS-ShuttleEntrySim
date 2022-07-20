@@ -182,7 +182,7 @@ IF SHIP:ALTITUDE>constants["apchalt"] {
 	UNLOCK STEERING.
 	SAS  ON.
 	
-	flaps_aoa_feedback(flap_control["parts"],-40).
+	flaps_aoa_feedback(flap_control["parts"],-20).
 
 	entry_loop().
 	
@@ -325,6 +325,7 @@ ELSE IF sim_settings["integrator"]= "rk4" {
 //navigation variables
 LOCAL az_err IS az_error(SHIP:GEOPOSITION,tgtrwy["position"],SHIP:VELOCITY:SURFACE).
 LOCAL range_err IS 0.
+LOCAL first_reversal_done IS FALSE.
 
 
 //initialise to a large value
@@ -414,6 +415,7 @@ WHEN TIME:SECONDS>(attitude_time_upd + 0.2) THEN {
 
 //reentry loop
 UNTIL FALSE {
+	SAS OFF.
 
 
 	IF reset_entry_flag {
@@ -427,11 +429,11 @@ UNTIL FALSE {
 		BREAK.
 	}
 	
-	IF ( is_auto_steering() AND SHIP:ALTITUDE < constants["firstrollalt"]) AND (SAS) {
-		SAS OFF.
+	IF ( NOT is_auto_steering() AND SHIP:ALTITUDE > constants["firstrollalt"]) {
+		SET constants["prebank_angle"] TO rollsteer.
 	}
 	
-	SET constants["prebank_angle"] TO rollsteer.
+	
 		
 	//run the vehicle simulation
 	LOCAL ICS IS LEXICON(
@@ -445,7 +447,6 @@ UNTIL FALSE {
 					simstate,
 					LEXICON("position",tgtrwy["hac"],"elevation",tgtrwy["elevation"]),
 					sim_end_conditions,
-					az_err_band,
 					roll_ref,
 					pitch_ref,
 					pitchroll_profiles_entry@
@@ -508,7 +509,7 @@ UNTIL FALSE {
 		SET last_hdot TO SHIP:VERTICALSPEED.
 		
 		//get updated pitch and roll from the profiles
-		LOCAL out IS pitchroll_profiles_entry(LIST(roll_ref,pitch_ref),LIST(rollguid,pitchguid),current_simstate(),hddot,az_err,az_err_band).
+		LOCAL out IS pitchroll_profiles_entry(LIST(roll_ref,pitch_ref),LIST(rollguid,pitchguid),current_simstate(),hddot,az_err,first_reversal_done).
 		LOCAL new_roll IS out[0].
 		SET pitch_ref TO out[1].
 		SET pitchguid TO pitch_ref.
@@ -520,9 +521,17 @@ UNTIL FALSE {
 			SET guid_converged_flag TO FALSE.
 		}
 		
+		
 		//use it only if the reference roll value is converged
 		IF guid_converged_flag {
+			LOCAL rollguid_p IS rollguid.
+		
 			SET rollguid TO new_roll.
+			
+			IF (NOT first_reversal_done AND  rollguid*rollguid_p < 0 AND rollguid*az_err > 0 ) {
+				SET first_reversal_done TO TRUE.
+			}
+			
 			//only if guidance is converged and if we're below first roll alt do pitch modulation
 			//only use the updated roll value as steering if we're below first roll, else use the slider value
 			IF SHIP:ALTITUDE < constants["firstrollalt"] {		

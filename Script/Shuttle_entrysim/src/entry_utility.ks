@@ -212,7 +212,7 @@ FUNCTION pitchroll_profiles_entry {
 	PARAMETER simstate.
 	PARAMETER hddot.
 	PARAMETER delaz.
-	PARAMETER az_band.
+	PARAMETER first_reversal_done.
 	
 	LOCAL roll_ref IS ref_att[0].
 	LOCAL pitch_ref IS ref_att[1].
@@ -225,7 +225,7 @@ FUNCTION pitchroll_profiles_entry {
 	IF (roll_cur = 0) {
 		SET roll_sign TO SIGN(delaz).
 	} ELSE {
-		SET roll_sign TO roll_reversal(SIGN(roll_cur),delaz,az_band,roll_ref).
+		SET roll_sign TO roll_reversal(SIGN(roll_cur),delaz,roll_ref,first_reversal_done).
 	}
 		
 	LOCAL roll_prof IS roll_sign*roll_profile(simstate,roll_ref,hddot,delaz).
@@ -296,7 +296,7 @@ FUNCTION roll_profile {
 	PARAMETER hddot.
 	PARAMETER delaz.
 	
-	//wil not command any roll above this altitude
+	//prebank command
 	IF state["altitude"]>constants["firstrollalt"] {
 		RETURN ABS(constants["prebank_angle"]).
 	}
@@ -328,8 +328,14 @@ FUNCTION roll_profile {
 FUNCTION roll_reversal {
 	PARAMETER cur_sign.
 	PARAMETER delaz.
-	PARAMETER bandwidth.
 	PARAMETER roll_ref.
+	PARAMETER first_reversal_done.
+	
+	//lower bandwidth before first roll reversa, higher afterwards
+	LOCAL bandwidth IS 10.5.
+	IF first_reversal_done {
+		SET bandwidth TO 17.5.
+	}
 	
 	//the 0.9 factor is to compensate for slow roll reversal and tendency to overshoot
 	
@@ -361,7 +367,6 @@ declare function simulate_reentry {
 	parameter simstate.
 	PARAMETER tgt_rwy.
 	PARAMETER end_conditions.
-	PARAMETER az_err_band .
 	PARAMETER roll0.
 	PARAMETER pitch0.
 	PARAMETER pitchroll_profiles.
@@ -384,6 +389,8 @@ declare function simulate_reentry {
 	LOCAL poslist IS LIST().
 	
 	LOCAL next_simstate IS simstate.
+	
+	LOCAL first_reversal_done IS FALSE.
 
 	
 	//putting the termination conditions here should save an if check per step
@@ -404,11 +411,16 @@ declare function simulate_reentry {
 		
 		
 		
-		LOCAL out IS pitchroll_profiles(LIST(roll0,pitch0),LIST(roll_prof,pitch_prof),simstate,hddot,delaz,az_err_band).
+		LOCAL out IS pitchroll_profiles(LIST(roll0,pitch0),LIST(roll_prof,pitch_prof),simstate,hddot,delaz,first_reversal_done).
+		
+		LOCAL roll_prof_p IS roll_prof.
 		SET roll_prof TO out[0].
 		SET pitch_prof TO out[1].
 		
-
+		IF ( NOT first_reversal_done AND roll_prof_p*roll_prof < 0 AND roll_prof*delaz > 0 ) {
+			
+			SET first_reversal_done TO TRUE.
+		}
 
 		SET simstate["latlong"] TO shift_pos(simstate["position"],simstate["simtime"]).
 		
