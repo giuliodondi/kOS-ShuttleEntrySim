@@ -4,7 +4,7 @@
 
 # Kerbal Space Program Shuttle Entry and Approach Guidance
 
-## updated July 15th 2022
+## updated July 20th 2022
 
 **PLEASE Read along with watching the demonstration videos at https://youtu.be/5VkAmHpXwn8 and https://youtu.be/oMyd0d86eV4 and https://www.youtube.com/watch?v=sIiksBwYEZI&t=2s**
 
