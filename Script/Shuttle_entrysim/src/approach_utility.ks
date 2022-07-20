@@ -114,7 +114,7 @@ FUNCTION refresh_runway_lex {
 
 	RETURN LEXICON(
 							"position",tgtsite["position"],
-							"elevation",tgtsite["position"]:TERRAINHEIGHT + 5,			//tgtsite["elevation"],
+							"elevation",tgtsite["elevation"],
 							"heading",tgtsite["heading"],
 							"length",tgtsite["length"],
 							"td_pt",LATLNG(0,0),
