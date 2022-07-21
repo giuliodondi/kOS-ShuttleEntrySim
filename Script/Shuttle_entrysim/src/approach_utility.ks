@@ -396,11 +396,14 @@ FUNCTION hac_turn_profile_alt{
 	//altitude at the exit
 	LOCAL final_alt IS final_profile_alt(params["final_dist"] + x0,rwy,params).
 	
+	//ramp down the gain as we approach the exit 
+	LOCAL hac_alt_corr_gain_rampdown IS MIN(1,pred_hac_gndtrk/20).
+	
 	//get the uncorrected altitude at the ship current point
-	LOCAL alt_corr IS (SHIP:ALTITUDE-final_alt)/hac_turn_cubic_prof(ship_hac_gndtrk - x0, rwy, apch_params).
+	LOCAL alt_corr_gain IS 1 + hac_alt_corr_gain_rampdown*(SHIP:ALTITUDE-final_alt)/hac_turn_cubic_prof(ship_hac_gndtrk - x0, rwy, apch_params).
 	
 	//now build the vertical profile value at the predicted point 
-	RETURN final_alt + hac_turn_cubic_prof(pred_hac_gndtrk - x0, rwy, apch_params)*alt_corr.
+	RETURN final_alt + hac_turn_cubic_prof(pred_hac_gndtrk - x0, rwy, apch_params)*alt_corr_gain.
 }
 
 
