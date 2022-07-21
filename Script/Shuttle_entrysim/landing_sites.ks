@@ -15,9 +15,9 @@ GLOBAL ldgsiteslex IS LEXICON(
 							
 						),
 						"Northrup",LEXICON(
-							"position",LATLNG(32.946760,-106.416492),
-							"elevation",1201,
-							"length",6000,
+							"position",LATLNG(32.941370,-106.414760),
+							"elevation",1203,
+							"length",5030,
 							"heading",343.6
 							
 						),
@@ -25,7 +25,7 @@ GLOBAL ldgsiteslex IS LEXICON(
 							"position",LATLNG(34.737224,-120.587830),
 							"elevation",103,
 							"length",5030,
-							"heading",338.8
+							"heading",343.5
 							
 						),
 						"Mataveri",LEXICON(
@@ -43,10 +43,31 @@ GLOBAL ldgsiteslex IS LEXICON(
 							
 						),
 						"Zaragoza",LEXICON(
-							"position",LATLNG(41.67028,-1.055773),
-							"elevation",702,
+							"position",LATLNG(41.672921,-1.057167),
+							"elevation",265,
 							"length",5030,
-							"heading",120.6
+							"heading",120.3
+							
+						),
+						"Rota",LEXICON(
+							"position",LATLNG(36.635919,-6.331021),
+							"elevation",92,
+							"length",5030,
+							"heading",96.7
+							
+						),
+						"Ben Guerir",LEXICON(
+							"position",LATLNG(32.127831,-7.878),
+							"elevation",465,
+							"length",5030,
+							"heading",176.5
+							
+						),
+						"Banjul",LEXICON(
+							"position",LATLNG(13.339939,-16.654652),
+							"elevation",89,
+							"length",5030,
+							"heading",130.4
 							
 						)
 						
