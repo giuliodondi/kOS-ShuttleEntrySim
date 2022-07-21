@@ -41,13 +41,15 @@ The script is configurable to work with any vessel and there is a configuration 
 - Some mod to display the surface-relative trajectory in the map view. I recomment Trajectories or the (awesome but challenging) Principia mod
 - Tweakscale to adjust the size of the A.I.R.B.R.A.K.E.S. you need to add
 
-You will find two folders: 
-- **GameData/kOS-Addons**
+You will find several folders: 
+- **GameData**
+    - **KerbalKonstructs/NewInstances**
+    - **kOS-Addons**
 - **Script**
 
-Make sure to put **kOS-Addons** inside your GameData folder. **WITHOUT THIS THE SCRIPTS WILL NEVER WORK.**
-That's the plugin made by me which provides a way for kOS to query aerodynamic data from Ferram Aerospace. 
-Documentation available at https://github.com/giuliodondi/kOS-Ferram
+Put all the contents of **GameData** folder in your GameData.  
+**Make sure to put kOS-Addons inside GameData. WITHOUT THIS THE SCRIPTS WILL NEVER WORK.** That's the plugin made by me which provides a way for kOS to query aerodynamic data from Ferram Aerospace. Documentation available at https://github.com/giuliodondi/kOS-Ferram.  
+The **KerbalKonstructs** folder contains instances for the runway props that I use, their position should match the landing site definitions used by the script. The elevation might be wrong depending on your RSS heightmap, beware of this.  
 
 
 Put the contents of the Scripts folder inside Ship/Script so that kOS can see all the files.
@@ -59,14 +61,17 @@ In particular, you will run two scripts:
 
 # Setup
 
-## KSP settings
+## Controls
 
-If using the keyboard modify the control mappings in this way:
+Disregard if you use a controller or flight stick.  
+If using the keyboard I suggest you modify the control mappings in this way:
 - pitch axis controlled by the W-S keys
 - roll axis controlled with A-D
 - yaw axis controlled by Q-E
 
-If you use a controller or flight stick this will not be necessary
+These changes are nto required by the script, they bring the principal axes of control (pitch and roll) right under your fingertips making it easier to fly the approach segment.
+
+
 
 ## Setting up the Space Shuttle in the VAB
 
