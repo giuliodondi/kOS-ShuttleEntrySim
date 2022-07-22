@@ -248,6 +248,7 @@ FUNCTION update_deorbit_GUI {
 GLOBAL entry_gui_height IS 220.
 
 FUNCTION make_global_entry_GUI {
+	PARAMETER wait_for_tgt_choice IS FALSE.
 	
 
 	//create the GUI.
@@ -302,7 +303,7 @@ FUNCTION make_global_entry_GUI {
 	}
 	SET quitb:ONCLICK TO quitcheck@.
 
-
+	
 	main_gui:addspacing(7).
 
 
@@ -322,7 +323,8 @@ FUNCTION make_global_entry_GUI {
 	FOR site IN ldgsiteslex:KEYS {
 		select_tgt:addoption(site).
 	}		
-		
+	
+	GLOBAL first_tgtsite_selection IS FALSE.
 		
 	popup_box:addspacing(20).
 
@@ -374,6 +376,8 @@ FUNCTION make_global_entry_GUI {
 	SET select_tgt:ONCHANGE to {
 		PARAMETER lex_key.
 		
+		SET first_tgtsite_selection TO TRUE.
+		
 		LOCAL newsite IS ldgsiteslex[lex_key].
 		
 		SET tgtrwy TO refresh_runway_lex(newsite).
@@ -417,6 +421,16 @@ FUNCTION make_global_entry_GUI {
 
 
 	main_gui:SHOW().
+	
+	IF wait_for_tgt_choice {	
+		//infinite loop that breaks when the user makes a first choice for the landing site
+		clearscreen.
+		print "Please select and double-check the landing site" .
+		UNTIL first_tgtsite_selection {
+			wait 0.
+		}
+		clearscreen.
+	}
 }
 
 

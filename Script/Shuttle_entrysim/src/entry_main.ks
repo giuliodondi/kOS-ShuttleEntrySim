@@ -39,7 +39,7 @@ define_td_points().
 
 //initialised by default to first landing site 
 //can be changed with the GUI
-make_global_entry_GUI().
+make_global_entry_GUI((SHIP:ALTITUDE>constants["apchalt"])).
 
 
 //ths lexicon contains all the necessary guidance objects 
