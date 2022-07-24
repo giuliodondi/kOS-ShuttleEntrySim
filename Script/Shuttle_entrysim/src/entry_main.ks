@@ -743,11 +743,6 @@ UNTIL FALSE {
 			TAEM_pitch_profile(pitch_ref, roll_ref,SHIP:VELOCITY:SURFACE:MAG,  hdoterr ),
 			get_roll_prograde()
 		).
-		
-		IF is_auto_steering() {
-			SET rollsteer TO rollguid.
-			SET pitchsteer TO pitchguid.
-		}
 
 	
 	} ELSE {
