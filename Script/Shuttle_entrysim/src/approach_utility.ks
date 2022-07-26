@@ -383,6 +383,7 @@ FUNCTION hac_turn_cubic_prof {
 //the cubic coefficients are now frozen
 //get the cubic profile altitude at the current position, find a gain factor to match it to the current altitude 
 //return the cubic profile altitude at the predicted postion corrected by this gain
+//ramp down the gain to 1 as we near the exit
 FUNCTION hac_turn_profile_alt{
 	PARAMETER ship_hac_gndtrk.
 	PARAMETER pred_hac_gndtrk.

@@ -39,7 +39,7 @@ define_td_points().
 
 //initialised by default to first landing site 
 //can be changed with the GUI
-make_global_entry_GUI().
+make_global_entry_GUI((SHIP:ALTITUDE>constants["apchalt"])).
 
 
 //ths lexicon contains all the necessary guidance objects 
@@ -743,11 +743,6 @@ UNTIL FALSE {
 			TAEM_pitch_profile(pitch_ref, roll_ref,SHIP:VELOCITY:SURFACE:MAG,  hdoterr ),
 			get_roll_prograde()
 		).
-		
-		IF is_auto_steering() {
-			SET rollsteer TO rollguid.
-			SET pitchsteer TO pitchguid.
-		}
 
 	
 	} ELSE {

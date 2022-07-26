@@ -41,13 +41,15 @@ The script is configurable to work with any vessel and there is a configuration 
 - Some mod to display the surface-relative trajectory in the map view. I recomment Trajectories or the (awesome but challenging) Principia mod
 - Tweakscale to adjust the size of the A.I.R.B.R.A.K.E.S. you need to add
 
-You will find two folders: 
-- **GameData/kOS-Addons**
+You will find several folders: 
+- **GameData**
+    - **KerbalKonstructs/NewInstances**
+    - **kOS-Addons**
 - **Script**
 
-Make sure to put **kOS-Addons** inside your GameData folder. **WITHOUT THIS THE SCRIPTS WILL NEVER WORK.**
-That's the plugin made by me which provides a way for kOS to query aerodynamic data from Ferram Aerospace. 
-Documentation available at https://github.com/giuliodondi/kOS-Ferram
+Put all the contents of **GameData** folder in your GameData.  
+**Make sure to put kOS-Addons inside GameData. WITHOUT THIS THE SCRIPTS WILL NEVER WORK.** That's the plugin made by me which provides a way for kOS to query aerodynamic data from Ferram Aerospace. Documentation available at https://github.com/giuliodondi/kOS-Ferram.  
+The **KerbalKonstructs** folder contains instances for the runway props that I use, their position should match the landing site definitions used by the script. The elevation might be wrong depending on your RSS heightmap, beware of this.  
 
 
 Put the contents of the Scripts folder inside Ship/Script so that kOS can see all the files.
@@ -59,14 +61,17 @@ In particular, you will run two scripts:
 
 # Setup
 
-## KSP settings
+## Controls
 
-If using the keyboard modify the control mappings in this way:
+Disregard if you use a controller or flight stick.  
+If using the keyboard I suggest you modify the control mappings in this way:
 - pitch axis controlled by the W-S keys
 - roll axis controlled with A-D
 - yaw axis controlled by Q-E
 
-If you use a controller or flight stick this will not be necessary
+These changes are nto required by the script, they bring the principal axes of control (pitch and roll) right under your fingertips making it easier to fly the approach segment.
+
+
 
 ## Setting up the Space Shuttle in the VAB
 
@@ -117,10 +122,9 @@ Refer to this video I made for an actual demonstration :  https://www.youtube.co
 
 The Shuttle has two main aerodynamic quirks: 
 - It has a relatively narrow pitch stability region, meaning that proper CG position makes the difference between a Shuttle that can't hold the nose up and a Shuttle that spins like a boomerang. If you use my Space Shuttle system fork, The centre of lift is adjusted as far forwards as possible for pitch manoruvrability at high AoA, but not too forward that it will lose control at low speeds.  
-You must deplete about 75% of your OMS fuel before reentering or you might be too tail heavy. However, you must keep about 50 m/s of OMS fuel for reentry control. IF you want to land with payload, it must be placed caefully to not alter the empty CG. **Do NOT adjust the payload CG with full OMS fuel**
-- At a high angle of attack, the tail is completely occluded by the Shuttle's wake and is ineffective. At high mach number the Shuttle is then unstable in Yaw, so You will need a lot of yaw RCS 
-  to maintain lateral stability or else you will start rolling around the velocity vector without control. Therefore you must be able to balance pitch well so you save all the RCS for yaw. 
-  This effect is only present above about 20° of angle of attack. Below that the tail should be exposed to the air and the rudder effective.
+You must deplete about 75% of your OMS fuel before reentering or you might be too tail heavy. However, you must keep about 50 m/s of OMS fuel for reentry control. IF you want to land with payload, it must be placed caefully to not alter the empty CG.  
+**Do NOT adjust the payload CG with full OMS fuel, remove temporarily all fuel from both nose and aft OMS pods.**
+- At a high angle of attack, the tail is completely occluded by the Shuttle's wake and is ineffective. At high mach number the Shuttle is then unstable in Yaw, so You will need yaw RCS to maintain lateral stability or else you will start rolling around the velocity vector without control. Therefore you must be able to balance pitch well so you save all the RCS for yaw. This effect is only present above about 20° of angle of attack. Below that the tail should be exposed to the air and the rudder effective, but even below 20° pitch RCS is recommended because the extra authority helps kOS achieve smoother control.
 
 The Entry Guidance has an auto-trim functionality that sets the deflection for the Elevons and Body Flap pased on average control surface deflection. For this to work you need to have enabled Flaps on both Elevons and Body Flap.
 Also do not mess with the engines on reentry. The script uses the Gimbal deflection of one of them to deduce how much flap trim is required.
@@ -191,7 +195,7 @@ Wait until you're below 120km, then enable _Guidance_ and focus on the HUD.
 - The _PIPPER_ moves around to indicate the values of bank and AOA that Guidance would like to fly right now
 - _WING LOAD_ is the lift generated by the wings measured in units of G
 - _MACH_ is self-explanatory, above 100km it is not a reliable measurement of speed. 
-- _FLAP TRIM_ indicates the commanded flap deflection. The scale depends on the motion range specified in **flapcontrol.ks**.
+- _FLAP TRIM_ indicates the commanded flap deflection. The scale goes from -1 to +1, the actual surface deflection is limited by the motion range specified in **flapcontrol.ks**.
 - _ALT_ is calculated above the elevation of the landing site (crucial to keep in mind if your landing site is at high elevation like Edwards)
 - _VERT SPEED_ is measured in increments of 100 m/s, the slider tops off at +-200 m/s
 - _TARGET_DIST_ is in km
@@ -220,7 +224,7 @@ Roll also follows a profile, but this depends on a "roll_ref" parameter which is
 
 **Important**
 The actual commanded roll angle is _never_ equal to "roll_ref", it incorporates a roll ramp-down logic and a phugoid-damping term.  
-More importantly roll is never less than 2x the instantaneous azimuth error, as this is the minimum roll angle that will enable the Shuttle to null the crossrange error and actually navigate to the landing site. The program will thus roll to reach the landing site even if the crossrange error is too large, meaning that after the azimuth error has been reduced the Shuttle may not have enough energy to glide the rest of the way.
+In addition, the commanded roll is never less than 2x the instantaneous azimuth error, as this is the minimum roll angle that will enable the Shuttle to null the crossrange error and actually navigate to the landing site. The program will thus **always** attempt to reduce crossrange, if the crossrange is too large it will null the azimuth error and then find itself with insufficient energy to glide the rest of the way.
 
 By default Guidance keeps the roll angle to zero until 100km altitude and command the first roll angle below that. The bank is to the same side of the target, so it depends on the sign of the Azimuth error.  You can force a "prebank angle" by switching to manual steering and rolling to one side, the guidance pipper should follow the nose indicator. If the crossrange error is very large you can modify the pitch profile to lower drag.  
 
