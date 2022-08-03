@@ -18,6 +18,8 @@ ELSE {
 	RUNPATH("0:/Shuttle_entrysim/VESSELS/" + vessel_dir + "/pitch_profile").
 }
 
+//delete global profile file
+IF EXISTS(pitchprof_log_path) {DELETEPATH(pitchprof_log_path).}
 
 //	Load libraries
 RUNPATH("0:/Libraries/misc_library").	
