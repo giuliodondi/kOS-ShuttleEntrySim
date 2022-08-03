@@ -61,6 +61,7 @@ FUNCTION update_attitude {
 	PARAMETER tgt_pitch.
 	PARAMETER tgt_roll.
 	
+	LOCAL pitch_tol IS 5.
 	LOCAL roll_tol IS 5.
 
 	
@@ -71,12 +72,19 @@ FUNCTION update_attitude {
 	SET upvec TO VXCL(PROGVEC,upvec).
 	
 	LOCAL cmd_vec IS cmd_dir:VECTOR.
-	LOCAL ship_vec IS SHIP:FACING:VECTOR.
-	
+	LOCAL ship_vec IS SHIP:FACING:VECTOR.	
 
-	//measure the current ship roll angle 
+	//measure the current steering angle 
+	LOCAL ship_pitch IS get_pitch_prograde().
 	LOCAL ship_roll IS get_roll_prograde().
-		
+	
+	LOCAL cmdpitch IS tgt_pitch.
+	LOCAL cmdroll IS tgt_roll.
+	
+	//is the current ship pitch too far from the target?
+	IF ABS(ship_pitch - tgt_pitch )>pitch_tol {
+		SET cmdpitch TO ship_pitch + SIGN(tgt_pitch - ship_pitch)*pitch_tol.
+	}
 		
 	//is the current ship direction too far from the target direction in the roll plane?
 	IF ABS( ship_roll - tgt_roll )>roll_tol {
@@ -99,20 +107,20 @@ FUNCTION update_attitude {
 			SET s_roll TO -SIGN(ship_roll - tgt_roll ).
 		}
 		
-		SET new_roll TO ship_roll +  s_roll*roll_tol.
+		LOCAL new_roll IS ship_roll +  s_roll*roll_tol.
 		
 		IF ABS( tgt_roll - new_roll )<roll_tol {
 			SET new_roll TO tgt_roll.
 		}
 		
 		//set the target roll to the current commanded roll
-		SET tgt_roll TO new_roll.
+		SET cmdroll TO new_roll.
 
 	}
 
 	
 	//create the target direction given pitch and roll values as givne or computed.
-	RETURN create_steering_dir(PROGVEC,upvec,tgt_pitch,tgt_roll).
+	RETURN create_steering_dir(PROGVEC,upvec,cmdpitch,cmdroll).
 }
 
 

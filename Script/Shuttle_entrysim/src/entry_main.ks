@@ -361,7 +361,7 @@ LOCAL pitch_ref IS pitchguid.
 //faster than the main loop 
 LOCAL attitude_time_upd IS TIME:SECONDS.
 LOCAL preserve_loop IS TRUE.
-WHEN TIME:SECONDS>(attitude_time_upd + 0.2) THEN {
+WHEN TIME:SECONDS>(attitude_time_upd + 0.25) THEN {
 
 	//calculte azimuth error
 	SET az_err TO az_error(SHIP:GEOPOSITION,tgtrwy["hac_entry"],SHIP:VELOCITY:SURFACE).
