@@ -137,7 +137,7 @@ FUNCTION TAEM_pitch_profile {
 	SET out_pitch TO out_pitch - hdot_err*hdotgain.
 
 	//clamp to reasonable values.
-	RETURN CLAMP(out_pitch,0.5,20).
+	RETURN CLAMP(out_pitch,0,20).
 }
 
 //put the roll correctin in a separate function so it can be tied to the current roll instead of the roll ref value
@@ -151,7 +151,7 @@ FUNCTION TAEM_pitch_roll_cor {
 	LOCAL out_pitch IS ref_pitch/COS(ABS(cur_roll/2)).
 	
 	//clamp to reasonable values.
-	RETURN CLAMP(out_pitch,0,20).
+	RETURN CLAMP(out_pitch,1,20).
 	
 }
 
