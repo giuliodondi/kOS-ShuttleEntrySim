@@ -117,7 +117,7 @@ I provide you with my own landing sites definitions for reference, but I strongl
 
 # How to use
 
-Refer to this video I made for an actual demonstration :  https://www.youtube.com/watch?v=5VkAmHpXwn8
+Refer to this video I made for an actual demonstration (**old video, some features are missing**) :  https://www.youtube.com/watch?v=5VkAmHpXwn8
 
 ## Space Shuttle Aerodynamics 101  
 
