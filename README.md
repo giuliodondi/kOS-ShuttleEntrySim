@@ -120,14 +120,21 @@ Refer to this video I made for an actual demonstration :  https://www.youtube.co
 
 ## Space Shuttle Aerodynamics 101  
 
-The Shuttle has two main aerodynamic quirks: 
-- It has a relatively narrow pitch stability region, meaning that proper CG position makes the difference between a Shuttle that can't hold the nose up and a Shuttle that spins like a boomerang. If you use my Space Shuttle system fork, The centre of lift is adjusted as far forwards as possible for pitch manoruvrability at high AoA, but not too forward that it will lose control at low speeds.  
-You must deplete about 75% of your OMS fuel before reentering or you might be too tail heavy. However, you must keep about 50 m/s of OMS fuel for reentry control. IF you want to land with payload, it must be placed caefully to not alter the empty CG.  
-**Do NOT adjust the payload CG with full OMS fuel, remove temporarily all fuel from both nose and aft OMS pods.**
-- At a high angle of attack, the tail is completely occluded by the Shuttle's wake and is ineffective. At high mach number the Shuttle is then unstable in Yaw, so You will need yaw RCS to maintain lateral stability or else you will start rolling around the velocity vector without control. Therefore you must be able to balance pitch well so you save all the RCS for yaw. This effect is only present above about 20° of angle of attack. Below that the tail should be exposed to the air and the rudder effective, but even below 20° pitch RCS is recommended because the extra authority helps kOS achieve smoother control.
-
+Ideally, the Shuttle should be able to hold high AoA (40°) with little to no RCS usage using flap trimming, both elevond ans body flap.  
 The Entry Guidance has an auto-trim functionality that sets the deflection for the Elevons and Body Flap pased on average control surface deflection. For this to work you need to have enabled Flaps on both Elevons and Body Flap.
-Also do not mess with the engines on reentry. The script uses the Gimbal deflection of one of them to deduce how much flap trim is required.
+
+The Shuttle has a few aerodynamic quirks: 
+- The Shuttle experiences a nose-down moment right after entry interface down to about Mach 20. I'm not quite sure if this is realistic.  
+The flap-trim mechanism will deflect the flaps nearly to the full-up position and you may see some continuous pitch RCS puffs, but below Mach 20 the Shuttle should be pitch-stable with flap trim alone. Beware that the pitch stability region is relatively narrow even with trimming, if the CG is too far forwards the pitch-down moment will persist even below Mach 20, and this will drain RCS quite fast
+- At a high angle of attack, the tail is completely occluded by the Shuttle's wake and is ineffective. At high mach number the Shuttle is then unstable in Yaw, so You will need yaw RCS to maintain lateral stability or else you will start rolling around the velocity vector without control. Therefore you must be able to balance pitch well so you save all the RCS for yaw. This effect is only present above about 20° of angle of attack. Below that the tail should be exposed to the air and the rudder becomes effective.
+- In constrast to high Mach number, at transonic and subsonic speeds the Shuttle seems to have a pitch UP moment. The program compensates for this by toggling the AoA feedback functionality offered by the Ferram control configs.
+
+Based on these considerations:
+- If adjusting payload placement in the VAB for CG balancing, **remove temporarily all fuel from both nose and aft OMS pods. Do NOT adjust the payload CG with full OMS fuel.**
+- Make sure you reenter with between 50 and 100 m/s of OMS deltaV, between cockpit and OMS pods fuel. That should be plenty to ensure reentry control but not too much to cause pitch-instability problems when subsonic. 
+- Do not mess with the engines on reentry. The script uses the Gimbal deflection of one of them to deduce how much flap trim is required.
+- Although RCS is technically not required for control below 18° pitch, keep it enabled until subsonic since the extra authority helps kOS achieve smoother control.
+
 
 If you did everything correctly you should be able to control the Shuttle below 90km altitude and hold a 38° angle of attack using the flaps and very little pitch RCS. At high AoA it does tend to nearly max out the flap authority.
 I will repeat once again the most important thing: **Above 18° pitch, the Shuttle is yaw-unstable. Without RCS you will 100% lose control.**
@@ -237,7 +244,7 @@ Keep an eye on Azimuth Error, the absolute value will increase at first but shou
 As the Shuttle does the roll reversal it passes through zero bank, meaning all the lift is directed upwards for a few moments. You will see vertical speed shoot up and even go positive. The pipper may command an adjustment in pitch when this happens. This is the Pitch Modulation mechanism which tries to quickly change drag if the calculated range error is too large.  
 The other advantage of flying manual is that you can always modulate AOA and bank a bit to alter the trajectory. Of course you need to have a feel for how the Shuttle flies during hypersonic entry, in any case don't stray too far from the pipper. 
 
-The Script is much gentler on the controls compared to previous versions and should use barely any RCS at all but it's not perfect. In particular the Shuttle has a nose-down moment right after entry interface down to about Mach 20. The flap-trim mechanism will deflect the flaps nearly to the full-up position and you may see some continuous pitch RCS puffs, but below Mach 20 the Shuttle should be pitch-stable with flap trim alone. If it is not, you need to alter the CG somehow.  
+The Script is much gentler on the controls compared to previous versions and should use barely any RCS at all but it's not perfect. 
 **Do NOT run out of RCS or you will lose yaw control**. You can use fine controls to save RCS fuel, but **disengage fine controls during a Roll Reversal or you may lose control.** Below about 18° of pitch, the Rudder is no longer obstructed and becomes effective, but keep RCS on so that kOS doesn't wiggle controls too much.
 
 
