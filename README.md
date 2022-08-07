@@ -269,7 +269,7 @@ TAEM is very sensitive to speed and, in previous iterations, tended to command a
 TAEM guidance puts speedbrakes on Auto which **as far as I've tested** slows you down just enough for TAEM to do its thing without going mental.
 **The rule of thumb is slowing down to Mach 2 at 50/60 km distance from the HAC entry point**. If you're still above Mach 2 closer in you might want to take manual control and dive down into thicker air, which is the fastest way to decelerate.
  
-Assuming everything goes to plan, TAEM will take the Shuttle to a gentle glide, wings mostly level, heading straight towards the HAC entry point at a manageable speed. 
+Assuming everything goes to plan, TAEM will take the Shuttle to a gentle glide, wings mostly level, heading straight towards the HAC entry point at a manageable speed. I advise to keep RCS on throughout since it gives kOS more control authority and makes everything smoother.
 
 ###  At 15km distance it will switch automatically to approach guidance   
 ### If things go bad, remember you have a button to force the program out of TAEM into Approach guidance, remember to disable auto steer and Guidance or it won't activate. Do not switch manually above 20km altitude ot Mach 2
