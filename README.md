@@ -31,6 +31,7 @@ If you decide to modify the code yourself you do so 100% on your own.
 - A complete install of RSS/Realism Overhaul with the latest Ferram Aerospace Resarch.
 - kOS version 1.3 at least
 - Space Shuttle System mod, [Use my own fork of SpaceODY's Shuttle System so that the RO configs will be identical to what I use](https://github.com/giuliodondi/Space-Shuttle-System-Expanded).  
+Should also be compatible with [SpaceODY's version](https://github.com/SpaceODY/Space-Shuttle-System-Expanded)
 
 **IF you want to use SOCK**
 The script is configurable to work with any vessel and there is a configuration folder for SOCK, the configs are way out of date since I don't fly SOCK and so there will be some fine-tuning to be done. **YMMV**
