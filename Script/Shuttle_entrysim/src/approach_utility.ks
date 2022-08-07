@@ -381,9 +381,9 @@ FUNCTION hac_turn_cubic_prof {
 
 //profile altitude during mode4
 //the cubic coefficients are now frozen
-//get the cubic profile altitude at the current position, find a gain factor to match it to the current altitude 
-//return the cubic profile altitude at the predicted postion corrected by this gain
-//ramp down the gain to 1 as we near the exit
+//calculate the cubic profile altitude at the predicted postion
+//based on current altitude and the cubic profile altitude at current position, calculate a gain factor to match them
+//let the gain factor ramp down to zero as we approach the exit
 FUNCTION hac_turn_profile_alt{
 	PARAMETER ship_hac_gndtrk.
 	PARAMETER pred_hac_gndtrk.
@@ -397,14 +397,19 @@ FUNCTION hac_turn_profile_alt{
 	//altitude at the exit
 	LOCAL final_alt IS final_profile_alt(params["final_dist"] + x0,rwy,params).
 	
+	//nominal uncorrected profile altitude at the predicted point 
+	LOCAL nom_hac_prof_alt IS hac_turn_cubic_prof(pred_hac_gndtrk - x0, rwy, apch_params).
+	
+	//gain factor to match current altitude to nominal profile alt at the current point 
+	LOCAL alt_corr_gain IS (SHIP:ALTITUDE-final_alt)/hac_turn_cubic_prof(ship_hac_gndtrk - x0, rwy, apch_params).
+	
 	//ramp down the gain as we approach the exit 
-	LOCAL hac_alt_corr_gain_rampdown IS MIN(1,pred_hac_gndtrk/20).
+	LOCAL alt_corr_gain_rampdown IS MIN(1,pred_hac_gndtrk/20).
 	
-	//get the uncorrected altitude at the ship current point
-	LOCAL alt_corr_gain IS 1 + hac_alt_corr_gain_rampdown*(SHIP:ALTITUDE-final_alt)/hac_turn_cubic_prof(ship_hac_gndtrk - x0, rwy, apch_params).
+	print "hac_alt_corr_gain : " + alt_corr_gain at (1,9). 
 	
-	//now build the vertical profile value at the predicted point 
-	RETURN final_alt + hac_turn_cubic_prof(pred_hac_gndtrk - x0, rwy, apch_params)*alt_corr_gain.
+	//now build the vertical profile value at the predicted point with the gain factors
+	RETURN final_alt + nom_hac_prof_alt*(1 + (alt_corr_gain - 1)*alt_corr_gain_rampdown).
 }
 
 
