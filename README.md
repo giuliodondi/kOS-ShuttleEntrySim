@@ -176,7 +176,7 @@ Run **_entry.ks_**, this opens the main reentry guidance window and the HUD.** M
 - _Switch to Approach_ forces the program to break out of automatic guidance and take you to Approach. In normal operation you shouldn't need it as the program decides automatically when to switch.  
 **ONLY PRESS THIS BUTTON IF SOMETHING HAS GONE VERY WRONG WITH GUIDANCE**.
 - _Auto Steering_ switches between manual (off) and automatic (on) control of the Orbiter's attitude during reentry. More on this later.
-- _Guidance_ turns on the background trajectory optimisation given the landing site you chose.
+- _Guidance_ turns on the background trajectory optimisation given the landing site you chose. Turning this button off and back on again will re-set Guidance.
 - _Override Pitch Profile_ displays the pitch-velocity points loaded from  **Scripts/Shuttle_entrysim/VESSELS/vessel_name/pitch_profile.ks** and allows you to edit them live to adjust the reentry profile.
 - _Override Controller Gains_ **should never be touched** unless you have gone through the code and know what you're doing.
 
@@ -228,8 +228,9 @@ In addition, the commanded roll is never less than 2x the instantaneous azimuth 
 
 By default Guidance keeps the roll angle to zero until 100km altitude and command the first roll angle below that. The bank is to the same side of the target, so it depends on the sign of the Azimuth error.  You can force a "prebank angle" by switching to manual steering and rolling to one side, the guidance pipper should follow the nose indicator. If the crossrange error is very large you can modify the pitch profile to lower drag.  
 
-Commanded bank angle is 70+ degrees are a bit extreme and indicative of a high-energy reentry (you did your deorbit burn a bit too close to the landing site).  
-You can force Guidance to lower the reference bank angle by increasing drag through pitch. Us the _Override Pitch Profile_ button to add 2-3° of pitch and hopefully see the bank angle decrease a bit.  
+Commanded bank angle is 70+ degrees are a bit extreme and indicative of a high-energy reentry (you did your deorbit burn a bit too close to the landing site). You can force Guidance to lower the reference bank angle by increasing drag through pitch. Use the _Override Pitch Profile_ button to add 2-3° of pitch and hopefully see the bank angle decrease a bit.  
+On the other hand, if the reference roll angle is too low, you can decrease pitch to force Guidance to increase drag with roll.  
+Either way, whenever you change the pitch rpofile it is a good idea to turn the guidance button off and back on to reset the roll-ref parameter and force the algorithm to re-converge.
 
 
 Keep an eye on Azimuth Error, the absolute value will increase at first but should eventually start moving towards zero and then pick up on the other side as the Shuttle continues to bank in the same direction. At some point the absolute value of Az error becomes large enough that we should start heading the other way, at that point a **roll reversal** is commanded, the pipper will shoot on the opposite side and automatic steering will chase it. **If flying manual you must be ready to adjust attitude quickly**.  
