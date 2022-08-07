@@ -237,8 +237,9 @@ Keep an eye on Azimuth Error, the absolute value will increase at first but shou
 As the Shuttle does the roll reversal it passes through zero bank, meaning all the lift is directed upwards for a few moments. You will see vertical speed shoot up and even go positive. The pipper may command an adjustment in pitch when this happens. This is the Pitch Modulation mechanism which tries to quickly change drag if the calculated range error is too large.  
 The other advantage of flying manual is that you can always modulate AOA and bank a bit to alter the trajectory. Of course you need to have a feel for how the Shuttle flies during hypersonic entry, in any case don't stray too far from the pipper. 
 
-Below 80km you theoretically only need Yaw RCS, you can use the actuation toggles to disable the other axes and save RCS if you are low on fuel. **Do NOT run out of RCS or you will lose yaw control**. The Script is much gentler on the controls compared to previous versions but it's not perfect.  
-You can also use fine controls to save RCS fuel, but **disengage fine controls during a Roll Reversal or you may lose control.** Below about 18° of pitch, the Rudder is no longer obstructed and becomes effective, you can (and should) disable RCS at this point, unless for some reason the Shuttle is hard to control.
+The Script is much gentler on the controls compared to previous versions and should use barely any RCS at all but it's not perfect. In particular the Shuttle has a nose-down moment right after entry interface down to about Mach 20. The flap-trim mechanism will deflect the flaps nearly to the full-up position and you may see some continuous pitch RCS puffs, but below Mach 20 the Shuttle should be pitch-stable with flap trim alone. If it is not, you need to alter the CG somehow.  
+**Do NOT run out of RCS or you will lose yaw control**. You can use fine controls to save RCS fuel, but **disengage fine controls during a Roll Reversal or you may lose control.** Below about 18° of pitch, the Rudder is no longer obstructed and becomes effective, but keep RCS on so that kOS doesn't wiggle controls too much.
+
 
 
 ### The Heading Alignment Cilindres (HACs)
@@ -253,8 +254,8 @@ Given a HAC, the entrance point is calculated as the point whose tangent crosses
 
 ### TAEM guidance
 
-### This mode is EXPERIMENTAL. MOST of the time it works MOSTLY correctly, but occasionally it will mess up and dump a bit too much energy, or dump too little energy and overshoot the HAC entry point.
-### I've made a huge 'Switch to Approach' override button for a good reason, don't be afraid to use it if you see a problem
+### This mode works as expected MOST of the time, I built in some protective checks to prevent excessive S-turning and pitch smoothing since a large change in commanded pitch can cause kOS to lose control.  
+### I'm fairly confident it is robust enough, but keep in mind you have a huge 'Switch to Approach' override button if you see a problem.
 
 As mentioned, you need to hit the HAC aiming point at the correct altitude, at least within 100m or so. Additionally you need to be subsonic, as the Shuttle cannot turn around a HAC this tight at M1+.
 
