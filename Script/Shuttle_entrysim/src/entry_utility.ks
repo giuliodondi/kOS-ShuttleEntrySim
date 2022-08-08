@@ -47,18 +47,6 @@ FUNCTION log_gains {
 
 
 
-//calculating average of quantity
-//given a list of current and previous readings
-//and global indices that track the next value position
-FUNCTION average_list {
-	PARAMETER value_list.
-	LOCAL  avg IS 0.
-	FROM {LOCAL k IS 1.} UNTIL k > len STEP { SET k TO k+1.} DO{ SET avg TO avg + value_list[k]/len. }
-	RETURN avg.
-}
-
-
-
 
 
 
@@ -92,28 +80,6 @@ FUNCTION update_ref_pitch {
 }
 
 
-//old strategy : compare curent heading and bearing to target
-//prone to angle singularities and weird stuff when flying retrograde or due north
-//FUNCTION az_error {
-//	PARAMETEr position.
-//	PARAMETER tgt_pos.
-//	PARAMETER surfv.
-//
-//
-//	//use haversine formula to get the bearings to target and impact point
-//	LOCAL tgt_bng IS bearingg(tgt_pos, position).
-//
-//	local hdg is compass_for(surfv,position).
-//	
-//
-//
-//	LOCAL out IS tgt_bng - hdg.
-//	IF ABS(out)>90 {
-//		SET out TO unfixangle(out + 180).
-//	}
-//	
-//	RETURN out.
-//}
 
 //new approach, hopefully more robust
 //simply calculate the angle between velocity vector and vector pointing to the target

@@ -131,11 +131,9 @@ SET flap_control["pitch_control"] TO average_value_factory(5).
 
 
 //if conducting an ALT this will prevent the entry guidance from running
-//the flap trim logic is contained within entry guidance block
 IF SHIP:ALTITUDE>constants["apchalt"] {
 
 	make_entry_GUI().
-	
 
 	
 	//SHUTDOWN ALL engines and initalise gimbals parts
@@ -151,41 +149,14 @@ IF SHIP:ALTITUDE>constants["apchalt"] {
 		PRINT "You may only specify positive pitch values to positive velocity values" AT (0,2). 
 		RETURN.
 	}
-
-	
-	gimbals:DOACTION("free gimbal", TRUE).
-	//gg:DOEVENT("Show actuation toggles").
-	gimbals:DOACTION("toggle gimbal roll", TRUE).
-	gimbals:DOACTION("toggle gimbal yaw", TRUE).
 	
 	//activate auto flaps 
 	SET flptrm:PRESSED TO TRUE.
 	
 	
-	//steer towards an initial direction before starting the whole thing
-	//the direction is defined by the first profile pithch value and zero roll
-	//reference prograde vector about which everything is rotated
-	LOCAL initial_dir IS create_steering_dir(
-					SHIP:srfprograde:vector:NORMALIZED,
-					VXCL(SHIP:srfprograde:vector:NORMALIZED,-SHIP:ORBIT:BODY:POSITION:NORMALIZED),
-					pitchprof_segments[pitchprof_segments:LENGTH-1][1],
-					0
-					).
-
-	//SEt STEERING TO initial_dir.
-	//
-	//UNTIL FALSE {
-	//	IF (VANG(SHIP:FACING:FOREVECTOR , initial_dir:FOREVECTOR) < 5 ) { BREAK.}
-	//	WAIT 0.1.
-	//}
-
-	UNLOCK STEERING.
-	SAS  ON.
-	
 	flaps_aoa_feedback(flap_control["parts"],-20).
 
 	entry_loop().
-	
 	
 	//remove entry GUI sections
 	clean_entry_gui().
@@ -238,12 +209,8 @@ SAS OFF.
 //or because approach guidance was called manually, in which case skip TAEM
 LOCAL TAEM_flag IS FALSE.
 
-
-
 //flag to signal that roll guidance has converged
-IF NOT (DEFINED guid_converged_flag) {
-	GLOBAL guid_converged_flag IS FALSE.
-}
+GLOBAL guid_converged_flag IS FALSE.
 
 //flag to stop the entry loop and transition to approach
 GLOBAL stop_entry_flag IS FALSE.
@@ -335,7 +302,6 @@ LOCAL last_T Is TIME:SECONDS.
 LOCAL last_hdot IS 0.
 
 
-
 //roll ref is the base roll value that gets updated by guidance 
 //the actual roll value is determined by the roll profile routine
 //it's zero above 90 km and it's roll_ref plus hdot modulation below that.
@@ -343,17 +309,10 @@ LOCAL last_hdot IS 0.
 LOCAL roll_ref IS constants["rollguess"].
 
 
-
 // control variables
 //initialise the roll sign to the azimuth error sign
 LOCAL roll_sign IS SIGN(az_err).
 LOCAL pitch_ref IS pitchguid.
-
-
-
-
-
-
 
 
 
@@ -819,19 +778,6 @@ GLOBAL sim_settings IS LEXICON(
 					"integrator","rk3",
 					"log",FALSE
 ).
-
-
-//define the delegate to the integrator function, saves an if check per integration step
-LOCAL integrate IS 0.
-IF sim_settings["integrator"]= "rk2" {
-	SET integrate TO rk2@.
-}
-ELSE IF sim_settings["integrator"]= "rk3" {
-	SET integrate TO rk3@.
-}
-ELSE IF sim_settings["integrator"]= "rk4" {
-	SET integrate TO rk4@.
-}
 
 
 LOCAL pitchprog IS get_pitch_prograde().
