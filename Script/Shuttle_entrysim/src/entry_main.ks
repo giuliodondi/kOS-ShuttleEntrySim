@@ -89,6 +89,8 @@ GLOBAL loglex IS LEXICON(
 GLOBAL reset_entry_flag Is FALSE.
 
 
+//initialise all pids
+reset_pids().
 
 
 //find the airbrakes parts
@@ -103,8 +105,6 @@ GLOBAL airbrake_control IS LEXICON(
 						"parts",airbrakes,
 						"spdbk_val",0
 						).
-
-IF (DEFINED BRAKESPID) {UNSET BRAKESPID.}
 
 
 LISt ENGINES IN englist.
@@ -121,7 +121,7 @@ gimbals:DOACTION("free gimbal", TRUE).
 gimbals:DOACTION("toggle gimbal roll", TRUE).
 gimbals:DOACTION("toggle gimbal yaw", TRUE).
 
-IF (DEFINED FLAPPID) {UNSET FLAPPID.}
+
 
 //initialise the running average for the pitch control values
 SET flap_control["pitch_control"] TO average_value_factory(5).
@@ -164,6 +164,9 @@ IF SHIP:ALTITUDE>constants["apchalt"] {
 }
 
 flaps_aoa_feedback(flap_control["parts"],+40).
+
+//reduce KP on the flaps PID so that auto flaps are nto so aggressive 
+SET FLAPPID:KP TO FLAPPID:KP/3.
 
 
 SET mode TO 3.
@@ -825,7 +828,7 @@ UNTIL FALSE{
 	//read off the pilot input, assumes manual control
 	flap_control["pitch_control"]:update(SHIP:CONTROL:PILOTPITCH).
 	
-	SET flap_control TO flaptrim_control(flptrm:PRESSED, flap_control).
+	SET flap_control TO flaptrim_control(flptrm:PRESSED, flap_control,0.2).
 	
 	
 

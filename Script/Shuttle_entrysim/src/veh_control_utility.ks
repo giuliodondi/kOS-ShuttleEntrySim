@@ -195,6 +195,27 @@ FUNCTION autoland {
 
 }
 
+FUNCTION reset_pids {
+	
+	IF (DEFINED FLAPPID) {UNSET FLAPPID.}
+	//initialise the flap control pid loop, pid gains rated for deflection as percentage of maximum
+	LOCAL Kp IS -0.0375.
+	LOCAL Ki IS 0.
+	LOCAL Kd IS 0.0214.
+
+	GLOBAL FLAPPID IS PIDLOOP(Kp,Ki,Kd).
+	SET FLAPPID:SETPOINT TO 0.
+	
+	IF (DEFINED BRAKESPID) {UNSET BRAKESPID.}
+	//initialise the air brake control pid loop 		
+	LOCAL Kp IS -0.005.
+	LOCAL Ki IS 0.
+	LOCAL Kd IS -0.02.
+
+	GLOBAL BRAKESPID IS PIDLOOP(Kp,Ki,Kd).
+	SET BRAKESPID:SETPOINT TO 0.
+}
+
 
 FUNCTION activate_spdbrk {
 	PARAMETER airbrake_control.
@@ -267,16 +288,6 @@ FUNCTION speed_control {
 			}
 			
 		}
-
-		//initialise the air brake control pid loop 		
-		IF NOT (DEFINED BRAKESPID) {
-			LOCAL Kp IS -0.005.
-			LOCAL Ki IS 0.
-			LOCAL Kd IS -0.02.
-
-			GLOBAL BRAKESPID IS PIDLOOP(Kp,Ki,Kd).
-			SET BRAKESPID:SETPOINT TO 0.
-		}
 		
 		LOCAL delta_spdbk IS CLAMP(BRAKESPID:UPDATE(TIME:SECONDS,delta_spd), -2, 2).
 		
@@ -305,33 +316,28 @@ FUNCTION speed_control {
 FUNCTION  flaptrim_control{
 	PARAMETER auto_flag.
 	PARAMETER flap_control.
+	PARAMETER control_deadband IS 0.
 
-	
+	LOCAL flap_incr IS 0.
 	
 	If auto_flag {
-	
-		//initialise the flap control pid loop, pid gains rated for deflection as percentage of maximum
-		IF NOT (DEFINED FLAPPID) {
-			LOCAL Kp IS -0.0375.	//-1.05.
-			LOCAL Ki IS 0.
-			LOCAL Kd IS 0.0214.	//0.6.
-
-			GLOBAL FLAPPID IS PIDLOOP(Kp,Ki,Kd).
-			SET FLAPPID:SETPOINT TO 0.
-		}
-
-		
 		LOCAL controlavg IS flap_control["pitch_control"]:average().
-		LOCAL flap_incr IS  FLAPPID:UPDATE(TIME:SECONDS,controlavg).
-		SET flap_control["deflection"] TO CLAMP(
+		
+		IF (ABS(controlavg)>control_deadband) {
+			SET flap_incr TO FLAPPID:UPDATE(TIME:SECONDS,controlavg).
+		}
+		
+	} ELSE {
+		SET flap_incr TO SHIP:CONTROL:PILOTPITCHTRIM.
+		SET SHIP:CONTROL:PILOTPITCHTRIM TO 0.
+		
+	}
+	
+	SET flap_control["deflection"] TO CLAMP(
 			flap_control["deflection"] + flap_incr,
 			-1,
 			1
 		).
-
-	} ELSE {
-		SET flap_control["deflection"] TO  SHIP:CONTROL:PILOTPITCHTRIM.
-	}
 	
 	deflect_flaps(flap_control["parts"] , -flap_control["deflection"]).
 	
