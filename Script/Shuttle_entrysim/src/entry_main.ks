@@ -444,13 +444,12 @@ UNTIL FALSE {
 	}
 	
 	clearscreen.
+	print "mode: " + mode at (1,1).
 	print "simulation steps: " + step_num at (1,2).
 	print "timestep: " + sim_settings["deltat"] at (1,3).
 		
 	
 	IF is_guidance() {
-		//register guidance enabled 
-		SET mode TO 2.
 	
 		//Roll ref PID stuff
 		LOCAL P IS range_err.
@@ -499,7 +498,6 @@ UNTIL FALSE {
 		}
 	
 	} ELSE {
-		SET mode TO 1.
 		//in this case we use the current commanded roll value for the trajectory prediction
 		SET roll_ref TO ABS(rollguid).
 		//reset the start guidance flag 
@@ -655,6 +653,7 @@ UNTIL FALSE {
 
 	
 	clearscreen.
+	print "mode: " + mode at (1,1).
 	print "simulation steps: " + step_num at (1,2).
 	print "timestep: " + sim_settings["deltat"] at (1,3).
 	
@@ -664,8 +663,6 @@ UNTIL FALSE {
 	
 	
 	IF is_guidance() {
-		//register guidance enabled 
-		SET mode TO 2.
 	
 		//Pitch ref PID stuff
 		//invert signs to keep the signs of the gains consistent with entry guidance
@@ -705,7 +702,6 @@ UNTIL FALSE {
 
 	
 	} ELSE {
-		SET mode TO 1.
 		//in this case we use the current commanded roll value for the trajectory prediction
 		SET pitch_ref TO pitchsteer.
 	}
