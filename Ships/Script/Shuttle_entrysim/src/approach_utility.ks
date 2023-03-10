@@ -24,12 +24,12 @@ FUNCTION pos_arrow {
 
 //draw a vector centered on ship with label
 FUNCTION arrow {
-	PARAMETER v.
+	PARAMETER vec.
 	PARAMETER label.
 	
 	VECDRAW(
       V(0,0,0),
-      v,
+      vec,
       RGB(1,0,0),
       label,
       60,

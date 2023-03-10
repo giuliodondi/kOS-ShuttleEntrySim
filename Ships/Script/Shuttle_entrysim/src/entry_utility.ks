@@ -119,25 +119,25 @@ FUNCTION abeam {
 	//this is the B spherical angle
 	PARAMETER az_err.
 	//this is the c side
-	PARAMETER  range.
+	PARAMETER _range.
 	
 	LOCAL p2 IS 180/((SHIP:ORBIT:BODY:RADIUS/1000)*CONSTANT:PI).
 
-	RETURN get_a_cBB(range*p2,ABS(az_err))/p2.
+	RETURN get_a_cBB(_range*p2,ABS(az_err))/p2.
 }
 
 FUNCTION cross_error {
 	PARAMETEr pos.
 	PARAMETER tgt_pos.
 	PARAMETER surfv.
-	PARAMETER  range. //this is the c side
+	PARAMETER  _range. //this is the c side
 	
 	//this is the B spherical angle
 	LOCAL az_err IS az_error(pos,tgt_pos,surfv).
 	
 	LOCAL p2 IS 180/((SHIP:ORBIT:BODY:RADIUS/1000)*CONSTANT:PI).
 	
-	RETURN get_b_cBB(range*p2,az_err)/p2.
+	RETURN get_b_cBB(_range*p2,az_err)/p2.
 	
 }
 
