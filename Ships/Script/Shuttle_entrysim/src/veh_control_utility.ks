@@ -6,6 +6,170 @@
 
 
 
+FUNCTION dap_controller_factory{
+
+	LOCAL this IS lexicon().
+
+	
+	this:add("steering_dir", SHIP:FACINg).
+	
+	this:add("reset_steering",{
+		SET this:steering_dir TO SHIP:FACINg.
+	}).
+	
+	this:add("last_time", TIME:SECONDS).
+	
+	this:add("iteration_dt", 0).
+	
+	this:add("update_time",{
+		LOCAL old_t IS this:last_time.
+		SET this:last_time TO TIME:SECONDS.
+		SET this:iteration_dt TO this:last_time - old_t.
+	}).
+	
+	this:add("prog_pitch",0).
+	this:add("prog_yaw",0).
+	this:add("prog_roll",0).
+	
+	this:add("update_prog_angles", {
+		SET this:prog_pitch TO get_pitch_prograde(0).
+		SET this:prog_roll TO get_roll_prograde().
+		SET this:prog_yaw TO get_yaw_prograde().
+	}).
+	
+	this:update_prog_angles().
+	
+	this:add("steer_pitch",0).
+	this:add("steer_yaw",0).
+	this:add("steer_roll",0).
+	
+	//by default do not rotate in yaw, to enforce zero sideslip
+	this:add("create_prog_steering_dir",{
+		PARAMETER pch.
+		PARAMETER rll.
+		PARAMETER yaw IS 0.
+		
+		//reference prograde vector about which everything is rotated
+		LOCAL progvec is SHIP:srfprograde:vector:NORMALIZED.
+		//vector pointing to local up and normal to prograde
+		LOCAL upvec IS -SHIP:ORBIT:BODY:POSITION:NORMALIZED.
+		SET upvec TO VXCL(progvec,upvec).
+		
+		//rotate the up vector by the new roll anglwe
+		SET upvec TO rodrigues(upvec, progvec, -rll).
+		//create the pitch rotation vector
+		LOCAL nv IS VCRS(progvec, upvec).
+		//rotate the prograde vector by the pitch angle
+		LOCAL aimv IS rodrigues(progvec, nv, pch).
+		
+		//rotate the aim vector by the yaw
+		if (ABS(yaw)>0) {
+			SET aimv TO rodrigues(aimv, upvec, yaw).
+		}
+		
+		RETURN LOOKDIRUP(aimv, upvec).
+	}).
+
+	this:add("atmo_css", {
+	
+		this:update_time().
+		this:update_prog_angles().
+		
+		//gains suitable for manoeivrable steerign in atmosphere
+		LOCAL rollgain IS 6.
+		LOCAL pitchgain IS 2.
+		LOCAL yawgain IS 2.
+		
+		//required for continuous pilot input across several funcion calls
+		LOCAL time_gain IS ABS(this:iteration_dt/0.03).
+		
+		//measure input minus the trim settings
+		LOCAL deltaroll IS time_gain * rollgain * (SHIP:CONTROL:PILOTROLL - SHIP:CONTROL:PILOTROLLTRIM).
+		LOCAL deltapitch IS time_gain * pitchgain * (SHIP:CONTROL:PILOTPITCH - SHIP:CONTROL:PILOTPITCHTRIM).
+		LOCAL deltayaw IS time_gain * yawgain * (SHIP:CONTROL:PILOTYAW - SHIP:CONTROL:PILOTYAWTRIM).
+		
+		//apply the deltas to the current angles so the inputs will tend to "ndge" the nose around and then leave it where it is when the controls are released
+		SET this:steer_pitch TO this:prog_pitch + deltapitch.
+		SET this:steer_roll TO this:prog_roll + deltaroll.
+		SET this:steer_yaw TO 0 + deltayaw.
+		
+		SET this:steering_dir TO this:create_prog_steering_dir(
+			this:steer_pitch,
+			this:steer_roll,
+			this:steer_yaw
+		).
+		
+		RETURN this:steering_dir.
+	
+	}).
+	
+	this:add("reentry_css", {
+	
+		this:update_time().
+		this:update_prog_angles().
+		
+		LOCAL rollgain IS 1.2.
+		LOCAL pitchgain IS 0.5.
+		
+		//required for continuous pilot input across several funcion calls
+		LOCAL time_gain IS ABS(this:iteration_dt/0.03).
+		
+		LOCAL deltaroll IS rollgain*(SHIP:CONTROL:PILOTROLL - SHIP:CONTROL:PILOTROLLTRIM).
+		LOCAL deltapitch IS pitchgain*(SHIP:CONTROL:PILOTPITCH - SHIP:CONTROL:PILOTPITCHTRIM).
+		
+		SET this:steer_pitch TO MAx(this:steer_pitch + deltapitch, 0.5).
+		SET this:steer_roll TO this:steer_roll + deltaroll.
+	
+		SET this:steering_dir TO this:create_prog_steering_dir(
+			this:steer_pitch,
+			this:steer_roll
+		).
+		
+		RETURN this:steering_dir.
+		
+	}).
+	
+	this:add("reentry_auto",{
+		PARAMETER rollguid.
+		PARAMETER pitchguid.
+		
+		this:update_time().
+		this:update_prog_angles().
+		
+		LOCAL pitch_tol IS 5.
+		LOCAL roll_tol IS 5.
+	
+		SET this:steer_roll TO this:steer_roll + CLAMP(rollguid - this:steer_roll,-roll_tol,roll_tol).
+		SET this:steer_pitch TO this:steer_pitch + CLAMP(pitchguid - this:steer_pitch,-pitch_tol,pitch_tol).
+		
+		
+	}).
+	
+	
+	this:add("print_debug",{
+		PARAMETER line.
+		
+		print "loop dt : " + round(this:iteration_dt(),3) + "    " at (0,line + 1).
+		
+		print "prog pitch : " + round(this:prog_pitch,3) + "    " at (0,line + 2).
+		print "prog roll : " + round(this:prog_roll,3) + "    " at (0,line + 3).
+		print "prog yaw : " + round(this:prog_yaw,3) + "    " at (0,line + 4).
+		
+		
+		print "steer pitch : " + round(this:steer_pitch,3) + "    " at (0,line + 5).
+		print "steer roll : " + round(this:steer_roll,3) + "    " at (0,line + 6).
+		print "steer yaw : " + round(this:steer_yaw,3) + "    " at (0,line + 7).
+		
+	}).
+	
+	IF (DEFINED SASPITCHPID) {UNSET SASPITCHPID.}
+	IF (DEFINED SASROLLPID) {UNSET SASROLLPID.}
+	SET STEERINGMANAGER:ROLLCONTROLANGLERANGE TO 180.
+	return this.
+
+}
+
+
 
 
 //simulate Control Stick Steering : use pilot input to update steering angles 
