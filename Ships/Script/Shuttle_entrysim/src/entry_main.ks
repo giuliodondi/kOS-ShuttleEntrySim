@@ -775,12 +775,24 @@ define_flare_circle(apch_params).
 GLOBAL sim_settings IS LEXICON(
 					"deltat",1.2,//was 2, set to 1.2 to try and make the pipper less jumpy
 					"integrator","rk3",
-					"log",FALSE
+					"log",FALSE 
 ).
 
 
 LOCAL pitchprog IS get_pitch_prograde().
 LOCAL rollprog IS get_roll_prograde().
+
+LOCAL P_att IS SHIP:FACING.
+LOCAL dap IS dap_controller_factory().
+LOCK STEERING TO P_att.
+
+
+local exec is loop_executor_factory(
+								0.15,
+								{
+									SET P_att TO dap:atmo_css().
+								}
+).
 
 UNTIL FALSE{
 	

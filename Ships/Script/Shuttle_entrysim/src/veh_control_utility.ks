@@ -32,7 +32,7 @@ FUNCTION dap_controller_factory{
 	this:add("prog_roll",0).
 	
 	this:add("update_prog_angles", {
-		SET this:prog_pitch TO get_pitch_prograde(0).
+		SET this:prog_pitch TO get_pitch_prograde().
 		SET this:prog_roll TO get_roll_prograde().
 		SET this:prog_yaw TO get_yaw_prograde().
 	}).
