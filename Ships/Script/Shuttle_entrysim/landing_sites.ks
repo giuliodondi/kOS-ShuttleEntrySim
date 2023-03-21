@@ -2,72 +2,72 @@
 IF (DEFINED ldgsiteslex) {UNSET ldgsiteslex.}
 GLOBAL ldgsiteslex IS LEXICON(
 						"KSC",LEXICON(
-							"position",LATLNG(28.61938,-80.70092),
-							"elevation",14,
-							"length",5030,
-							"heading",329.9
+							"position",LATLNG(28.6149805,-80.6944507),
+							"elevation",7,
+							"length",4519.1,
+							"heading",330.08
 						),
 						"Edwards",LEXICON(
-							"position",LATLNG(34.898557,-117.9088947),
-							"elevation",821,
-							"length",6000,
-							"heading",58.2
+							"position",LATLNG(34.8972793,-117.9024972),
+							"elevation",761,
+							"length",5142,
+							"heading",58.24
 							
 						),
 						"Northrup",LEXICON(
-							"position",LATLNG(32.941370,-106.414760),
-							"elevation",1203,
-							"length",5030,
-							"heading",343.6
+							"position",LATLNG(32.9455153,-106.41617762),
+							"elevation",1202,
+							"length",5028,
+							"heading",163.59
 							
 						),
 						"Vandenberg",LEXICON(
-							"position",LATLNG(34.737224,-120.587830),
-							"elevation",103,
-							"length",5030,
-							"heading",343.5
+							"position",LATLNG(34.7410677,-120.5775855),
+							"elevation",140,
+							"length",5028,
+							"heading",149.3
 							
 						),
 						"Mataveri",LEXICON(
-							"position",LATLNG(-27.1766369,-109.401308),
-							"elevation",102,
-							"length",5030,
-							"heading",168.4
+							"position",LATLNG(-27.1759651,-109.4014619),
+							"elevation",105,
+							"length",3770,
+							"heading",348.47
 							
 						),
 						"Istres",LEXICON(
-							"position",LATLNG(43.524123,4.953187),
-							"elevation",106,
-							"length",5030,
-							"heading",152.3
+							"position",LATLNG(43.5247397,4.9527536),
+							"elevation",102,
+							"length",5028,
+							"heading",332.6
 							
 						),
 						"Zaragoza",LEXICON(
-							"position",LATLNG(41.672921,-1.057167),
-							"elevation",265,
-							"length",5030,
+							"position",LATLNG(41.6707970,-1.05230687),
+							"elevation",261,
+							"length",5028,
 							"heading",120.3
 							
 						),
 						"Rota",LEXICON(
-							"position",LATLNG(36.635919,-6.331021),
+							"position",LATLNG(36.6354140,-6.3257163),
 							"elevation",92,
-							"length",5030,
-							"heading",96.7
+							"length",5028,
+							"heading",276.78
 							
 						),
 						"Ben Guerir",LEXICON(
-							"position",LATLNG(32.127831,-7.878),
-							"elevation",465,
-							"length",5030,
-							"heading",176.5
+							"position",LATLNG(32.123550,-7.877701),
+							"elevation",466,
+							"length",5028,
+							"heading",356.53
 							
 						),
 						"Banjul",LEXICON(
-							"position",LATLNG(13.339939,-16.654652),
-							"elevation",89,
-							"length",5030,
-							"heading",130.4
+							"position",LATLNG(13.337200,-16.6513127),
+							"elevation",87,
+							"length",5028,
+							"heading",310.5
 							
 						)
 						
