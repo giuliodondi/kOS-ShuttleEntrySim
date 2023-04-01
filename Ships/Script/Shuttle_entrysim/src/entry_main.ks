@@ -218,6 +218,9 @@ GLOBAL guid_converged_flag IS FALSE.
 //flag to stop the entry loop and transition to approach
 GLOBAL stop_entry_flag IS FALSE.
 
+//dap controller object
+LOCAL dap IS dap_controller_factory().
+
 
 //initialise pitch and roll guidance values .
 LOCAL pitchguid IS pitch_profile(pitchprof_segments[pitchprof_segments:LENGTH-1][1],SHIP:VELOCITY:SURFACE:MAG).
@@ -230,7 +233,7 @@ LOCAL rollsteer IS rollguid.
 
 
 //first steering command 
-GLOBAL P_att IS update_attitude(SHIP:FACING,pitchsteer,rollsteer).
+GLOBAL P_att IS dap:create_prog_steering_dir(pitchguid, rollguid).
 LOCK STEERING TO P_att.
 
 IF SHIP:ALTITUDE < constants["firstrollalt"] {	
@@ -294,15 +297,8 @@ ELSE IF sim_settings["integrator"]= "rk4" {
 
 //navigation variables
 LOCAL az_err IS az_error(SHIP:GEOPOSITION,tgtrwy["position"],SHIP:VELOCITY:SURFACE).
-LOCAL range_err IS 0.
-LOCAL first_reversal_done IS FALSE.
+LOCAL tgt_range IS greatcircledist(tgtrwy["hac_entry"], SHIP:GEOPOSITION).
 
-
-//initialise to a large value
-LOCAL tgt_range IS 1000.
-
-LOCAL last_T Is TIME:SECONDS.
-LOCAL last_hdot IS 0.
 
 
 //roll ref is the base roll value that gets updated by guidance 
@@ -318,68 +314,67 @@ LOCAL roll_sign IS SIGN(az_err).
 LOCAL pitch_ref IS pitchguid.
 
 
+local control_loop is loop_executor_factory(
+								0.3,
+								{
+									//calculte azimuth error
+									SET az_err TO az_error(SHIP:GEOPOSITION,tgtrwy["hac_entry"],SHIP:VELOCITY:SURFACE).
+									
+									//distance to target
+									set tgt_range to greatcircledist(tgtrwy["hac_entry"], SHIP:GEOPOSITION).
+	
+									//update the flaps trim setting and airbrakes IF WE'RE BELOW FIRST ROLL ALT
+									IF SHIP:ALTITUDE < constants["firstrollalt"] {	
+										//read off the gimbal angle to get the pitch control input 
+										flap_control["pitch_control"]:update(gimbals:PITCHANGLE).
+										SET flap_control TO flaptrim_control(flptrm:PRESSED, flap_control).
+										SET airbrake_control TO speed_control(arbkb:PRESSED, airbrake_control, mode).
+									}
 
-//run the control loop 
-//faster than the main loop 
-LOCAL attitude_time_upd IS TIME:SECONDS.
-LOCAL preserve_loop IS TRUE.
-WHEN TIME:SECONDS>(attitude_time_upd + 0.25) THEN {
+									print "roll_ref : " + ROUND(roll_ref,1) + "    " at (0,4).
+									print "rollguid : " + ROUND(rollguid,1) + "    " at (0,5).
+									print "pitchguid : " + ROUND(pitchguid,1) + "    " at (0,6).
+									
+									IF is_auto_steering() {
+										SET P_att TO dap:reentry_auto(rollguid,pitchguid).
+									} ELSE {
+										SET P_att TO dap:reentry_css().
+									}
+									
+									LOCAL pipper_deltas IS LIST(
+																rollguid - dap:steer_roll, 
+																pitchguid -  dap:steer_pitch
+									).
+									
+									update_entry_GUI(
+													mode,
+													pipper_deltas,
+													az_err,
+													tgt_range,
+													airbrake_control["spdbk_val"],
+													flap_control["deflection"],
+													update_nz(
+														-SHIP:ORBIT:BODY:POSITION,
+														SHIP:VELOCITY:SURFACE,
+														LIST(dap:steer_pitch,dap:steer_roll)
+													
+													)	
+									).
+								}
+).
 
-	//calculte azimuth error
-	SET az_err TO az_error(SHIP:GEOPOSITION,tgtrwy["hac_entry"],SHIP:VELOCITY:SURFACE).
-	
-	//distance to target
-	set tgt_range to greatcircledist(tgtrwy["hac_entry"], SHIP:GEOPOSITION).
 
-	//update the flaps trim setting and airbrakes IF WE'RE BELOW FIRST ROLL ALT
-	IF SHIP:ALTITUDE < constants["firstrollalt"] {	
-		//read off the gimbal angle to get the pitch control input 
-		flap_control["pitch_control"]:update(gimbals:PITCHANGLE).
-		SET flap_control TO flaptrim_control(flptrm:PRESSED, flap_control).
-		SET airbrake_control TO speed_control(arbkb:PRESSED, airbrake_control, mode).
-	}
-	
-	//measure CSS attitude
-	LOCAL out IS update_steering_attitude(rollsteer,pitchsteer,rollguid,pitchguid).
-	SET rollsteer TO out[0].
-	SET pitchsteer TO out[1].
 
-	print "roll_ref : " + ROUND(roll_ref,1) + "    " at (0,4).
-	print "rollguid : " + ROUND(rollguid,1) + "    " at (0,5).
-	print "pitchguid : " + ROUND(pitchguid,1) + "    " at (0,6).
-	
-	//steer to the new pitch and roll 
-	SET P_att TO update_attitude(P_att,pitchsteer,rollsteer).
-	
-	update_entry_GUI(
-					mode,
-					rollsteer, 
-					pitchsteer,
-					az_err,
-					tgt_range,
-					rollguid,
-					pitchguid,
-					airbrake_control["spdbk_val"],
-					flap_control["deflection"],
-					update_nz(
-						-SHIP:ORBIT:BODY:POSITION,
-						SHIP:VELOCITY:SURFACE,
-						LIST(pitchsteer,rollsteer)
-					
-					)	
-	).
-	
-	SET attitude_time_upd TO TIME:SECONDS.
-	IF (preserve_loop) {
-		PRESERVE.
-	}
-}
+// loop-specific stuff
+LOCAL last_T Is TIME:SECONDS.
+LOCAL last_hdot IS 0.
+LOCAL range_err IS 0.
+LOCAL first_reversal_done IS FALSE.
 
 //reentry loop
 UNTIL FALSE {
 	SAS OFF.
-
-
+	
 	IF reset_entry_flag {
 		SET reset_entry_flag TO FALSE.
 		SET roll_ref TO constants["rollguess"]. 
@@ -546,7 +541,7 @@ define_hac(SHIP:GEOPOSITION,tgtrwy,apch_params).
 
 //if we broke out manually before TAEM conditions go directly to approach 
 IF (NOT TAEM_flag) { 
-	SET preserve_loop TO FALSE.
+	control_loop:stop_execution().
 	UNLOCK STEERING.
 	SAS ON.
 	RETURN.
@@ -595,7 +590,7 @@ LOCAL hdot_ref IS -50.
 
 //TAEM loop
 UNTIL FALSE {
-	
+
 	IF reset_entry_flag {
 		SET reset_entry_flag TO FALSE.
 		SET pitch_ref TO pitchsteer. 
@@ -745,7 +740,7 @@ UNTIL FALSE {
 
 
 
-SET preserve_loop TO FALSE.
+control_loop:stop_execution().
 UNLOCK STEERING.
 SAS ON.
 
@@ -847,7 +842,7 @@ UNTIL FALSE{
 
 	update_apch_GUI(
 		mode,
-		diamond_deviation_apch(deltas,mode),
+		deltas,
 		mode_dist(simstate,tgtrwy,apch_params),
 		airbrake_control["spdbk_val"],
 		flap_control["deflection"],

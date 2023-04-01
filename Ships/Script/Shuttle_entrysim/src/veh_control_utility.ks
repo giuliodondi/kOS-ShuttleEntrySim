@@ -111,9 +111,6 @@ FUNCTION dap_controller_factory{
 		LOCAL rollgain IS 1.2.
 		LOCAL pitchgain IS 0.5.
 		
-		//required for continuous pilot input across several funcion calls
-		LOCAL time_gain IS ABS(this:iteration_dt/0.03).
-		
 		LOCAL deltaroll IS rollgain*(SHIP:CONTROL:PILOTROLL - SHIP:CONTROL:PILOTROLLTRIM).
 		LOCAL deltapitch IS pitchgain*(SHIP:CONTROL:PILOTPITCH - SHIP:CONTROL:PILOTPITCHTRIM).
 		
@@ -136,13 +133,20 @@ FUNCTION dap_controller_factory{
 		this:update_time().
 		this:update_prog_angles().
 		
-		LOCAL pitch_tol IS 5.
-		LOCAL roll_tol IS 5.
+		LOCAL pitch_tol IS 3.
+		LOCAL roll_tol IS 3.
 	
 		SET this:steer_roll TO this:steer_roll + CLAMP(rollguid - this:steer_roll,-roll_tol,roll_tol).
 		SET this:steer_pitch TO this:steer_pitch + CLAMP(pitchguid - this:steer_pitch,-pitch_tol,pitch_tol).
 		
 		
+		
+		SET this:steering_dir TO this:create_prog_steering_dir(
+			this:steer_pitch,
+			this:steer_roll
+		).
+		
+		RETURN this:steering_dir.
 	}).
 	
 	
@@ -169,123 +173,6 @@ FUNCTION dap_controller_factory{
 
 }
 
-
-
-
-//simulate Control Stick Steering : use pilot input to update steering angles 
-FUNCTION update_steering_attitude {
-	PARAMETER rollsteer.
-	PARAMETER pitchsteer.
-	PARAMETER rollguid.
-	PARAMETER pitchguid.
-	
-	IF is_auto_steering() {
-		SET rollsteer TO rollsteer + CLAMP(rollguid - rollsteer,-1.5,1.5).
-		SET pitchsteer TO pitchsteer + CLAMP(pitchguid - pitchsteer,-1.5,1.5).
-	} ELSE {
-		LOCAL rollgain IS 1.2.
-		LOCAL pitchgain IS 0.5.
-		
-		LOCAL deltaroll IS rollgain*(SHIP:CONTROL:PILOTROLL - SHIP:CONTROL:PILOTROLLTRIM).
-		LOCAL deltapitch IS pitchgain*(SHIP:CONTROL:PILOTPITCH - SHIP:CONTROL:PILOTPITCHTRIM).
-		
-		IF ABS(deltaroll)>0.1 {
-			SET rollsteer TO rollsteer + deltaroll.
-		}
-		
-		IF ABS(deltapitch)>0.1 {
-			SET pitchsteer TO pitchsteer + deltapitch.
-		}
-	}
-	
-	RETURN LIST(rollsteer,pitchsteer).
-}
-
-//create KSP direction based on AOA and bank angle wrt two specified vectors
-FUNCTION create_steering_dir {
-		PARAMETER refv.
-		PARAMETER upv.
-		PARAMETER pch.
-		PARAMETER rll.
-		
-		//rotate the up vector by the new roll anglwe
-		SET upv TO rodrigues(upv,refv,-rll).
-		//create the pitch rotation vector
-		LOCAL nv IS VCRS(refv,upv).
-		//rotate the prograde vector by the pitch angle
-		LOCAL aimv IS rodrigues(refv,nv,pch).
-		
-		RETURN LOOKDIRUP(aimv, upv).
-	}
-
-
-//handles vehicle attitude
-FUNCTION update_attitude {
-	PARAMETER cmd_dir.
-	PARAMETER tgt_pitch.
-	PARAMETER tgt_roll.
-	
-	LOCAL pitch_tol IS 5.
-	LOCAL roll_tol IS 5.
-
-	
-	//reference prograde vector about which everything is rotated
-	LOCAL PROGVEC is SHIP:srfprograde:vector:NORMALIZED.
-	//vector pointing to local up and normal to prograde
-	LOCAL upvec IS -SHIP:ORBIT:BODY:POSITION:NORMALIZED.
-	SET upvec TO VXCL(PROGVEC,upvec).
-	
-	LOCAL cmd_vec IS cmd_dir:VECTOR.
-	LOCAL ship_vec IS SHIP:FACING:VECTOR.	
-
-	//measure the current steering angle 
-	LOCAL ship_pitch IS get_pitch_prograde().
-	LOCAL ship_roll IS get_roll_prograde().
-	
-	LOCAL cmdpitch IS tgt_pitch.
-	LOCAL cmdroll IS tgt_roll.
-	
-	//is the current ship pitch too far from the target?
-	IF ABS(ship_pitch - tgt_pitch )>pitch_tol {
-		SET cmdpitch TO ship_pitch + SIGN(tgt_pitch - ship_pitch)*pitch_tol.
-	}
-		
-	//is the current ship direction too far from the target direction in the roll plane?
-	IF ABS( ship_roll - tgt_roll )>roll_tol {
-		//target roll angle is too far to be set directly
-		//use the current commanded roll angle as an intermediate roll angle
-		// if we're close enough to it we need to update it 
-		//to move it closer to the true target direction
-		
-		
-		//we initialise the roll correction sign to minus the sign of the current ship roll
-		//because that's the correct sign in case of a roll reversal condition
-		//i.e. when the target roll is of opposite sign to the current roll.
-		//in this case the absolute value of the roll needs to be decreased in either case
-		//we actually want minus if the current roll is below 90 but plus if it's above 90
-		
-		LOCAL s_roll IS SIGN(ship_roll)*SIGN(ABS(ship_roll)-90).
-		//if we're not in a reversal they'll have the same sign
-		//and in that case work out if the roll needs to be increased or decreased
-		IF SIGN(ship_roll)=SIGN(tgt_roll) {
-			SET s_roll TO -SIGN(ship_roll - tgt_roll ).
-		}
-		
-		LOCAL new_roll IS ship_roll +  s_roll*roll_tol.
-		
-		IF ABS( tgt_roll - new_roll )<roll_tol {
-			SET new_roll TO tgt_roll.
-		}
-		
-		//set the target roll to the current commanded roll
-		SET cmdroll TO new_roll.
-
-	}
-
-	
-	//create the target direction given pitch and roll values as givne or computed.
-	RETURN create_steering_dir(PROGVEC,upvec,cmdpitch,cmdroll).
-}
 
 
 

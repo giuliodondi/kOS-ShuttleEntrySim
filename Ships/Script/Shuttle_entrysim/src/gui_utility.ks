@@ -1179,22 +1179,12 @@ FUNCTION diamond_deviation_entry {
 
 FUNCTION update_entry_GUI {
 	PARAMETER mode.
-	PARAMETER steer_roll.
-	PARAMETER steer_pitch.
+	PARAMETER pipper_deltas.
 	PARAMETER az_err.
 	PARAMETER tgt_range.
-	PARAMETER roll_guid.
-	PARAMETER pitch_guid.
 	PARAMETER spdbk_val.
 	PARAMETER flapval.
 	PARAMETER cur_nz.
-	
-	
-	
-	LOCAL pipper_deltas IS LIST(
-								roll_guid - steer_roll, 
-								pitch_guid -  steer_pitch
-	).
 	
 	LOCAL mode_str IS "".
 	IF is_auto_steering() {
@@ -1210,8 +1200,8 @@ FUNCTION update_entry_GUI {
 		distance_format(tgt_range,mode),
 		ROUND(az_err,1),
 		"M" + ROUND(ADDONS:FAR:MACH,1),
-		steer_pitch,
-		steer_roll,
+		get_pitch_prograde(),
+		get_roll_prograde(),
 		spdbk_val,
 		flapval,
 		cur_nz
@@ -1341,7 +1331,7 @@ FUNCTION diamond_deviation_apch {
 
 FUNCTION update_apch_GUI {
 	PARAMETER mode.
-	PARAMETER pipper_pos.
+	PARAMETER pipper_deltas.
 	PARAMETEr modedist.
 	PARAMETER spdbk_val.
 	PARAMETER flapval.
@@ -1362,7 +1352,7 @@ FUNCTION update_apch_GUI {
 	
 	update_hud_gui(
 		mode_str,
-		pipper_pos,
+		diamond_deviation_apch(pipper_deltas, mode),
 		altitude_format(mode),
 		distance_format(modedist,mode),
 		ROUND(compass_for(SHIP:SRFPROGRADE:VECTOR,SHIP:GEOPOSITION),0),
