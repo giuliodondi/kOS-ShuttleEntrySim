@@ -1348,6 +1348,8 @@ FUNCTION update_apch_GUI {
 		SET mode_str TO "FLARE".
 	} ELSE IF (mode=7) {
 		SET mode_str TO "FNLFL".
+	} ELSE IF (mode=8) {
+		SET mode_str TO "ROLLOUT".
 	}
 	
 	update_hud_gui(

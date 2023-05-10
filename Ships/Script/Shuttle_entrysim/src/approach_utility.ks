@@ -845,6 +845,11 @@ FUNCTION mode_switch {
 		IF ALT:RADAR <= 50{
 				SET switch_mode TO TRUE.
 		}
+	} ELSE IF mode=7 {
+		IF SHIP:STATUS = "LANDED" {
+			UNLOCK STEERING.
+			SET switch_mode TO TRUE.
+		}
 	}
 	
 	IF switch_mode {
