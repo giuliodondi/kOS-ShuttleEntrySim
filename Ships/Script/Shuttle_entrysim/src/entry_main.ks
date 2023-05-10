@@ -845,7 +845,7 @@ UNTIL FALSE{
 		log_data(loglex,"0:/Shuttle_entrysim/LOGS/entry_log").
 	}
 
-	IF quitflag OR (mode=7 AND SHIP:VELOCITY:SURFACE:MAG < 5) {BREAK.}
+	IF quitflag OR (mode>=7 AND SHIP:VELOCITY:SURFACE:MAG < 1) {BREAK.}
 	wait 0.
 
 }
