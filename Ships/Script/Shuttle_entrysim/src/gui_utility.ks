@@ -1307,8 +1307,13 @@ FUNCTION diamond_deviation_apch {
 	LOCAL vmult iS -1/320.
 	
 	LOCAL hmult iS 0.04.
-	IF mode=4 {SET hmult TO 0.02.}
-	IF mode>=5 {SET hmult TO 0.01.}
+	IF mode=4 {
+		SET hmult TO 0.02.
+	}
+	IF mode>=5 {
+		SET hmult TO 0.008.
+		SET vmult TO -1/300.
+	}
 	
 	LOCAL horiz IS hmult*hdelta.
 	LOCAL vert IS  vmult*vdelta.
