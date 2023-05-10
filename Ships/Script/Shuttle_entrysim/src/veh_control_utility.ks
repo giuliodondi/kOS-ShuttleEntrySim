@@ -268,6 +268,22 @@ FUNCTION reset_pids {
 }
 
 
+FUNCTION initialise_spdbrk {
+	//find the airbrakes parts
+	LOCAL airbrakes IS LIST().
+	FOR b IN SHIP:PARTSDUBBED("airbrake1") {
+		LOCAL bmod IS b:getmodule("ModuleAeroSurface").
+		bmod:SETFIELD("Deploy Angle",0). 
+		
+		airbrakes:ADD(bmod).
+	}
+	RETURN LEXICON(
+							"parts",airbrakes,
+							"spdbk_val",0
+							).
+}
+
+
 FUNCTION activate_spdbrk {
 	PARAMETER airbrake_control.
 	
@@ -361,13 +377,43 @@ FUNCTION speed_control {
 
 
 
-
+FUNCTION initialise_flap_control {
+	PARAMETER flap_control.
+	
+	activate_flaps(flap_control["parts"]).
+	
+	//initialise the running average for the pitch control values
+	SET flap_control["pitch_control"] TO average_value_factory(5).
+	
+	//only do it once
+	IF NOT (flap_control:HASKEY("gimbal")) {
+		LISt ENGINES IN englist.
+		LOCAL gimbal_ IS 0.
+		FOR e IN englist {
+			IF e:HASSUFFIX("gimbal") {
+				SET gimbal_ TO e:GIMBAL.
+				BREAK.
+			}
+		}
+		
+		gimbal_:DOACTION("free gimbal", TRUE).
+		//gg:DOEVENT("Show actuation toggles").
+		gimbal_:DOACTION("toggle gimbal roll", TRUE).
+		gimbal_:DOACTION("toggle gimbal yaw", TRUE).
+	
+	
+		flap_control:ADD("gimbal", gimbal_).
+	}
+}
 
 //automatic flap control
 FUNCTION  flaptrim_control{
 	PARAMETER auto_flag.
 	PARAMETER flap_control.
 	PARAMETER control_deadband IS 0.
+	
+	//read off the gimbal angle to get the pitch control input 
+	flap_control["pitch_control"]:update(flap_control["gimbal"]:PITCHANGLE).
 
 	LOCAL flap_incr IS 0.
 	

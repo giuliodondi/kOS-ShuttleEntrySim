@@ -5,6 +5,12 @@
 //main loop
 FUNCTION entry_main_loop {
 
+SAS OFF.
+
+ON SAS {
+	SAS OFF.
+}
+
 apch_params:ADD("hac_h_cub0",0).
 apch_params:ADD("hac_h_cub1",0).
 apch_params:ADD("hac_h_cub2",0).
@@ -93,40 +99,9 @@ GLOBAL reset_entry_flag Is FALSE.
 reset_pids().
 
 
-//find the airbrakes parts
-LOCAL airbrakes IS LIST().
-FOR b IN SHIP:PARTSDUBBED("airbrake1") {
-	LOCAL bmod IS b:getmodule("ModuleAeroSurface").
-	bmod:SETFIELD("Deploy Angle",0). 
-	
-	airbrakes:ADD(bmod).
-}
-GLOBAL airbrake_control IS LEXICON(
-						"parts",airbrakes,
-						"spdbk_val",0
-						).
+GLOBAL airbrake_control IS initialise_spdbrk().
 
-
-LISt ENGINES IN englist.
-IF NOT (DEFINED gimbals) {
-	FOR e IN englist {
-		IF e:HASSUFFIX("gimbal") {
-			GLOBAL gimbals IS e:GIMBAL.
-			BREAK.
-		}
-	}
-}
-gimbals:DOACTION("free gimbal", TRUE).
-//gg:DOEVENT("Show actuation toggles").
-gimbals:DOACTION("toggle gimbal roll", TRUE).
-gimbals:DOACTION("toggle gimbal yaw", TRUE).
-
-
-
-//initialise the running average for the pitch control values
-SET flap_control["pitch_control"] TO average_value_factory(5).
-
-
+initialise_flap_control(flap_control).
 
 
 
@@ -163,7 +138,7 @@ IF SHIP:ALTITUDE>constants["apchalt"] {
 
 }
 
-flaps_aoa_feedback(flap_control["parts"],+40).
+flaps_aoa_feedback(flap_control["parts"],+50).
 
 //reduce KP on the flaps PID so that auto flaps are nto so aggressive 
 SET FLAPPID:KP TO FLAPPID:KP/3.
@@ -205,8 +180,6 @@ IF EXISTS(pitchprof_log_path) {DELETEPATH(pitchprof_log_path).}
 FUNCTION entry_loop{
 
 IF quitflag {RETURN.}
-
-SAS OFF.
 
 //this flag signals if entry guidance was halted automatically bc of taem transition
 //or because approach guidance was called manually, in which case skip TAEM
@@ -325,8 +298,6 @@ local control_loop is loop_executor_factory(
 	
 									//update the flaps trim setting and airbrakes IF WE'RE BELOW FIRST ROLL ALT
 									IF SHIP:ALTITUDE < constants["firstrollalt"] {	
-										//read off the gimbal angle to get the pitch control input 
-										flap_control["pitch_control"]:update(gimbals:PITCHANGLE).
 										SET flap_control TO flaptrim_control(flptrm:PRESSED, flap_control).
 										SET airbrake_control TO speed_control(arbkb:PRESSED, airbrake_control, mode).
 									}
@@ -373,7 +344,6 @@ LOCAL first_reversal_done IS FALSE.
 
 //reentry loop
 UNTIL FALSE {
-	SAS OFF.
 	
 	IF reset_entry_flag {
 		SET reset_entry_flag TO FALSE.
@@ -543,7 +513,6 @@ define_hac(SHIP:GEOPOSITION,tgtrwy,apch_params).
 IF (NOT TAEM_flag) { 
 	control_loop:stop_execution().
 	UNLOCK STEERING.
-	SAS ON.
 	RETURN.
 }
 
@@ -742,7 +711,6 @@ UNTIL FALSE {
 
 control_loop:stop_execution().
 UNLOCK STEERING.
-SAS ON.
 
 }
 

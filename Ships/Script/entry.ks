@@ -45,9 +45,6 @@ If (SHIP:ALTITUDE >= constants["atmalt"]) {
 	RUNONCEPATH("0:/Shuttle_entrysim/src/approach_utility").
 	RUNONCEPATH("0:/Shuttle_entrysim/src/taem_utility").
 	RUNONCEPATH("0:/Shuttle_entrysim/src/veh_control_utility").
-	
-	
-	activate_flaps(flap_control["parts"]).
 			
 
 	RUNONCEPATH("0:/Shuttle_entrysim/src/entry_main").
