@@ -259,7 +259,7 @@ FUNCTION reset_pids {
 	
 	IF (DEFINED BRAKESPID) {UNSET BRAKESPID.}
 	//initialise the air brake control pid loop 		
-	LOCAL Kp IS -0.005.
+	LOCAL Kp IS -0.004.
 	LOCAL Ki IS 0.
 	LOCAL Kd IS -0.02.
 
@@ -340,20 +340,21 @@ FUNCTION speed_control {
 				SET delta_spd TO airspd - 180.
 			}
 			ELSE IF mode=5 {
-				SET delta_spd TO airspd - 145.
+				SET delta_spd TO airspd - 150.
 			}
-			ELSE IF mode>=6 {
-				SET delta_spd TO airspd - 130.		
-			
-				IF SHIP:STATUS = "LANDED" {
-					SET delta_spd TO airspd.
+			ELSE IF mode=6 {
+				SET delta_spd TO airspd - 130.
+			}
+			ELSE IF mode=7 {
+				SET delta_spd TO airspd - 125.
+			}
+			ELSE IF mode=8 {
+				SET delta_spd TO airspd.
 					
-					IF airspd < 65 {
-						BRAKES ON.
-					}
+				IF airspd < 65 {
+					BRAKES ON.
 				}
 			}
-			
 		}
 		
 		LOCAL delta_spdbk IS CLAMP(BRAKESPID:UPDATE(TIME:SECONDS,delta_spd), -2, 2).
