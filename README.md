@@ -289,9 +289,17 @@ Assuming everything goes to plan, TAEM will take the Shuttle to a gentle glide, 
 
 ## Approach
 
-### Steering now becomes fully manual without any kOS augmentation, like you are used to flying planes in KSP
-
 ### Do not engage the Brakes action group. Nothing catastrophic happens if you do, but the program handles it on its own
+
+The goal of the approach phase is to guide you around the HAC cilindres (see a couple images above) and align you with the runway on the correct glideslope.
+Keep in mind that the approach path is completely dumb and oblivious to your energy state, contrary to TAEM guidance or the real Space Shuttle Guidance.   
+
+The program will simulate the Shuttle a couple seconds in the future and measure the deviations from the guidance profile. The diamond-shaped pipper displays this deviation in a way that suggests where the nose should be pointed to correct the error.
+Your focus should be on following the pipper diamond around with gentle commands. The pipper will guide you through several approach phases that align the Shuttle with the runway and settle it on the proper 20° glideslope for landing.  
+
+Steering is still Fly-By-Wire during approach like it used to be during entry guidance. The difference is that there is no automatic guidance law, you will have to manually control AoA and bank angles to follow the pipper.  
+Fly-by-wire during this phase will take care of any nose-up or nose-down imbalances and make steering a bit more stable. **Nevertheless you should be gentle and make only small inputs**.  
+Fly-by-wire will automatically disengage when you touch down on the runway. 
 
 Transitioning into Approach guidance will get rid of some now irrelevant items in the main GUI.  
 The HUD is identical to Entry/TAEM but the meaning of some symbols is now different:
@@ -305,20 +313,15 @@ The HUD is identical to Entry/TAEM but the meaning of some symbols is now differ
 - _APCH PHASE_ indicates which segmet of the approash you are in. ACQ for HAC acquisition, HDG for the turn sround the HAC. OGS for the final descent into the runway and FLARE just before the landing flare
 - _PHASE DIST_ is the distance in km to the guidance point for the current approach phase. It is useful to know when the script is about to switch phases
 
-The goal of the approach phase is to guide you around the HAC cilindres (see a couple images above) and align you with the runway on the correct glideslope.
-Keep in mind that the approach path is completely dumb and oblivious to your energy state, contrary to TAEM guidance or the real Space Shuttle Guidance.   
-
-The program will simulate the Shuttle a couple seconds in the future and measure the deviations from the guidance profile. The diamond-shaped pipper displays this deviation in a way that suggests where the nose should be pointed to correct the error.
-Your focus should be on following the pipper diamond around with gentle commands. The pipper will guide you through several approach phases that align the Shuttle with the runway and settle it on the proper 20° glideslope for landing.  
 
 Here's a brief description of the approach phases:
 - **Acquisition (ACQ)** fly straight towards the HAC entry point on a shallow glideslope, the lateral deviation is proportional to the azimuth error and the vertical to the altitude error. At the end of this phase you should bank in the direction of the HAC (left for a left HAC, right for a right HAC).
 - **Hac turn (HDG)** fly around the HAC, an overhead turn (the default case if you go with the HAC selected automatically by the program) usually sweeps 160/270 degrees. The HAC turn follows a spiral groundtrack that shrinks as we get closer to the exit, the spiral is adjusted to always guide you smoothly to the right exit point, making it much easier to track the pipper compared to a fixed-radius HAC. The vertical profile is a cubic curve that transitions from the shallow acquisition glideslope to the steep 20° Outer glideslope.  
 When near the HAC exit (phase distance < 3km) the errors amplify so don't panic if the pipper is not exactly centered. At the end of this phase you should be nearly on runway centerline.
 -  **Outer Glideslope (OGS)** The final descent, the lateral error is artificially amplified to get you back onto centreline as quickly as possible. **The glideslope does NOT aim for the runway but a point a couple km short of it. This is intentional. Follow the pipper and fight your urge to chase the runway.**
--  **Flare** A smooth transition between the steep Outer Glideslope and a shallow Inner Glideslope. If you followed the OGS guidance correctly, you will find yourself on a shallow 3° descent right on the runway touchdown markings, slowing down gently. Focus less on the pipper in this phase and more on visual cues and the vertical speed indicator.
-
-Depending on which Space Shuttle mod you use and your OMS quantity, you may be pitch-too-stable (nose heavy) or pitch-unstable (tail-heavy) at this point. Use manual flap trim accordingly to maintain stability and controllability.
+-  **FLARE** A smooth transition between the steep Outer Glideslope and a shallow Inner Glideslope. If you followed the OGS guidance correctly, you will find yourself on a shallow 3° descent right on the runway touchdown markings, slowing down gently. Focus less on the pipper in this phase and more on visual cues and the vertical speed indicator. The landing gear should be extended automatically during this phase
+-  **Final Flare (FLFLR)** The final portion of the inner glideslope, between 50m altitude and touchdown. The pipper disappears altogether since by now your attention must be fully on the runway.
+-  **ROLLOUT** After touchdown, Fly-by-wire disengages so you can track the runway centerline manually without interference. Also brakes and drag chute should come out automatically
 
 Speedbrakes are controlled either manually using the throttle slider or automatically by the script. A button lets you switch between the modes.
 By default they are set to AUTO after TAEM, if you switched manually from TAEM because guidance messed up, you might want to switch to manual and close them until you are sure that you'll make the HAC with at least 220 m/s of velocity.
