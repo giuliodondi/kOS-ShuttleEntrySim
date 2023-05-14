@@ -122,12 +122,16 @@ FUNCTION deorbit_main {
 	//	}
 	//}
 	
-	
-	
+	//reset guidance automatically once every few guidance cycles
+	//to unstuck roll-ref
+	LOCAL auto_reset_counter IS 0.
 	
 	UNTIL FALSE{
+	
+		SET auto_reset_counter TO auto_reset_counter + 1.
 		
-		IF reset_entry_flag {
+		IF reset_entry_flag OR (auto_reset_counter = 20) {
+			SET auto_reset_counter TO 0.
 			SET reset_entry_flag TO FALSE.
 			SET roll_ref TO constants["rollguess"]. 
 		}
