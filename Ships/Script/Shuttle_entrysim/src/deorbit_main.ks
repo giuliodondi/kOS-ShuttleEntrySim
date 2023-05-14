@@ -130,7 +130,7 @@ FUNCTION deorbit_main {
 	
 		SET auto_reset_counter TO auto_reset_counter + 1.
 		
-		IF reset_entry_flag OR (auto_reset_counter = 20) {
+		IF reset_entry_flag OR (auto_reset_counter = 10) {
 			SET auto_reset_counter TO 0.
 			SET reset_entry_flag TO FALSE.
 			SET roll_ref TO constants["rollguess"]. 
