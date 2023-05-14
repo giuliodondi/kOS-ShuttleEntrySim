@@ -204,29 +204,15 @@ LOCAL rollguid IS 0.
 LOCAL pitchsteer IS pitchguid.
 LOCAL rollsteer IS rollguid.
 
-
-//first steering command 
-GLOBAL P_att IS dap:create_prog_steering_dir(pitchguid, rollguid).
-LOCK STEERING TO P_att.
-
 IF SHIP:ALTITUDE < constants["firstrollalt"] {	
 	//override to current measured attitude
 	SET pitchsteer TO get_pitch_prograde().
 	SET rollsteer TO get_roll_prograde().
-} ELSE {
-	
-	SET P_att TO create_steering_dir(
-									SHIP:srfprograde:vector:NORMALIZED,
-									-SHIP:ORBIT:BODY:POSITION:NORMALIZED,
-									pitchsteer,
-									rollsteer
-	).
-	
-	UNTIL VANG(SHIP:FACING:VECTOR,P_att:VECTOR)<10 {
-		WAIT 0.1.
-	}
 }
 
+//first steering command 
+GLOBAL P_att IS dap:create_prog_steering_dir(pitchguid, rollguid).
+LOCK STEERING TO P_att.
 
 //add prebank constant 
 constants:ADD("prebank_angle",rollsteer).
