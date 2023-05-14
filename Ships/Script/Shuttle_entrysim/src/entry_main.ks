@@ -129,7 +129,7 @@ IF SHIP:ALTITUDE>constants["apchalt"] {
 	SET flptrm:PRESSED TO TRUE.
 	
 	
-	flaps_aoa_feedback(flap_control["parts"],-20).
+	
 
 	entry_loop().
 	
@@ -138,15 +138,8 @@ IF SHIP:ALTITUDE>constants["apchalt"] {
 
 }
 
-flaps_aoa_feedback(flap_control["parts"],+50).
-
-//reduce KP on the flaps PID so that auto flaps are nto so aggressive 
-SET FLAPPID:KP TO FLAPPID:KP/3.
-
-
 SET mode TO 3.
 SET CONFIG:IPU TO 800.
-
 
 
 LOCAL closest_out IS get_closest_site(ldgsiteslex).
@@ -190,6 +183,9 @@ GLOBAL guid_converged_flag IS FALSE.
 
 //flag to stop the entry loop and transition to approach
 GLOBAL stop_entry_flag IS FALSE.
+
+//negative aoa feedback to help with maintainign high pitch
+flaps_aoa_feedback(flap_control["parts"],-50).
 
 //dap controller object
 LOCAL dap IS dap_controller_factory().
@@ -495,6 +491,9 @@ UNTIL FALSE {
 select_opposite_hac().
 define_hac(SHIP:GEOPOSITION,tgtrwy,apch_params).
 
+//strong positive aoa feedback to help keep stability
+flaps_aoa_feedback(flap_control["parts"],+200).
+
 //if we broke out manually before TAEM conditions go directly to approach 
 IF (NOT TAEM_flag) { 
 	control_loop:stop_execution().
@@ -735,6 +734,11 @@ LOCAL P_att IS SHIP:FACING.
 LOCAL dap IS dap_controller_factory().
 LOCK STEERING TO P_att.
 
+//strong positive aoa feedback to help keep stability
+flaps_aoa_feedback(flap_control["parts"],+200).
+
+//reduce KP on the flaps PID so that auto flaps are nto so aggressive 
+SET FLAPPID:KP TO FLAPPID:KP/3.
 
 local exec is loop_executor_factory(
 								0.15,
