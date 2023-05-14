@@ -216,11 +216,6 @@ declare function simulate_TAEM {
 		//IF (tgtdist>1) {
 		//	update_hac_entry_pt(simstate["latlong"], tgt_rwy, apch_params). 
 		//}
-		
-	
-		SET simstate["altitude"] TO bodyalt(simstate["position"]).
-		
-		SET simstate["surfvel"] TO surfacevel(simstate["velocity"],simstate["position"]).
 
 		LOCAL hdot IS VDOT(simstate["position"]:NORMALIZED,simstate["surfvel"]).
 		
@@ -232,10 +227,6 @@ declare function simulate_TAEM {
 		SET roll0 TO TAEM_roll_profile(delaz,hdoterr).
 		SET pitch_prof TO TAEM_pitch_profile(pitch0,roll_prof,simstate["surfvel"]:MAG, hdoterr).
 		SET roll_prof TO SIGN(delaz)*roll0.
-		
-
-		SET simstate["latlong"] TO shift_pos(simstate["position"],simstate["simtime"]).
-		
 		
 		IF simsets["log"]= TRUE {
 			
@@ -253,6 +244,11 @@ declare function simulate_TAEM {
 		}
 		
 		SET simstate TO simsets["integrator"]:CALL(simsets["deltat"],simstate,LIST(pitch_prof,roll_prof)).
+		
+		SET simstate["altitude"] TO bodyalt(simstate["position"]).
+		SET simstate["surfvel"] TO surfacevel(simstate["velocity"],simstate["position"]).
+		SET simstate["latlong"] TO shift_pos(simstate["position"],simstate["simtime"]).
+		
 
 		//update distance from the current entry point 
 		SET tgtdistp TO tgtdist.

@@ -363,10 +363,6 @@ declare function simulate_reentry {
 	UNTIL (( next_simstate["altitude"]< tgtalt AND next_simstate["surfvel"]:MAG < end_conditions["surfvel"] ) OR next_simstate["altitude"]>140000)  {
 	
 		SET simstate TO next_simstate.
-	
-		SET simstate["altitude"] TO bodyalt(simstate["position"]).
-		
-		SET simstate["surfvel"] TO surfacevel(simstate["velocity"],simstate["position"]).
 		
 		LOCAL hdot IS VDOT(simstate["position"]:NORMALIZED,simstate["surfvel"]).
 		SET hddot TO (hdot - hdotp)/simsets["deltat"].
@@ -410,6 +406,9 @@ declare function simulate_reentry {
 		}
 		
 		SET next_simstate TO simsets["integrator"]:CALL(simsets["deltat"],simstate,LIST(pitch_prof,roll_prof)).
+		
+		SET next_simstate["altitude"] TO bodyalt(next_simstate["position"]).
+		SET next_simstate["surfvel"] TO surfacevel(next_simstate["velocity"],next_simstate["position"]).
 
 	}
 	
