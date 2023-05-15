@@ -207,9 +207,13 @@ declare function simulate_TAEM {
 	LOCAL tgtdist IS greatcircledist(tgt_rwy["hac_entry"],simstate["latlong"]).
 	LOCAL tgtdistp IS 2*tgtdist.
 	
+	LOCAL next_simstate IS simstate.
+	
 	//putting the termination conditions here should save an if check per step
 	//UNTIL ( greatcircledist(initialpos,simstate["latlong"]) >= greatcircledist(initialpos,tgt_rwy["hac_entry"]) )  {
-	UNTIL ( (tgtdist<5) OR ( greatcircledist(simstate["latlong"],pos0) >= greatcircledist(tgt_rwy["hac_entry"],pos0) ) OR simstate["altitude"] < 5000 )  {
+	UNTIL ( (tgtdist<5) OR ( greatcircledist(next_simstate["latlong"],pos0) >= greatcircledist(tgt_rwy["hac_entry"],pos0) ) OR next_simstate["altitude"] < 5000 )  {
+			
+		SET simstate TO next_simstate.
 			
 		//if target distance is less than 1km we no longer update the entry point
 		//probably not necessary, save computations and avoid problems with spiral hac
@@ -243,16 +247,16 @@ declare function simulate_TAEM {
 			log_data(loglex).
 		}
 		
-		SET simstate TO simsets["integrator"]:CALL(simsets["deltat"],simstate,LIST(pitch_prof,roll_prof)).
+		SET next_simstate TO simsets["integrator"]:CALL(simsets["deltat"],simstate,LIST(pitch_prof,roll_prof)).
 		
-		SET simstate["altitude"] TO bodyalt(simstate["position"]).
-		SET simstate["surfvel"] TO surfacevel(simstate["velocity"],simstate["position"]).
-		SET simstate["latlong"] TO shift_pos(simstate["position"],simstate["simtime"]).
+		SET next_simstate["altitude"] TO bodyalt(next_simstate["position"]).
+		SET next_simstate["surfvel"] TO surfacevel(next_simstate["velocity"],next_simstate["position"]).
+		SET next_simstate["latlong"] TO shift_pos(next_simstate["position"],next_simstate["simtime"]).
 		
 
 		//update distance from the current entry point 
 		SET tgtdistp TO tgtdist.
-		SET tgtdist TO greatcircledist(tgt_rwy["hac_entry"],simstate["latlong"]).
+		SET tgtdist TO greatcircledist(tgt_rwy["hac_entry"],next_simstate["latlong"]).
 		
 	}
 
