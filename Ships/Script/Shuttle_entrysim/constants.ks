@@ -8,7 +8,7 @@ GLOBAL constants is LEXICON(
 					"interfalt",122000,
 					"firstrollalt",100000,
 					"apchalt",20000,
-					"rolltol",2,
+					"rolltol",1,
 					"rollguess",55,
 					"TAEMtgtvel",260
 ).
