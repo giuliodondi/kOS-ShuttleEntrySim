@@ -69,6 +69,13 @@ GLOBAL ldgsiteslex IS LEXICON(
 							"length",5028,
 							"heading",310.5
 							
+						),
+						"McChord",LEXICON(
+							"position",LATLNG(47.138021,-122.476801),
+							"elevation",99,
+							"length",4380.5,
+							"heading",180.02
+							
 						)
 						
 ).
