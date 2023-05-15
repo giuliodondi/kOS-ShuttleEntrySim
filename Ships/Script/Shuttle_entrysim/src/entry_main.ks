@@ -184,9 +184,6 @@ GLOBAL guid_converged_flag IS FALSE.
 //flag to stop the entry loop and transition to approach
 GLOBAL stop_entry_flag IS FALSE.
 
-//negative aoa feedback to help with maintainign high pitch
-flaps_aoa_feedback(flap_control["parts"],-50).
-
 //dap controller object
 LOCAL dap IS dap_controller_factory().
 
@@ -498,8 +495,8 @@ UNTIL FALSE {
 select_opposite_hac().
 define_hac(SHIP:GEOPOSITION,tgtrwy,apch_params).
 
-//strong positive aoa feedback to help keep stability
-flaps_aoa_feedback(flap_control["parts"],+200).
+//positive aoa feedback to help keep stability
+flaps_aoa_feedback(flap_control["parts"],+25).
 
 //if we broke out manually before TAEM conditions go directly to approach 
 IF (NOT TAEM_flag) { 
@@ -742,7 +739,7 @@ LOCAL dap IS dap_controller_factory().
 LOCK STEERING TO P_att.
 
 //strong positive aoa feedback to help keep stability
-flaps_aoa_feedback(flap_control["parts"],+200).
+flaps_aoa_feedback(flap_control["parts"],+50).
 
 //reduce KP on the flaps PID so that auto flaps are nto so aggressive 
 SET FLAPPID:KP TO FLAPPID:KP/3.
