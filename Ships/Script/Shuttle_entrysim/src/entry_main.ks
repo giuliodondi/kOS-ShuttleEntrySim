@@ -184,6 +184,9 @@ GLOBAL guid_converged_flag IS FALSE.
 //flag to stop the entry loop and transition to approach
 GLOBAL stop_entry_flag IS FALSE.
 
+//null feedback to help keep high pitch
+flaps_aoa_feedback(flap_control["parts"],0).
+
 //dap controller object
 LOCAL dap IS dap_controller_factory().
 
@@ -292,8 +295,8 @@ local control_loop is loop_executor_factory(
 									}
 									
 									LOCAL pipper_deltas IS LIST(
-																rollguid - dap:steer_roll, 
-																pitchguid -  dap:steer_pitch
+																rollguid - dap:prog_roll, 
+																pitchguid -  dap:prog_pitch
 									).
 									
 									update_entry_GUI(
