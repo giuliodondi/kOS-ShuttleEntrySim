@@ -320,46 +320,45 @@ FUNCTION speed_control {
 	If auto_flag {
 
 		//above 3000 m/s the autobrake is disabled
-		IF SHIP:VELOCITy:SURFACE:MAG>2500 { RETURN previous_val.}
-
-
-		LOCAL tgtspeed IS 0.
-		LOCAL delta_spd IS 0..
-		LOCAL airspd IS SHIP:VELOCITy:SURFACE:MAG.
-		
-		IF (mode=1 OR mode=2) {
-			LOCAL tgt_rng IS greatcircledist(tgtrwy["position"], SHIP:GEOPOSITION).
-			SET tgtspeed TO MAX(250,51.48*tgt_rng^(0.6)).
-			SET delta_spd TO airspd - tgtspeed.
-		}
-		ELSE {
-			IF mode=3 {
-				SET delta_spd TO airspd - 220.
+		IF SHIP:VELOCITy:SURFACE:MAG<3000 {
+			LOCAL tgtspeed IS 0.
+			LOCAL delta_spd IS 0.
+			LOCAL airspd IS SHIP:VELOCITy:SURFACE:MAG.
+			
+			IF (mode=1 OR mode=2) {
+				LOCAL tgt_rng IS greatcircledist(tgtrwy["position"], SHIP:GEOPOSITION).
+				SET tgtspeed TO MAX(250,51.48*tgt_rng^(0.6)).
+				SET delta_spd TO airspd - tgtspeed.
 			}
-			ELSE IF mode=4 {
-				SET delta_spd TO airspd - 180.
-			}
-			ELSE IF mode=5 {
-				SET delta_spd TO airspd - 150.
-			}
-			ELSE IF mode=6 {
-				SET delta_spd TO airspd - 130.
-			}
-			ELSE IF mode=7 {
-				SET delta_spd TO airspd - 125.
-			}
-			ELSE IF mode=8 {
-				SET delta_spd TO airspd.
-					
-				IF airspd < 65 {
-					BRAKES ON.
+			ELSE {
+				IF mode=3 {
+					SET delta_spd TO airspd - 220.
+				}
+				ELSE IF mode=4 {
+					SET delta_spd TO airspd - 180.
+				}
+				ELSE IF mode=5 {
+					SET delta_spd TO airspd - 150.
+				}
+				ELSE IF mode=6 {
+					SET delta_spd TO airspd - 130.
+				}
+				ELSE IF mode=7 {
+					SET delta_spd TO airspd - 125.
+				}
+				ELSE IF mode=8 {
+					SET delta_spd TO airspd.
+						
+					IF airspd < 65 {
+						BRAKES ON.
+					}
 				}
 			}
+			
+			LOCAL delta_spdbk IS CLAMP(BRAKESPID:UPDATE(TIME:SECONDS,delta_spd), -2, 2).
+			
+			SET newval TO newval + delta_spdbk.
 		}
-		
-		LOCAL delta_spdbk IS CLAMP(BRAKESPID:UPDATE(TIME:SECONDS,delta_spd), -2, 2).
-		
-		SET newval TO newval + delta_spdbk.
 		
 	}
 	ELSE {
