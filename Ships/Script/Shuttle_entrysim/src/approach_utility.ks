@@ -264,13 +264,13 @@ FUNCTION update_hac_angle {
 	
 	SET rwy["hac_angle"] TO MAX(0,rwy["hac_angle"] + delta_hac_angle). 
 	
-	//LOCAL hac_gndtrk IS get_hac_groundtrack(hac_angle, apch_params).
+	//LOCAL hac_gndtrk IS get_hac_groundtrack(hac_angle, vehicle_params).
 	
 	//calculate profile altitude
 	//if we're off by hal a turn's worth of altitude assume that the angle is off by 360° and add another turn around the HAC
-	//LOCAL profile_alt IS ( apch_params["final_dist"] + hac_gndtrk)*apch_params["glideslope"]["outer"].
+	//LOCAL profile_alt IS ( vehicle_params["final_dist"] + hac_gndtrk)*vehicle_params["glideslope"]["outer"].
 	//SET profile_alt TO rwy["elevation"] +  profile_alt*1000.
-	//LOCAL alt_tol IS get_hac_groundtrack(180,apch_params)*apch_params["glideslope"]["outer"]*1000.
+	//LOCAL alt_tol IS get_hac_groundtrack(180,vehicle_params)*vehicle_params["glideslope"]["outer"]*1000.
 	//IF ABS(profile_alt - simstate["altitude"])
 	
 	//RETURN hac_angle.
@@ -361,7 +361,7 @@ FUNCTION final_profile_alt {
 	PARAMETER rwy.
 	PARAMETER params.
 
-	RETURN rwy["elevation"] + dist*apch_params["glideslope"]["outer"]*1000.
+	RETURN rwy["elevation"] + dist*vehicle_params["glideslope"]["outer"]*1000.
 
 }
 
@@ -398,10 +398,10 @@ FUNCTION hac_turn_profile_alt{
 	LOCAL final_alt IS final_profile_alt(params["final_dist"] + x0,rwy,params).
 	
 	//nominal uncorrected profile altitude at the predicted point 
-	LOCAL nom_hac_prof_alt IS hac_turn_cubic_prof(pred_hac_gndtrk - x0, rwy, apch_params).
+	LOCAL nom_hac_prof_alt IS hac_turn_cubic_prof(pred_hac_gndtrk - x0, rwy, vehicle_params).
 	
 	//gain factor to match current altitude to nominal profile alt at the current point 
-	LOCAL alt_corr_gain IS (SHIP:ALTITUDE-final_alt)/hac_turn_cubic_prof(ship_hac_gndtrk - x0, rwy, apch_params).
+	LOCAL alt_corr_gain IS (SHIP:ALTITUDE-final_alt)/hac_turn_cubic_prof(ship_hac_gndtrk - x0, rwy, vehicle_params).
 	
 	//ramp down the gain as we approach the exit 
 	LOCAL alt_corr_gain_rampdown IS MIN(1,pred_hac_gndtrk/20).
@@ -532,7 +532,7 @@ FUNCTION mode3 {
 
 	// no special function here since we use the real entry pt distance to recalculate the cubic parameters 
 	//and use the predicted entry pt distance for vertical guidance
-	LOCAL hacentry_profilealt IS hac_entry_profile_alt(ship_hac_dist, rwy, apch_params).
+	LOCAL hacentry_profilealt IS hac_entry_profile_alt(ship_hac_dist, rwy, vehicle_params).
 	LOCAL profile_alt IS hacentry_profilealt + ship_hac_dist_pred*params["glideslope"]["taem"]*1000.
 	
 	print "profile alt:  " +  profile_alt at (1,2).	

@@ -188,7 +188,7 @@ declare function simulate_TAEM {
 	PARAMETER simsets.
 	parameter simstate.
 	PARAMETER tgt_rwy.
-	PARAMETER apch_params.
+	PARAMETER vehicle_params.
 	PARAMETER roll0.
 	PARAMETER pitch0.
 	PARAMETER hdot_ref.
@@ -218,7 +218,7 @@ declare function simulate_TAEM {
 		//if target distance is less than 1km we no longer update the entry point
 		//probably not necessary, save computations and avoid problems with spiral hac
 		//IF (tgtdist>1) {
-		//	update_hac_entry_pt(simstate["latlong"], tgt_rwy, apch_params). 
+		//	update_hac_entry_pt(simstate["latlong"], tgt_rwy, vehicle_params). 
 		//}
 
 		LOCAL hdot IS VDOT(simstate["position"]:NORMALIZED,simstate["surfvel"]).

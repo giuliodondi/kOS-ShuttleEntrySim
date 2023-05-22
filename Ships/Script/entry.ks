@@ -4,9 +4,6 @@ clearvecdraws().
 CLEARGUIS().
 
 
-//load parameters
-RUNONCEPATH("0:/Shuttle_entrysim/constants").
-
 
 //hard-coded check to run the script only in atmosphere
 If (SHIP:ALTITUDE >= constants["atmalt"]) {
@@ -20,7 +17,7 @@ If (SHIP:ALTITUDE >= constants["atmalt"]) {
 	//load parameters
 	RUNONCEPATH("0:/Shuttle_entrysim/vessel_dir").
 	RUNONCEPATH("0:/Shuttle_entrysim/landing_sites").
-	RUNONCEPATH("0:/Shuttle_entrysim/parameters").
+	RUNONCEPATH("0:/Shuttle_entrysim/simulation_parameters").
 	
 	//this flag should only ever be defined during GRTLS
 	IF NOT (DEFINEd bypass_pitchprof_def) {
@@ -32,7 +29,7 @@ If (SHIP:ALTITUDE >= constants["atmalt"]) {
 	}
 	
 	RUNONCEPATH("0:/Shuttle_entrysim/VESSELS/" + vessel_dir + "/flapcontrol").
-	RUNONCEPATH("0:/Shuttle_entrysim/VESSELS/" + vessel_dir + "/approach_params").
+	RUNONCEPATH("0:/Shuttle_entrysim/VESSELS/" + vessel_dir + "/vehicle_params").
 
 
 	//	Load libraries

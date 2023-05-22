@@ -1,15 +1,11 @@
 clearscreen.
 SET CONFIG:IPU TO 1500.					//	Required to run the script fast enough.
 
-//load parameters
-RUNONCEPATH("0:/Shuttle_entrysim/constants").
-
-
 
 //load parameters
 RUNONCEPATH("0:/Shuttle_entrysim/vessel_dir").
 RUNONCEPATH("0:/Shuttle_entrysim/landing_sites").
-RUNONCEPATH("0:/Shuttle_entrysim/parameters").
+RUNONCEPATH("0:/Shuttle_entrysim/simulation_parameters").
 
 
 //if the global pitch ptofile file is defined, load that one
@@ -20,6 +16,8 @@ ELSE {
 
 //delete global profile file
 IF EXISTS(pitchprof_log_path) {DELETEPATH(pitchprof_log_path).}
+
+RUNONCEPATH("0:/Shuttle_entrysim/VESSELS/" + vessel_dir + "/vehicle_params").
 
 //	Load libraries
 RUNONCEPATH("0:/Libraries/misc_library").	

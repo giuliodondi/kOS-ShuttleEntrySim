@@ -55,7 +55,7 @@ FUNCTION deorbit_main {
 
 
 	//initialise the bank control value
-	GLOBAL roll_ref IS constants["rollguess"].
+	GLOBAL roll_ref IS vehicle_params["rollguess"].
 	
 
 	LOCAL pitch_ref IS pitchprof_segments[pitchprof_segments:LENGTH-1][1].
@@ -133,7 +133,7 @@ FUNCTION deorbit_main {
 		IF reset_entry_flag OR (auto_reset_counter = 10) {
 			SET auto_reset_counter TO 0.
 			SET reset_entry_flag TO FALSE.
-			SET roll_ref TO constants["rollguess"]. 
+			SET roll_ref TO vehicle_params["rollguess"]. 
 		}
 	
 		SET shipvec TO - SHIP:ORBIT:BODY:POSITION.

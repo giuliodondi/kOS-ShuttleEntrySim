@@ -65,13 +65,13 @@ FUNCTION make_global_deorbit_GUI {
 	GLOBAL force_roll IS popup_box:addhlayout().
 	SET force_roll:STYLE:ALIGN TO "center".
 	GLOBAL force_roll_text IS force_roll:addlabel("Force Roll ref. : ").
-	GLOBAL force_roll_box is force_roll:addtextfield(constants["rollguess"]:tostring).
+	GLOBAL force_roll_box is force_roll:addtextfield(vehicle_params["rollguess"]:tostring).
 	set force_roll_box:style:width to 65.
 	set force_roll_box:style:height to 18.
 		
 	set force_roll_box:onconfirm to { 
 		parameter val.
-		SET roll_ref tO val:tonumber(constants["rollguess"]).
+		SET roll_ref tO val:tonumber(vehicle_params["rollguess"]).
 	}.
 	
 	GLOBAL pchprof_but IS  popup_box:ADDBUTTON("<size=13>Override Pitch Profile</size>").
@@ -356,7 +356,7 @@ FUNCTION make_global_entry_GUI {
 	SET select_side:ONCHANGE to { 
 		PARAMETER side.	
 		SET tgtrwy["hac_side"] TO side.
-		define_hac(SHIP:GEOPOSITION,tgtrwy,apch_params).
+		define_hac(SHIP:GEOPOSITION,tgtrwy,vehicle_params).
 	}.
 	SET select_rwy:ONCHANGE to { 
 		PARAMETER rwy.	
@@ -368,7 +368,7 @@ FUNCTION make_global_entry_GUI {
 		
 		select_opposite_hac().
 		
-		define_hac(SHIP:GEOPOSITION,tgtrwy,apch_params).
+		define_hac(SHIP:GEOPOSITION,tgtrwy,vehicle_params).
 	}.
 	SET select_tgt:ONCHANGE to {
 		PARAMETER lex_key.
@@ -387,7 +387,7 @@ FUNCTION make_global_entry_GUI {
 		SET tgtrwy["heading"] TO newsite["rwys"][select_rwy:VALUE]["heading"].
 		SET tgtrwy["td_pt"] TO newsite["rwys"][select_rwy:VALUE]["td_pt"].
 		SET tgtrwy["hac_side"] TO select_side:VALUE.
-		define_hac(SHIP:GEOPOSITION,tgtrwy,apch_params).
+		define_hac(SHIP:GEOPOSITION,tgtrwy,vehicle_params).
 		
 		reset_hud_bg_brightness().
 	}.	

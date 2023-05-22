@@ -2,7 +2,9 @@
 
 //define the approach guidance constants
 
-GLOBAL apch_params IS LEXICON(
+GLOBAL vehicle_params IS LEXICON(
+					"rollguess",65,
+					"TAEMtgtvel",260,
 					"hac_radius",4.26,
 					"hac_r2",0.0000283,
 					"final_dist",7.5,

@@ -11,11 +11,11 @@ ON SAS {
 	SAS OFF.
 }
 
-apch_params:ADD("hac_h_cub0",0).
-apch_params:ADD("hac_h_cub1",0).
-apch_params:ADD("hac_h_cub2",0).
-apch_params:ADD("hac_h_cub3",0).
-apch_params["glideslope"]:ADD("taem",0).
+vehicle_params:ADD("hac_h_cub0",0).
+vehicle_params:ADD("hac_h_cub1",0).
+vehicle_params:ADD("hac_h_cub2",0).
+vehicle_params:ADD("hac_h_cub3",0).
+vehicle_params["glideslope"]:ADD("taem",0).
 
 STEERINGMANAGER:RESETPIDS().
 STEERINGMANAGER:RESETTODEFAULT().
@@ -58,7 +58,7 @@ SET tgtrwy["heading"] TO ldgsiteslex[select_tgt:VALUE]["rwys"][select_rwy:VALUE]
 SET tgtrwy["td_pt"] TO ldgsiteslex[select_tgt:VALUE]["rwys"][select_rwy:VALUE]["td_pt"].
 SET tgtrwy["hac_side"] TO select_side:VALUE.
 
-define_hac(SHIP:GEOPOSITION, tgtrwy, apch_params).
+define_hac(SHIP:GEOPOSITION, tgtrwy, vehicle_params).
 
 
 
@@ -260,7 +260,7 @@ LOCAL tgt_range IS greatcircledist(tgtrwy["hac_entry"], SHIP:GEOPOSITION).
 //the actual roll value is determined by the roll profile routine
 //it's zero above 90 km and it's roll_ref plus hdot modulation below that.
 //initialise it to 45 arbitrarily
-LOCAL roll_ref IS constants["rollguess"].
+LOCAL roll_ref IS vehicle_params["rollguess"].
 
 
 // control variables
@@ -336,7 +336,7 @@ UNTIL FALSE {
 	IF reset_entry_flag OR (auto_reset_counter = 25) {
 		SET auto_reset_counter TO 0.
 		SET reset_entry_flag TO FALSE.
-		SET roll_ref TO constants["rollguess"]. 
+		SET roll_ref TO vehicle_params["rollguess"]. 
 	}
 	
 	//put TAEM transition calculation here 
@@ -473,7 +473,7 @@ UNTIL FALSE {
 		SET loglex["alt"] TO SHIP:ALTITUDE/1000.
 		SET loglex["speed"] TO SHIP:VELOCITY:SURFACE:MAG. 
 		SET loglex["hdot"] TO SHIP:VERTICALSPEED.
-		SET loglex["range"] TO tgt_range + estimate_range_hac_landing(tgtrwy,apch_params).
+		SET loglex["range"] TO tgt_range + estimate_range_hac_landing(tgtrwy,vehicle_params).
 		SET loglex["lat"] TO SHIP:GEOPOSITION:LAT.
 		SET loglex["long"] TO SHIP:GEOPOSITION:LNG.
 		SET loglex["pitch"] TO get_pitch_prograde().
@@ -496,7 +496,7 @@ UNTIL FALSE {
 }
 
 select_opposite_hac().
-define_hac(SHIP:GEOPOSITION,tgtrwy,apch_params).
+define_hac(SHIP:GEOPOSITION,tgtrwy,vehicle_params).
 
 //positive aoa feedback to help keep stability
 flaps_aoa_feedback(flap_control["parts"],+25).
@@ -544,7 +544,7 @@ TAEM_spdbk().
 
 //keep track of whether we are in an s-turn or not
 LOCAL is_s_turn IS FALSE.
-LOCAL s_turn_tgt_vel IS constants["TAEMtgtvel"].
+LOCAL s_turn_tgt_vel IS vehicle_params["TAEMtgtvel"].
 
 //guesstimate of the reference hdot value
 LOCAL hdot_ref IS -50.
@@ -561,11 +561,11 @@ UNTIL FALSE {
 	apch_transition(tgt_range).
 	
 	//update HAC entry 
-	update_hac_entry_pt(SHIP:GEOPOSITION, tgtrwy, apch_params). 
+	update_hac_entry_pt(SHIP:GEOPOSITION, tgtrwy, vehicle_params). 
 	
 	//calculate the target altitude 
 	LOCAL alt_err_p IS alt_err.
-	LOCAL tgtalt IS taem_profile_alt(tgtrwy, apch_params).
+	LOCAL tgtalt IS taem_profile_alt(tgtrwy, vehicle_params).
 		
 	//run the vehicle simulation
 	LOCAL ICS IS LEXICON(
@@ -581,7 +581,7 @@ UNTIL FALSE {
 					sim_settings,
 					simstate,
 					tgtrwy,
-					apch_params,
+					vehicle_params,
 					roll_ref,
 					pitch_ref,
 					hdot_ref
@@ -677,7 +677,7 @@ UNTIL FALSE {
 		SET loglex["alt"] TO runway_alt(SHIP:ALTITUDE)/1000.
 		SET loglex["speed"] TO SHIP:VELOCITY:SURFACE:MAG. 
 		SET loglex["hdot"] TO SHIP:VERTICALSPEED.
-		SET loglex["range"] TO tgt_range + estimate_range_hac_landing(tgtrwy,apch_params).
+		SET loglex["range"] TO tgt_range + estimate_range_hac_landing(tgtrwy,vehicle_params).
 		SET loglex["lat"] TO SHIP:GEOPOSITION:LAT.
 		SET loglex["long"] TO SHIP:GEOPOSITION:LNG.
 		SET loglex["pitch"] TO get_pitch_prograde().
@@ -724,7 +724,7 @@ make_apch_GUI().
 //hud_declutter7_gui().
 
 
-define_flare_circle(apch_params).
+define_flare_circle(vehicle_params).
 
 
 GLOBAL sim_settings IS LEXICON(
@@ -774,25 +774,25 @@ UNTIL FALSE{
 	SET simstate["surfvel"] TO surfacevel(simstate["velocity"],simstate["position"]).
 	SET simstate["latlong"] TO shift_pos(simstate["position"],simstate["simtime"]).
 	
-	SET mode tO mode_switch(simstate,tgtrwy,apch_params).
+	SET mode tO mode_switch(simstate,tgtrwy,vehicle_params).
 	
 	LOCAL deltas IS LIST(0,0).
 	
 	
 	IF mode=3 {
-		SET deltas TO mode3(simstate,tgtrwy,apch_params).
+		SET deltas TO mode3(simstate,tgtrwy,vehicle_params).
 	}
 	ELSE IF mode=4 {
 		
-		SET deltas TO mode4(simstate,tgtrwy,apch_params).
+		SET deltas TO mode4(simstate,tgtrwy,vehicle_params).
 	}
 	ELSE IF mode=5  {
 		SET sim_settings["delta_t"] TO 1.
-		SET deltas TO mode5(simstate,tgtrwy,apch_params).
+		SET deltas TO mode5(simstate,tgtrwy,vehicle_params).
 	}
 	ELSE IF mode=6 {
 		SET sim_settings["delta_t"] TO 1.
-		SET deltas TO mode6(simstate,tgtrwy,apch_params).
+		SET deltas TO mode6(simstate,tgtrwy,vehicle_params).
 	}
 	
 	SET airbrake_control TO speed_control(is_autoairbk(),airbrake_control,mode).
@@ -808,7 +808,7 @@ UNTIL FALSE{
 	update_apch_GUI(
 		mode,
 		deltas,
-		mode_dist(simstate,tgtrwy,apch_params),
+		mode_dist(simstate,tgtrwy,vehicle_params),
 		airbrake_control["spdbk_val"],
 		flap_control["deflection"],
 		update_nz(
@@ -834,7 +834,7 @@ UNTIL FALSE{
 		SET loglex["long"] TO SHIP:GEOPOSITION:LNG.
 		SET loglex["pitch"] TO get_pitch_lvlh().
 		SET loglex["roll"] TO get_roll_lvlh().
-		SET loglex["range"] TO total_range_hac_landing(simstate["latlong"],tgtrwy,apch_params).
+		SET loglex["range"] TO total_range_hac_landing(simstate["latlong"],tgtrwy,vehicle_params).
 		
 			
 			
