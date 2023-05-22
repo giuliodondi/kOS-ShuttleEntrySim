@@ -74,78 +74,26 @@ FUNCTION make_global_deorbit_GUI {
 		SET roll_ref tO val:tonumber(vehicle_params["rollguess"]).
 	}.
 	
-	GLOBAL pchprof_but IS  popup_box:ADDBUTTON("<size=13>Override Pitch Profile</size>").
-	SET pchprof_but:STYLE:WIDTH TO 185.
-	SET pchprof_but:STYLE:HEIGHT TO 30.
+	
+	GLOBAL pitchngains IS popup_box:ADDHLAYOUT().
+	SET pitchngains:STYLE:ALIGN TO "Center".
+
+	//button to override pitch profile
+
+	GLOBAL pchprof_but IS  pitchngains:ADDBUTTON("<size=13>Override               Pitch Profile</size>").
+	SET pchprof_but:STYLE:WIDTH TO 115.
+	SET pchprof_but:STYLE:HEIGHT TO 45.
 	SET pchprof_but:STYLE:ALIGN TO "Center".
 	set pchprof_but:style:wordwrap to true.
-	
-	
-	function profgui {
-			GLOBAL prof_gui is gui(145,200).
-			SET prof_gui:X TO main_gui:X + + main_gui:STYLE:WIDTH.
-			SET prof_gui:Y TO main_gui:Y.
-			GLOBAL proftext IS prof_gui:ADDLABEL("<size=18>Pitch Profile</size>").
-			SET proftext:STYLE:ALIGN TO "center".
-			
-			
-			GLOBAL profsegs_box IS prof_gui:ADDVLAYOUT().
-			SET profsegs_box:STYLE:ALIGN TO "center".
-			SET profsegs_box:STYLE:WIDTH TO 145.
-			
-			GLOBAL profseg_boxes_list Is LIST().
-			
-			FROM {local k is 0.} UNTIL k >= pitchprof_segments:LENGTH STEP {set k to k+1.} DO {
-			
-				LOCAL s IS pitchprof_segments[k].
-			
-				LOCAL newsegbox IS profsegs_box:addhlayout().
-				LOCAL newsegveltext IS newsegbox:addtextfield(s[0]:tostring).
-				set newsegveltext:style:width to 65.
-				set newsegveltext:style:height to 18.
-				LOCAL newsegpcgtext IS newsegbox:addtextfield(s[1]:tostring).
-				set newsegpcgtext:style:width to 65.
-				set newsegpcgtext:style:height to 18.
-				
-				
-				set newsegveltext:onconfirm to { 
-					parameter val.
-					
-					set val to val:tonumber(0).
-					if val = 0 {RETURN.}
-					
-					SET s[0] TO val.
-					
-				}.
-				
-				set newsegpcgtext:onconfirm to { 
-					parameter val.
-					
-					set val to val:tonumber(0).
-					if val = 0 {RETURN.}
-					
-					SET s[1] TO val.
-					
-				}.
-				
-				profseg_boxes_list:ADD(newsegbox).
-				
-			}
-			
-			
-			GLOBAL prof_close IS  prof_gui:ADDBUTTON("<size=16>Close</size>").
-			SET prof_close:STYLE:WIDTH TO 50.
-			SET prof_close:STYLE:ALIGN TO "center".
-			//SET quitb:style:width TO 80.
-			function profclosecheck {
-				log_new_pitchprof(pitchprof_log_path).
-				prof_gui:HIDE().
-			}
-			SET prof_close:ONCLICK TO profclosecheck@.
-			prof_gui:SHOW().
-	}
-
 	SET pchprof_but:ONCLICK TO profgui@.
+
+	//button to override controller gains
+	GLOBAL gains_but IS  pitchngains:ADDBUTTON("<size=13>Override Controller Gains</size>").
+	SET gains_but:STYLE:WIDTH TO 115.
+	SET gains_but:STYLE:HEIGHT TO 45.
+	SET gains_but:STYLE:ALIGN TO "Center".
+	set gains_but:style:wordwrap to true.
+	SET gains_but:ONCLICK TO gainsgui@.
 	
 	
 	
@@ -862,20 +810,38 @@ FUNCTION make_entry_GUI {
 	}.
 	
 	GLOBAL pitchngains IS rightbox:ADDHLAYOUT().
-
+	SET pitchngains:STYLE:ALIGN TO "Center".
 
 	//button to override pitch profile
 
-	SET pitchngains:STYLE:ALIGN TO "Center".
-	
 	GLOBAL pchprof_but IS  pitchngains:ADDBUTTON("<size=13>Override               Pitch Profile</size>").
 	SET pchprof_but:STYLE:WIDTH TO 115.
 	SET pchprof_but:STYLE:HEIGHT TO 45.
 	SET pchprof_but:STYLE:ALIGN TO "Center".
 	set pchprof_but:style:wordwrap to true.
+	SET pchprof_but:ONCLICK TO profgui@.
+
+	//button to override controller gains
+	GLOBAL gains_but IS  pitchngains:ADDBUTTON("<size=13>Override Controller Gains</size>").
+	SET gains_but:STYLE:WIDTH TO 115.
+	SET gains_but:STYLE:HEIGHT TO 45.
+	SET gains_but:STYLE:ALIGN TO "Center".
+	set gains_but:style:wordwrap to true.
+	SET gains_but:ONCLICK TO gainsgui@.
 	
 	
-	function profgui {
+	make_hud_gui().
+	
+	
+	
+	
+	SET vspd_slider:MIN TO -200.
+	SET vspd_slider:MAX TO +200.
+
+
+}
+
+function profgui {
 			GLOBAL prof_gui is gui(145,200).
 			SET prof_gui:X TO main_gui:X + + main_gui:STYLE:WIDTH.
 			SET prof_gui:Y TO main_gui:Y.
@@ -939,24 +905,7 @@ FUNCTION make_entry_GUI {
 			prof_gui:SHOW().
 	}
 
-	SET pchprof_but:ONCLICK TO profgui@.
-	
-	
-	
-	
-	
-	//button to override controller gains
-	
-
-	GLOBAL gains_but IS  pitchngains:ADDBUTTON("<size=13>Override Controller Gains</size>").
-	SET gains_but:STYLE:WIDTH TO 115.
-	SET gains_but:STYLE:HEIGHT TO 45.
-	SET gains_but:STYLE:ALIGN TO "Center".
-	set gains_but:style:wordwrap to true.
-
-
-
-	function gainsgui {
+function gainsgui {
 	  //create the gains gui
 		GLOBAL gains_gui is gui(180,200).
 		SET gains_gui:X TO main_gui:X + main_gui:STYLE:WIDTH + 200.
@@ -1109,19 +1058,6 @@ FUNCTION make_entry_GUI {
 		SET gains_close:ONCLICK TO gainsclosecheck@.
 		gains_gui:SHOW().
 	}
-	SET gains_but:ONCLICK TO gainsgui@.
-	
-	
-	make_hud_gui().
-	
-	
-	
-	
-	SET vspd_slider:MIN TO -200.
-	SET vspd_slider:MAX TO +200.
-
-
-}
 
 
 FUNCTION is_guidance {

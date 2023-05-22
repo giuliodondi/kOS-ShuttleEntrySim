@@ -1,11 +1,11 @@
 clearscreen.
 SET CONFIG:IPU TO 1500.					//	Required to run the script fast enough.
 
-
 //load parameters
 RUNONCEPATH("0:/Shuttle_entrysim/vessel_dir").
 RUNONCEPATH("0:/Shuttle_entrysim/landing_sites").
-RUNONCEPATH("0:/Shuttle_entrysim/simulation_parameters").
+RUNONCEPATH("0:/Shuttle_entrysim/constants").
+RUNONCEPATH("0:/Shuttle_entrysim/simulation_params").
 
 
 //if the global pitch ptofile file is defined, load that one

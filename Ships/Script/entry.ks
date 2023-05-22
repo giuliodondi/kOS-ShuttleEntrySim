@@ -17,7 +17,8 @@ If (SHIP:ALTITUDE >= constants["atmalt"]) {
 	//load parameters
 	RUNONCEPATH("0:/Shuttle_entrysim/vessel_dir").
 	RUNONCEPATH("0:/Shuttle_entrysim/landing_sites").
-	RUNONCEPATH("0:/Shuttle_entrysim/simulation_parameters").
+	RUNONCEPATH("0:/Shuttle_entrysim/constants").
+	RUNONCEPATH("0:/Shuttle_entrysim/simulation_params").
 	
 	//this flag should only ever be defined during GRTLS
 	IF NOT (DEFINEd bypass_pitchprof_def) {
