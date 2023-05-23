@@ -3,7 +3,7 @@ clearscreen.
 clearvecdraws().
 CLEARGUIS().
 
-
+RUNONCEPATH("0:/Shuttle_entrysim/constants").
 
 //hard-coded check to run the script only in atmosphere
 If (SHIP:ALTITUDE >= constants["atmalt"]) {
@@ -17,7 +17,6 @@ If (SHIP:ALTITUDE >= constants["atmalt"]) {
 	//load parameters
 	RUNONCEPATH("0:/Shuttle_entrysim/vessel_dir").
 	RUNONCEPATH("0:/Shuttle_entrysim/landing_sites").
-	RUNONCEPATH("0:/Shuttle_entrysim/constants").
 	RUNONCEPATH("0:/Shuttle_entrysim/simulation_params").
 	
 	//this flag should only ever be defined during GRTLS
