@@ -478,7 +478,6 @@ UNTIL FALSE {
 		SET loglex["long"] TO SHIP:GEOPOSITION:LNG.
 		SET loglex["pitch"] TO get_pitch_prograde().
 		SET loglex["roll"] TO get_roll_prograde().
-		SET loglex["tgt_range"] TO tgt_range.
 		SET loglex["range_err"] TO range_err.
 		SET loglex["az_err"] TO az_err.
 		SET loglex["roll_ref"] TO roll_ref. 
