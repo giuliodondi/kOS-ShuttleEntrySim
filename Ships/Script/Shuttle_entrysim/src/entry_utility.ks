@@ -391,6 +391,8 @@ declare function simulate_reentry {
 		}
 		
 		IF simsets["log"]= TRUE {
+		
+			LOCAL tgt_range IS greatcircledist( tgtpos , simstate["position"] ).
 			
 			
 			SET loglex["time"] TO simstate["simtime"].
@@ -399,6 +401,7 @@ declare function simulate_reentry {
 			SET loglex["hdot"] TO hdot.
 			SET loglex["lat"] TO simstate["latlong"]:LAT.
 			SET loglex["long"] TO simstate["latlong"]:LNG.
+			SET loglex["range"] TO tgt_range.
 			SET loglex["pitch"] TO pitch_prof.
 			SET loglex["roll"] TO roll_prof.
 			SET loglex["az_err"] TO delaz.
