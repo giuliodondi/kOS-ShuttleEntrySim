@@ -293,6 +293,8 @@ FUNCTION deorbit_main {
 		//if there is no manoeuvre
 		} ELSE IF SHIP:orbit:periapsis<constants["interfalt"] {
 		
+			print "no node" at (0,10).
+		
 			local normvec IS VCRS(-SHIP:ORBIT:BODY:POSITION,SHIP:VELOCITY:ORBIT).
 	
 			//time to the node
@@ -385,6 +387,12 @@ FUNCTION deorbit_main {
 
 			//fetch the position list for plotting
 			SET poslist TO simstate["poslist"].
+			
+			//fetch the position list for plotting
+			IF plot_trajectory {
+				SET poslist TO simstate["poslist"].
+				plot_traj_vectors(poslist).
+			}
 			
 			//calculate the range error for bank optimisation
 			LOCAL delta_t IS  TIME:SECONDS - last_T.
