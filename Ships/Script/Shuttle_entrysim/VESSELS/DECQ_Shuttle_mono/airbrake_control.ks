@@ -4,15 +4,11 @@ FUNCTION airbrake_control_factory {
 
 	LOCAL this IS LEXICON().
 	
-	LOCAL airbrakes IS LIST().
-	FOR b IN SHIP:PARTSDUBBED("airbrake1") {
-		LOCAL bmod IS b:getmodule("ModuleAeroSurface").
-		bmod:SETFIELD("Deploy Angle",0). 
-		
-		airbrakes:ADD(bmod).
-	}
-	
-	this:ADD("parts",airbrakes).
+	this:ADD("parts",LIST(
+						SHIP:PARTSDUBBED("ShuttleTailControl")[0]:MODULESNAMED("ModuleControlSurface")[0],
+						SHIP:PARTSDUBBED("ShuttleTailControl")[0]:MODULESNAMED("ModuleControlSurface")[1]
+					)
+	).
 	
 	this:ADD("max_deploy", 50).
 	
@@ -33,6 +29,16 @@ FUNCTION airbrake_control_factory {
 			bmod:SETFIELD("Deploy Angle",this["max_deploy"]*this["deflection"]). 
 		}
 	}).
+	
+	this:ADD("deactivate",{
+		FOR bmod IN this["parts"] {
+			bmod:SETFIELD("deploy",FALSE).
+		}
+	}).
+	
+	FOR bmod IN this["parts"] {
+		bmod:SETFIELD("Deploy Angle",0). 
+	}
 	
 	RETURN this.
 }
