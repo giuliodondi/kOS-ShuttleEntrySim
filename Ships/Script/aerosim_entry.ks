@@ -26,10 +26,10 @@ GLOBAL sim_input IS LEXICON(
 						"target", "Vandenberg",
 						"deorbit_apoapsis", 190,
 						"deorbit_periapsis", 30,
-						"deorbit_inclination", 104,
-						"entry_interf_eta", 135,
-						"entry_interf_dist", 10000,
-						"entry_interf_xrange", 1850,
+						"deorbit_inclination", -105.5,
+						"entry_interf_eta", 150,
+						"entry_interf_dist", 9500,
+						"entry_interf_xrange", 1500,
 						"entry_interf_offset", "right"
 ).
 
@@ -43,17 +43,16 @@ FUNCTION generate_simulation_ics {
 	
 	LOCAL tgt_vec IS pos2vec(tgt_pos).
 	
-	//find the vector of the ascending node
-	LOCAL c IS get_c_bBB(tgt_pos:LAT, sim_input["deorbit_inclination"]).
-	LOCAL a IS get_a_bc(tgt_pos:LAT, c).
+	//get the azimuth of the orbit at the launch site
 	
-	LOCAL lan_pos IS LATLNG(0, unfixangle(tgt_pos:LNG - a)).
+	LOCAL orbaz IS get_orbit_azimuth(sim_input["deorbit_inclination"], tgt_pos:LAT, (sim_input["deorbit_inclination"] < 0)).
 	
-	LOCAL lan_vec IS pos2vec(lan_pos).
+	LOCAL orbvec IS vector_pos_bearing(tgt_vec, orbaz).
 	
 	//normal vector to the orbital plane
 	
-	LOCAL norm_vec IS VCRS(tgt_vec, lan_vec) : NORMALIZED * BODy:RADIUS.
+	LOCAL norm_vec IS VCRS(orbvec, tgt_vec) : NORMALIZED * BODy:RADIUS.
+	
 	
 	LOCAL x IS dist2degrees(sim_input["entry_interf_xrange"]).
 	
@@ -78,7 +77,6 @@ FUNCTION generate_simulation_ics {
 		LOCAL rot IS xrange_err * 1.5.
 		
 		SET norm_vec TO rodrigues(norm_vec, V(0,1,0), rot_sign*rot).
-		SET lan_vec TO rodrigues(lan_vec, V(0,1,0), rot_sign*rot).
 		
 		WAIT 0.
 	}
@@ -92,6 +90,11 @@ FUNCTION generate_simulation_ics {
 	//scale by entry interface altitude
 	LOCAL h IS BODy:RADIUS + constants["interfalt"].
 	SET ei_vec TO ei_vec:NORMALIZED * h.
+	
+	clearvecdraws().
+	arrow_body(tgt_vec,"tgt_vec").
+	arrow_body(norm_vec,"norm_vec").
+	arrow_body(ei_vec,"ei_vec").
 
 
 	print "x " + x + " d " + d + " y " + y at (0,8).
