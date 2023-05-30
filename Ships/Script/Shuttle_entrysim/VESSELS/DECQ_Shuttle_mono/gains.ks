@@ -1,1 +1,1 @@
-GLOBAL gains IS LEXICON("rangeKP",0.007,"rangeKD",0.0015,"Khdot",0,"Roll_ramp",0.0045,"pchmod",0.06,"taemKP",0.08,"taemKD",0.12,"strmgr",5,"pitchKD",0.5,"yawKD",0.5,"rollKD",0.5).
+GLOBAL gains IS LEXICON("rangeKP",0.007,"rangeKD",0.0015,"Khdot",0,"Roll_ramp",0.0045,"pchmod",0.06,"taemKP",0.08,"taemKD",0.12,"strmgr",2,"pitchKD",0.5,"yawKD",0.5,"rollKD",0.5).
