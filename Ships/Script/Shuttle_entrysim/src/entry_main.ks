@@ -83,7 +83,8 @@ GLOBAL loglex IS LEXICON(
 									"tgt_range",0,
 									"range_err",0,
 									"az_err",0,
-									"roll_ref",0
+									"roll_ref",0,
+									"l_d",0
 
 
 ).
@@ -99,7 +100,8 @@ GLOBAL reset_entry_flag Is FALSE.
 reset_pids().
 
 
-GLOBAL airbrake_control IS initialise_spdbrk().
+GLOBAL airbrake_control IS airbrake_control_factory().
+
 
 initialise_flap_control(flap_control).
 
@@ -282,8 +284,8 @@ local control_loop is loop_executor_factory(
 	
 									//update the flaps trim setting and airbrakes IF WE'RE BELOW FIRST ROLL ALT
 									IF SHIP:ALTITUDE < constants["firstrollalt"] {	
-										SET flap_control TO flaptrim_control(flptrm:PRESSED, flap_control).
-										SET airbrake_control TO speed_control(arbkb:PRESSED, airbrake_control, mode).
+										flaptrim_control(flptrm:PRESSED, flap_control).
+										speed_control(arbkb:PRESSED, airbrake_control, mode).
 									}
 
 									print "roll_ref : " + ROUND(roll_ref,1) + "    " at (0,4).
@@ -306,7 +308,7 @@ local control_loop is loop_executor_factory(
 													pipper_deltas,
 													az_err,
 													tgt_range,
-													airbrake_control["spdbk_val"],
+													airbrake_control["deflection"],
 													flap_control["deflection"],
 													update_nz(
 														-SHIP:ORBIT:BODY:POSITION,
@@ -467,6 +469,7 @@ UNTIL FALSE {
 	
 	if is_log() {
 	
+		LOCAL outforce IS aeroforce_ld(simstate["position"], simstate["velocity"], LIST(pitchguid, rollguid)).
 		
 		//prepare list of values to log.
 		
@@ -483,6 +486,7 @@ UNTIL FALSE {
 		SET loglex["range_err"] TO range_err.
 		SET loglex["az_err"] TO az_err.
 		SET loglex["roll_ref"] TO roll_ref. 
+		SET loglex["l_d"] TO outforce["lift"] / outforce["drag"].
 			
 			
 
@@ -796,7 +800,7 @@ UNTIL FALSE{
 		SET deltas TO mode6(simstate,tgtrwy,vehicle_params).
 	}
 	
-	SET airbrake_control TO speed_control(is_autoairbk(),airbrake_control,mode).
+	speed_control(is_autoairbk(),airbrake_control,mode).
 	
 	//read off the pilot input, assumes manual control
 	flap_control["pitch_control"]:update(SHIP:CONTROL:PILOTPITCH).
@@ -810,7 +814,7 @@ UNTIL FALSE{
 		mode,
 		deltas,
 		mode_dist(simstate,tgtrwy,vehicle_params),
-		airbrake_control["spdbk_val"],
+		airbrake_control["deflection"],
 		flap_control["deflection"],
 		update_nz(
 						-SHIP:ORBIT:BODY:POSITION,

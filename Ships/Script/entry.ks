@@ -29,6 +29,7 @@ If (SHIP:ALTITUDE >= constants["atmalt"]) {
 	}
 	
 	RUNONCEPATH("0:/Shuttle_entrysim/VESSELS/" + vessel_dir + "/flapcontrol").
+	RUNONCEPATH("0:/Shuttle_entrysim/VESSELS/" + vessel_dir + "/airbrake_control").
 	RUNONCEPATH("0:/Shuttle_entrysim/VESSELS/" + vessel_dir + "/vehicle_params").
 
 

@@ -268,40 +268,6 @@ FUNCTION reset_pids {
 }
 
 
-FUNCTION initialise_spdbrk {
-	//find the airbrakes parts
-	LOCAL airbrakes IS LIST().
-	FOR b IN SHIP:PARTSDUBBED("airbrake1") {
-		LOCAL bmod IS b:getmodule("ModuleAeroSurface").
-		bmod:SETFIELD("Deploy Angle",0). 
-		
-		airbrakes:ADD(bmod).
-	}
-	RETURN LEXICON(
-							"parts",airbrakes,
-							"spdbk_val",0
-							).
-}
-
-
-FUNCTION activate_spdbrk {
-	PARAMETER airbrake_control.
-	
-	FOR bmod IN airbrake_control["parts"] {
-		bmod:SETFIELD("deploy",TRUE).
-	}
-}
-
-FUNCTION deflect_spdbrk {
-	PARAMETER airbrake_control.
-	
-	FOR bmod IN airbrake_control["parts"] {
-		bmod:SETFIELD("Deploy Angle",50*airbrake_control["spdbk_val"]). 
-	}
-	
-}
-
-
 //automatic speedbrake control
 FUNCTION speed_control {
 	PARAMETER auto_flag.
@@ -310,7 +276,7 @@ FUNCTION speed_control {
 	
 	//do it every time as the airbrakes might be wired to the brakes AG 
 	//which could toggle them closed if pressed prematurely
-	activate_spdbrk(airbrake_control).
+	airbrake_control["activate"].
 	
 	LOCAL previous_val IS airbrake_control["spdbk_val"].
 	
@@ -366,13 +332,7 @@ FUNCTION speed_control {
 
 	}
 	
-	SET airbrake_control["spdbk_val"] TO CLAMP(newval,0,1).
-	
-	deflect_spdbrk(airbrake_control).
-
-	
-	RETURN airbrake_control.
-	
+	airbrake_control["deflect"](CLAMP(newval,0,1)).
 }
 
 
