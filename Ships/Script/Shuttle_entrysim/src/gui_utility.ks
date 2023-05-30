@@ -352,13 +352,13 @@ FUNCTION make_global_entry_GUI {
 	GLOBAL flptrm IS  toggles_box:ADDCHECKBOX("Auto Flap Trim",false).
 	toggles_box:addspacing(30).	
 	
-	SET flptrm:ONTOGGLE TO {
-		parameter b. 
-		IF NOT b {
-			null_flap_deflection().
-		}
-
-	}.
+	//SET flptrm:ONTOGGLE TO {
+	//	parameter b. 
+	//	IF NOT b {
+	//		null_flap_deflection().
+	//	}
+	//
+	//}.
 	
 	GLOBAL arbkb IS  toggles_box:ADDCHECKBOX("Auto Airbrake",false).
 

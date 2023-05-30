@@ -276,9 +276,9 @@ FUNCTION speed_control {
 	
 	//do it every time as the airbrakes might be wired to the brakes AG 
 	//which could toggle them closed if pressed prematurely
-	airbrake_control["activate"].
+	airbrake_control["activate"]().
 	
-	LOCAL previous_val IS airbrake_control["spdbk_val"].
+	LOCAL previous_val IS airbrake_control["deflection"].
 	
 	LOCAL newval IS previous_val.
 	
@@ -336,36 +336,6 @@ FUNCTION speed_control {
 }
 
 
-
-FUNCTION initialise_flap_control {
-	PARAMETER flap_control.
-	
-	activate_flaps(flap_control["parts"]).
-	
-	//initialise the running average for the pitch control values
-	SET flap_control["pitch_control"] TO average_value_factory(5).
-	
-	//only do it once
-	IF NOT (flap_control:HASKEY("gimbal")) {
-		LISt ENGINES IN englist.
-		LOCAL gimbal_ IS 0.
-		FOR e IN englist {
-			IF e:HASSUFFIX("gimbal") {
-				SET gimbal_ TO e:GIMBAL.
-				BREAK.
-			}
-		}
-		
-		gimbal_:DOACTION("free gimbal", TRUE).
-		//gg:DOEVENT("Show actuation toggles").
-		gimbal_:DOACTION("toggle gimbal roll", TRUE).
-		gimbal_:DOACTION("toggle gimbal yaw", TRUE).
-	
-	
-		flap_control:ADD("gimbal", gimbal_).
-	}
-}
-
 //automatic flap control
 FUNCTION  flaptrim_control{
 	PARAMETER auto_flag.
@@ -390,70 +360,5 @@ FUNCTION  flaptrim_control{
 		
 	}
 	
-	SET flap_control["deflection"] TO CLAMP(
-			flap_control["deflection"] + flap_incr,
-			-1,
-			1
-		).
-	
-	deflect_flaps(flap_control["parts"] , -flap_control["deflection"]).
-	
-	RETURN flap_control.
-}
-
-FUNCTION null_flap_deflection {
-
-	SET flap_control["deflection"] TO  0.
-	deflect_flaps(flap_control["parts"] , flap_control["deflection"]).
-
-}
-
-FUNCTION activate_flaps {
-	PARAMETER flap_parts.
-
-	
-	FOR f in flap_parts {
-		LOCAL fmod IS f["flapmod"].
-		IF NOT fmod:GETFIELD("Flp/Splr"). {fmod:SETFIELD("Flp/Splr",TRUE).}
-		wait 0.
-		fmod:SETFIELD("Flp/Splr Dflct",0). 
-		IF NOT fmod:GETFIELD("Flap"). {fmod:SETFIELD("Flap",TRUE).}
-		wait 0.
-		LOCAL flapset IS fmod:GETFIELD("Flap Setting").
-		FROM {local k is flapset.} UNTIL k>3  STEP {set k to k+1.} DO {
-			fmod:DOACTION("Increase Flap Deflection", TRUE).
-		}
-	}
-}
-
-
-FUNCTION deflect_flaps{
-	PARAMETER flap_parts.
-	PARAMETER deflection.
-	
-	FOR f in flap_parts {
-		LOCAL defl IS deflection*ABS(f["max_defl"]).
-		IF (deflection<0) {
-			SET defl TO deflection*ABS(f["min_defl"]).
-		}
-	
-		f["flapmod"]:SETFIELD("Flp/Splr dflct",CLAMP(defl,f["min_defl"],f["max_defl"])).
-		
-	}
-
-}.
-
-
-//activates the ferram aoa feedback
-FUNCTION flaps_aoa_feedback {
-	PARAMETER flap_parts.
-	PARAMETER feedback_percentage.
-	
-	FOR f in flap_parts {
-		LOCAL fmod IS f["flapmod"].
-		IF NOT fmod:GETFIELD("std. ctrl"). {fmod:SETFIELD("std. ctrl",TRUE).}
-		wait 0.
-		fmod:SETFIELD("aoa %",feedback_percentage).  	
-	}
-
+	flap_control["deflect"](CLAMP(flap_control["deflection"] + flap_incr,-1,1)).
 }

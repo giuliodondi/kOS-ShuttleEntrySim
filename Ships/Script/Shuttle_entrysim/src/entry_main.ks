@@ -102,8 +102,7 @@ reset_pids().
 
 GLOBAL airbrake_control IS airbrake_control_factory().
 
-
-initialise_flap_control(flap_control).
+GLOBAL flap_control IS flap_control_factory().
 
 
 
@@ -157,7 +156,8 @@ SET loglex["roll_ref"] TO 0.
 
 approach_loop().
 
-null_flap_deflection().
+flap_control["deactivate"]().
+airbrake_control["deactivate"]().
 
 close_all_GUIs().
 SET SHIP:CONTROL:NEUTRALIZE TO TRUE.
@@ -187,7 +187,7 @@ GLOBAL guid_converged_flag IS FALSE.
 GLOBAL stop_entry_flag IS FALSE.
 
 //null feedback to help keep high pitch
-flaps_aoa_feedback(flap_control["parts"],0).
+flap_control["set_aoa_feedback"](0).
 
 //dap controller object
 LOCAL dap IS dap_controller_factory().
@@ -504,7 +504,7 @@ select_opposite_hac().
 define_hac(SHIP:GEOPOSITION,tgtrwy,vehicle_params).
 
 //positive aoa feedback to help keep stability
-flaps_aoa_feedback(flap_control["parts"],+25).
+flap_control["set_aoa_feedback"](25).
 
 //if we broke out manually before TAEM conditions go directly to approach 
 IF (NOT TAEM_flag) { 
@@ -747,7 +747,7 @@ LOCAL dap IS dap_controller_factory().
 LOCK STEERING TO P_att.
 
 //strong positive aoa feedback to help keep stability
-flaps_aoa_feedback(flap_control["parts"],+50).
+flap_control["set_aoa_feedback"](50).
 
 //reduce KP on the flaps PID so that auto flaps are nto so aggressive 
 SET FLAPPID:KP TO FLAPPID:KP/3.
@@ -802,10 +802,7 @@ UNTIL FALSE{
 	
 	speed_control(is_autoairbk(),airbrake_control,mode).
 	
-	//read off the pilot input, assumes manual control
-	flap_control["pitch_control"]:update(SHIP:CONTROL:PILOTPITCH).
-	
-	SET flap_control TO flaptrim_control(flptrm:PRESSED, flap_control,0.2).
+	flaptrim_control(flptrm:PRESSED, flap_control).
 	
 	
 
