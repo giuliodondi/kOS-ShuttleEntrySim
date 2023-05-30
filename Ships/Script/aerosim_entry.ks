@@ -1,0 +1,307 @@
+CLEARSCREEN.
+
+
+RUNPATH("0:/Libraries/misc_library").	
+RUNPATH("0:/Libraries/maths_library").	
+RUNPATH("0:/Libraries/navigation_library").	
+
+RUNPATH("0:/Shuttle_entrysim/constants").
+RUNPATH("0:/Shuttle_entrysim/vessel_dir").
+RUNPATH("0:/Shuttle_entrysim/landing_sites").
+RUNPATH("0:/Shuttle_entrysim/simulation_params").
+
+RUNPATH("0:/Shuttle_entrysim/src/simulate_vehicle").
+RUNPATH("0:/Shuttle_entrysim/src/entry_utility").
+
+RUNPATH("0:/Shuttle_entrysim/VESSELS/" + vessel_dir + "/flapcontrol").
+RUNPATH("0:/Shuttle_entrysim/VESSELS/" + vessel_dir + "/vehicle_params").
+RUNPATH("0:/Shuttle_entrysim/VESSELS/" + vessel_dir + "/pitch_profile").
+
+GLOBAL gains_log_path IS "0:/Shuttle_entrysim/VESSELS/" + vessel_dir + "/gains.ks".
+IF EXISTS(gains_log_path) {RUNPATH(gains_log_path).}
+
+
+
+GLOBAL sim_input IS LEXICON(
+						"target", "Vandenberg",
+						"deorbit_apoapsis", 190,
+						"deorbit_periapsis", 30,
+						"deorbit_inclination", 104,
+						"entry_interf_eta", 135,
+						"entry_interf_dist", 10000,
+						"entry_interf_xrange", 1850,
+						"entry_interf_offset", "right"
+).
+
+
+
+//given the deorbit and entry interface parameters, generates the simulation initial conditions
+FUNCTION generate_simulation_ics {
+	PARAMETER sim_input.
+	
+	LOCAL tgt_pos IS ldgsiteslex[sim_input["target"]]["position"].
+	
+	LOCAL tgt_vec IS pos2vec(tgt_pos).
+	
+	//find the vector of the ascending node
+	LOCAL c IS get_c_bBB(tgt_pos:LAT, sim_input["deorbit_inclination"]).
+	LOCAL a IS get_a_bc(tgt_pos:LAT, c).
+	
+	LOCAL lan_pos IS LATLNG(0, unfixangle(tgt_pos:LNG - a)).
+	
+	LOCAL lan_vec IS pos2vec(lan_pos).
+	
+	//normal vector to the orbital plane
+	
+	LOCAL norm_vec IS VCRS(tgt_vec, lan_vec) : NORMALIZED * BODy:RADIUS.
+	
+	LOCAL x IS dist2degrees(sim_input["entry_interf_xrange"]).
+	
+	//rotate the orbital plane until the crossrange is within about 1 km of the parameter
+	
+	LOCAL tgt_vec_proj IS V(0,0,0).
+	
+	LOCAL rot_sign IS 1.
+	
+	IF sim_input["entry_interf_offset"] = "left" {
+		SET rot_sign TO -1.
+	}
+	
+	UNTIL FALSE {
+	
+		SET tgt_vec_proj TO VXCL(norm_vec, tgt_vec): NORMALIZED * BODy:RADIUS.
+	
+		LOCAL xrange_err IS x - VANG(tgt_vec, tgt_vec_proj).
+		
+		IF xrange_err < 0.01 {BREAK.}
+		
+		LOCAL rot IS xrange_err * 1.5.
+		
+		SET norm_vec TO rodrigues(norm_vec, V(0,1,0), rot_sign*rot).
+		SET lan_vec TO rodrigues(lan_vec, V(0,1,0), rot_sign*rot).
+		
+		WAIT 0.
+	}
+	
+	LOCAL d IS dist2degrees(sim_input["entry_interf_dist"]).
+	
+	LOCAL y IS get_c_ab(d, x).
+	
+	LOCAL ei_vec IS rodrigues(tgt_vec_proj, norm_vec, y).
+	
+	//scale by entry interface altitude
+	LOCAL h IS BODy:RADIUS + constants["interfalt"].
+	SET ei_vec TO ei_vec:NORMALIZED * h.
+
+
+	print "x " + x + " d " + d + " y " + y at (0,8).
+	print "dist " + greatcircledist( ei_vec , tgt_vec ) at (0,9).
+	
+	//conditions at entry interface
+	
+	
+	LOCAL ei_vel IS orbit_velocity_altitude(sim_input["deorbit_apoapsis"], sim_input["deorbit_periapsis"], constants["interfalt"]).
+	LOCAL ei_fpa IS orbit_gamma_altitude(sim_input["deorbit_apoapsis"], sim_input["deorbit_periapsis"], constants["interfalt"]).
+	
+	print "vel " + ei_vel + " gamma " + ei_fpa at (0,10).
+	
+	//now get velocity vector at the entry interface
+	LOCAL ei_vel_vec IS VCRs(ei_vec, norm_vec):NORMALIZED.
+	
+	SET ei_vel_vec TO rodrigues(ei_vel_vec, norm_vec, ei_fpa):NORMALIZED * ei_vel.
+
+	RETURN 	LEXICON(
+					 "position",ei_vec,
+	                 "velocity",ei_vel_vec
+	).
+}
+
+
+FUNCTION orbit_velocity_altitude {
+	PARAMETER ap.
+	PARAMETER pe.
+	PARAMETER h.
+	
+	LOCAL sma IS (ap*1000 + pe*1000 + 2*BODY:RADIUS)/2.
+	
+	LOCAL rad IS h + BODY:RADIUS.
+	
+	RETURN SQRT( BODY:MU * ( 2/rad - 1/sma  ) ).
+
+}
+
+FUNCTION orbit_eta_altitude {
+	PARAMETER ap.
+	PARAMETER pe.
+	PARAMETER h.
+	
+	LOCAL sma IS (ap*1000 + pe*1000 + 2*BODY:RADIUS)/2.
+	LOCAL ecc IS (ap*1000 - pe*1000) / (ap*1000 + pe*1000 + 2*BODY:RADIUS).
+	
+	LOCAL rad IS h + BODY:RADIUS.
+	
+	LOCAL eta_ IS (sma * (1 - ecc^2) / rad - 1) / ecc.
+	
+	RETURN ARCCOS(eta_).
+}
+
+FUNCTION orbit_gamma_altitude {
+	PARAMETER ap.
+	PARAMETER pe.
+	PARAMETER h.
+
+	LOCAL sma IS (ap*1000 + pe*1000 + 2*BODY:RADIUS)/2.
+	LOCAL ecc IS (ap*1000 - pe*1000) / (ap*1000 + pe*1000 + 2*BODY:RADIUS).
+	
+	LOCAL eta_ IS orbit_eta_altitude(ap, pe, h).
+	
+	LOCAL gamma IS ecc * SIN(eta_) / (1 + ecc * COS(eta_) ).
+	
+	//assumed downwards
+	RETURN -ARCTAN(gamma).
+}
+
+
+FUNCTION aero_simulate {.
+	SET CONFIG:IPU TO 1500.					//	Required to run the script fast enough.
+	if  (defined logname) {UNSET logname.}
+
+	
+	
+	LOCAL target IS ldgsiteslex[sim_input["target"]].
+		
+	//Initialise log lexicon 
+	GLOBAL loglex IS LEXICON(
+										"mode",1,
+										"time",0,
+										"alt",0,
+										"speed",0,
+										"hdot",0,
+										"range",0,
+										"lat",0,
+										"long",0,
+										"pitch",0,
+										"roll",0,
+										"tgt_range",0,
+										"range_err",0,
+										"az_err",0,
+										"roll_ref",0,
+										"l_d",0
+
+
+	).
+	
+	log_data(loglex,"0:/aerosim_log/log_" + sim_input["target"] + "_" + sim_input["deorbit_inclination"] + "_" + sim_input["entry_interf_xrange"] , TRUE).
+	
+	//define the delegate to the integrator function, saves an if check per integration step
+	IF sim_settings["integrator"]= "rk2" {
+		SET sim_settings["integrator"] TO rk2@.
+	}
+	ELSE IF sim_settings["integrator"]= "rk3" {
+		SET sim_settings["integrator"] TO rk3@.
+	}
+	ELSE IF sim_settings["integrator"]= "rk4" {
+		SET sim_settings["integrator"] TO rk4@.
+	}
+	
+
+	constants:ADD("prebank_angle",0).
+	
+	LOCAL ICS_0 IS generate_simulation_ics(sim_input).
+
+
+	LOCAL ICS IS ICS_0.
+	
+	LOCAL state0 IS blank_simstate(ICS).
+	
+	LOCAL init_pos IS  vec2pos(state0["position"]).
+	
+	 
+	LOCAL roll_ref IS vehicle_params["rollguess"].
+	LOCAL pitch_ref IS  pitchprof_segments[pitchprof_segments:LENGTH-1][1].
+
+
+	
+	LOCAL range_err IS 0.
+	
+	LOCAL last_T Is TIME:SECONDS.
+	
+	local count is 0.
+	
+	UNTIL FALSE {
+		
+		SET ICS TO ICS_0.
+		SET state0 TO blank_simstate(ICS).
+		
+		//create roll function delegate 
+		//update
+		
+		
+		LOCAL simstate IS simulate_reentry(
+						sim_settings,
+						state0,
+						target,
+						sim_end_conditions,
+						roll_ref,
+						pitch_ref,
+						pitchroll_profiles_entry@
+		).
+
+		LOCAL delta_t IS  TIME:SECONDS - last_T.
+		print "delta_t : " + delta_t at (1,1).
+		SET last_T TO  TIME:SECONDS.
+		
+		LOCAL tgt_range IS greatcircledist( target["position"] , init_pos ).
+		LOCAL end_range IS greatcircledist( simstate["latlong"] , init_pos ).
+		
+		LOCAL range_err_p IS range_err.
+		SET range_err TO end_range - tgt_range - sim_end_conditions["range_bias"]. 
+		print "range_err : " + range_err at (1,2).
+		
+		//PID stuff
+		LOCAL P IS range_err.
+		LOCAL D IS (range_err - range_err_p)/delta_t.
+			
+		//LOCAL delta_roll IS MAX(-2,MIN(2,P*0.005 + D*0)).
+		LOCAL delta_roll IS P*0.008 + D*0.
+		
+		LOCAL roll_ref_p IS roll_ref.
+		//update the reference roll value and clamp it
+		SET roll_ref TO clamp( roll_ref + delta_roll, 0, 120) .
+		
+		print "delta_roll : " + delta_roll at (1,3).
+		
+		print "roll_ref : " + roll_ref at (1,4).
+		
+		IF (ABS(roll_ref - roll_ref_p) < 0.25)  {
+			break.
+		}
+		
+		wait 0.01.
+
+	}
+	
+	print ("done optimising") at (0,12).
+
+	SET sim_settings["log"] TO TRUE.
+	
+	
+	SET ICS TO ICS_0.
+	SET state0 TO blank_simstate(ICS).
+	
+	LOCAL simstate IS simulate_reentry(
+						sim_settings,
+						state0,
+						target,
+						sim_end_conditions,
+						roll_ref,
+						pitch_ref,
+						pitchroll_profiles_entry@,
+						TRUE
+		).
+	
+}
+
+
+
+aero_simulate().
