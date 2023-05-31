@@ -286,7 +286,7 @@ FUNCTION roll_profile {
 	//min value to still ensure proper lateral guidance even in low-energy situations
 	//only enable it if the reference roll is too small
 	//update: use it in every case
-	LOCAL roll_min IS 2*ABS(delaz).
+	LOCAL roll_min IS constants["delaz_roll_factor"]*ABS(delaz).
 	
 	RETURN clamp(newroll,roll_min,85).
 }
@@ -313,7 +313,7 @@ FUNCTION roll_reversal {
 	//to disable the roll reversals and fly at zero bank
 	//do this by clamping the delaz bandwidth using the roll ref value which is small or even zero in low energy cases
 	//divide by 2 because of the same heuristic used for the min bank angle, only the other way around
-	LOCAL red_bandwidth IS 0.9*MIN(bandwidth,roll_ref/2).
+	LOCAL red_bandwidth IS 0.9*MIN(bandwidth,roll_ref/constants["delaz_roll_factor"]).
 	
 	//the default output is simply set to the current roll sign
 	LOCAL out_s IS cur_sign.
