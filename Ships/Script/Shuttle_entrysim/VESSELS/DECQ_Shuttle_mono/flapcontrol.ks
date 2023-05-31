@@ -6,7 +6,7 @@ FUNCTION flap_control_factory {
 	//specify here the part modules to be used as flaps
 	//need to be FAR control surface modules 
 	//positive deflection means flaps down
-	this:ADD("parts", LIST(
+	LOCAL flap_parts IS LIST(
 						LEXICON(
 								"flapmod",SHIP:PARTSDUBBED("ShuttleElevonL")[0]:getmodule("FARControllableSurface"),
 								"min_defl",-35,
@@ -22,8 +22,9 @@ FUNCTION flap_control_factory {
 								"min_defl",-12,
 								"max_defl",22
 						)
-					)
-	).
+					).
+	
+	this:ADD("parts", flap_parts).
 	
 	this:ADD("activate",{
 		
@@ -77,7 +78,7 @@ FUNCTION flap_control_factory {
 	}).
 	
 	this:ADD("null_deflection",{
-		this["deflect_flaps"](0).
+		this["deflect"](0).
 	}).
 	
 	this:ADD("set_aoa_feedback",{
