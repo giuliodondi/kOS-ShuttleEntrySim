@@ -988,7 +988,6 @@ function gainsgui {
 		set Khdot_box:onconfirm to { 
 			parameter val.
 			set val to val:tonumber(gains["Khdot"]).
-			if val < 0 set val to 0.
 			set gains["Khdot"] to val.
 		}.
 		set rollramp_box:onconfirm to { 
