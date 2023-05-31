@@ -10,17 +10,17 @@ FUNCTION flap_control_factory {
 						LEXICON(
 								"flapmod",SHIP:PARTSDUBBED("ShuttleElevonL")[0]:getmodule("FARControllableSurface"),
 								"min_defl",-35,
-								"max_defl",35
+								"max_defl",20
 						),
 						LEXICON(
 								"flapmod",SHIP:PARTSDUBBED("ShuttleElevonR")[0]:getmodule("FARControllableSurface"),
 								"min_defl",-35,
-								"max_defl",35
+								"max_defl",20
 						),
 						LEXICON(
 								"flapmod",SHIP:PARTSDUBBED("ShuttleBodyFlap")[0]:getmodule("FARControllableSurface"),
-								"min_defl",-28,
-								"max_defl",28
+								"min_defl",-12,
+								"max_defl",22
 						)
 					)
 	).
