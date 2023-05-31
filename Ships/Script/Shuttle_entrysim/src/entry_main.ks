@@ -153,6 +153,7 @@ SET loglex["range_err"] TO 0.
 SET loglex["az_err"] TO 0.
 SET loglex["roll_ref"] TO 0. 
 
+flap_control["null_deflection"]().
 
 approach_loop().
 
