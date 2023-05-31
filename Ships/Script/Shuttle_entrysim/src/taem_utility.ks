@@ -10,7 +10,11 @@ FUNCTION TAEM_spdbk {
 FUNCTION TAEM_transition {
 	PARAMETER tgt_dist.
 	
-	IF ((tgt_dist <= 150) OR (SHIP:VELOCITY:SURFACE:MAG <= 850)) {
+	LOCAL nominal_condition IS ((tgt_dist <= 150) OR (SHIP:VELOCITY:SURFACE:MAG <= 850)).
+	
+	LOCAL high_energy_condition IS ((tgt_dist <= 200) AND (SHIP:VELOCITY:SURFACE:MAG > 1250)).
+	
+	IF (nominal_condition OR high_energy_condition) {
 		RETURN TRUE.
 	}
 	
