@@ -111,11 +111,14 @@ FUNCTION dap_controller_factory{
 		LOCAL rollgain IS 1.2.
 		LOCAL pitchgain IS 0.5.
 		
-		LOCAL deltaroll IS rollgain*(SHIP:CONTROL:PILOTROLL - SHIP:CONTROL:PILOTROLLTRIM).
-		LOCAL deltapitch IS pitchgain*(SHIP:CONTROL:PILOTPITCH - SHIP:CONTROL:PILOTPITCHTRIM).
+		//required for continuous pilot input across several funcion calls
+		LOCAL time_gain IS ABS(this:iteration_dt/0.03).
 		
-		SET this:steer_pitch TO MAx(this:steer_pitch + deltapitch, 0.5).
-		SET this:steer_roll TO this:steer_roll + deltaroll.
+		LOCAL deltaroll IS time_gain * rollgain*(SHIP:CONTROL:PILOTROLL - SHIP:CONTROL:PILOTROLLTRIM).
+		LOCAL deltapitch IS time_gain * pitchgain*(SHIP:CONTROL:PILOTPITCH - SHIP:CONTROL:PILOTPITCHTRIM).
+		
+		SET this:steer_pitch TO this:prog_pitch + deltapitch.
+		SET this:steer_roll TO this:prog_roll + deltaroll.
 	
 		SET this:steering_dir TO this:create_prog_steering_dir(
 			this:steer_pitch,
@@ -133,11 +136,11 @@ FUNCTION dap_controller_factory{
 		this:update_time().
 		this:update_prog_angles().
 		
-		LOCAL pitch_tol IS 3.
-		LOCAL roll_tol IS 3.
+		LOCAL pitch_tol IS 5.
+		LOCAL roll_tol IS 5.
 	
-		SET this:steer_roll TO this:steer_roll + CLAMP(rollguid - this:steer_roll,-roll_tol,roll_tol).
-		SET this:steer_pitch TO this:steer_pitch + CLAMP(pitchguid - this:steer_pitch,-pitch_tol,pitch_tol).
+		SET this:steer_roll TO this:prog_roll + CLAMP(rollguid - this:prog_roll,-roll_tol,roll_tol).
+		SET this:steer_pitch TO this:prog_pitch + CLAMP(pitchguid - this:prog_pitch,-pitch_tol,pitch_tol).
 		
 		
 		
