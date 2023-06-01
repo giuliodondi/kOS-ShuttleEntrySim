@@ -108,11 +108,11 @@ FUNCTION dap_controller_factory{
 		this:update_time().
 		this:update_prog_angles().
 		
-		LOCAL rollgain IS 1.2.
-		LOCAL pitchgain IS 0.5.
+		LOCAL rollgain IS 1.0.
+		LOCAL pitchgain IS 0.4.
 		
 		//required for continuous pilot input across several funcion calls
-		LOCAL time_gain IS ABS(this:iteration_dt/0.03).
+		LOCAL time_gain IS ABS(this:iteration_dt/0.07).
 		
 		LOCAL deltaroll IS time_gain * rollgain*(SHIP:CONTROL:PILOTROLL - SHIP:CONTROL:PILOTROLLTRIM).
 		LOCAL deltapitch IS time_gain * pitchgain*(SHIP:CONTROL:PILOTPITCH - SHIP:CONTROL:PILOTPITCHTRIM).
@@ -136,8 +136,8 @@ FUNCTION dap_controller_factory{
 		this:update_time().
 		this:update_prog_angles().
 		
-		LOCAL pitch_tol IS 5.
-		LOCAL roll_tol IS 5.
+		LOCAL pitch_tol IS 8.
+		LOCAL roll_tol IS 8.
 	
 		SET this:steer_roll TO this:prog_roll + CLAMP(rollguid - this:prog_roll,-roll_tol,roll_tol).
 		SET this:steer_pitch TO this:prog_pitch + CLAMP(pitchguid - this:prog_pitch,-pitch_tol,pitch_tol).
