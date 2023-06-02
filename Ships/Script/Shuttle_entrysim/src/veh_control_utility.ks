@@ -10,6 +10,7 @@ FUNCTION dap_controller_factory{
 
 	LOCAL this IS lexicon().
 
+	this:add("enabled", TRUE).
 	
 	this:add("steering_dir", SHIP:FACINg).
 	
@@ -53,19 +54,27 @@ FUNCTION dap_controller_factory{
 		LOCAL progvec is SHIP:srfprograde:vector:NORMALIZED.
 		//vector pointing to local up and normal to prograde
 		LOCAL upvec IS -SHIP:ORBIT:BODY:POSITION:NORMALIZED.
-		SET upvec TO VXCL(progvec,upvec).
+		
+		SET upvec TO VXCL(progvec,upvec):NORMALIZED.
 		
 		//rotate the up vector by the new roll anglwe
 		SET upvec TO rodrigues(upvec, progvec, -rll).
 		//create the pitch rotation vector
 		LOCAL nv IS VCRS(progvec, upvec).
 		//rotate the prograde vector by the pitch angle
+		SET upvec TO rodrigues(upvec, nv, pch).
 		LOCAL aimv IS rodrigues(progvec, nv, pch).
+		
+		//clearvecdraws().
+		//arrow_ship(upvec, "upvec", 30, 0.02).
+		//arrow_ship(aimv, "aimv", 30, 0.02).
 		
 		//rotate the aim vector by the yaw
 		if (ABS(yaw)>0) {
 			SET aimv TO rodrigues(aimv, upvec, yaw).
 		}
+		
+		//arrow_ship(aimv, "aimv", 30, 0.02).
 		
 		RETURN LOOKDIRUP(aimv, upvec).
 	}).
@@ -91,7 +100,7 @@ FUNCTION dap_controller_factory{
 		//apply the deltas to the current angles so the inputs will tend to "ndge" the nose around and then leave it where it is when the controls are released
 		SET this:steer_pitch TO this:prog_pitch + deltapitch.
 		SET this:steer_roll TO this:prog_roll + deltaroll.
-		SET this:steer_yaw TO 0 + deltayaw.
+		SET this:steer_yaw TO this:prog_yaw*0.3 + deltayaw.
 		
 		SET this:steering_dir TO this:create_prog_steering_dir(
 			this:steer_pitch,

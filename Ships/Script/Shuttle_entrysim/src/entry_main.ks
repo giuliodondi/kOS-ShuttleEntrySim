@@ -757,6 +757,12 @@ local exec is loop_executor_factory(
 								0.15,
 								{
 									SET P_att TO dap:atmo_css().
+									
+									IF SHIP:STATUS = "LANDED" {
+										UNLOCK STEERING.
+										set dap:enabled to FALSE.
+									}
+
 								}
 ).
 
