@@ -17,9 +17,9 @@ GLOBAL sim_settings IS LEXICON(
 //range bias should be a small positive value to ensure a good margin of error for ranging
 IF NOT (DEFINED sim_end_conditions) {
 	GLOBAL sim_end_conditions IS LEXICON(
-							"altitude",15000,
-							"surfvel",400,
-							"range_bias",0
+							"altitude",30000,
+							"surfvel",900,
+							"range_bias",-70
 	).
 }
 
