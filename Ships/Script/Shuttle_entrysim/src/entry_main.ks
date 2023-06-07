@@ -510,7 +510,6 @@ flap_control["set_aoa_feedback"](25).
 //if we broke out manually before TAEM conditions go directly to approach 
 IF (NOT TAEM_flag) { 
 	control_loop:stop_execution().
-	UNLOCK STEERING.
 	RETURN.
 }
 
@@ -743,9 +742,7 @@ GLOBAL sim_settings IS LEXICON(
 LOCAL pitchprog IS get_pitch_prograde().
 LOCAL rollprog IS get_roll_prograde().
 
-LOCAL P_att IS SHIP:FACING.
 LOCAL dap IS dap_controller_factory().
-LOCK STEERING TO P_att.
 
 //strong positive aoa feedback to help keep stability
 flap_control["set_aoa_feedback"](50).
@@ -757,11 +754,6 @@ local exec is loop_executor_factory(
 								0.15,
 								{
 									SET P_att TO dap:atmo_css().
-									
-									IF SHIP:STATUS = "LANDED" {
-										UNLOCK STEERING.
-										set dap:enabled to FALSE.
-									}
 
 								}
 ).

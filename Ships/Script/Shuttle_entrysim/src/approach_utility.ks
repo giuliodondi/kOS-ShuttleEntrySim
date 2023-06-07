@@ -794,11 +794,12 @@ FUNCTION mode_switch {
 	} ELSE IF mode=6 {
 		//transition below 50m
 		IF ALT:RADAR <= 50{
-				SET switch_mode TO TRUE.
+			SET fbwb:PRESSED to FALSE.
+			SET switch_mode TO TRUE.
 		}
 	} ELSE IF mode=7 {
 		IF SHIP:STATUS = "LANDED" {
-			UNLOCK STEERING.
+			SET fbwb:PRESSED to FALSE.
 			SET switch_mode TO TRUE.
 		}
 	}
