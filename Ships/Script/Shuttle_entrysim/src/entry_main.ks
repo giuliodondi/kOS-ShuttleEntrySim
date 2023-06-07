@@ -39,6 +39,9 @@ IF (DEFINED FLAPPID) {UNSET FLAPPID.}
 IF (DEFINED AUTOLPITCHPID) {UNSET AUTOLPITCHPID.}
 IF (DEFINED AUTOLROLLPID) {UNSET AUTOLROLLPID.}
 
+//prepare steering 
+GLOBAL P_att IS SHIP:FACING.
+
 //initialise touchdown points for all landing sites
 define_td_points().
 
@@ -104,7 +107,8 @@ GLOBAL airbrake_control IS airbrake_control_factory().
 
 GLOBAL flap_control IS flap_control_factory().
 
-
+//activate fbw
+SET fbwb:PRESSED to TRUE.
 
 //if conducting an ALT this will prevent the entry guidance from running
 IF SHIP:ALTITUDE>constants["apchalt"] {
@@ -128,9 +132,6 @@ IF SHIP:ALTITUDE>constants["apchalt"] {
 	
 	//activate auto flaps 
 	SET flptrm:PRESSED TO TRUE.
-	
-	
-	
 
 	entry_loop().
 	
@@ -210,8 +211,7 @@ IF SHIP:ALTITUDE < constants["firstrollalt"] {
 }
 
 //first steering command 
-GLOBAL P_att IS dap:create_prog_steering_dir(pitchguid, rollguid).
-LOCK STEERING TO P_att.
+SET P_att TO dap:create_prog_steering_dir(pitchguid, rollguid).
 
 //add prebank constant 
 constants:ADD("prebank_angle",rollsteer).

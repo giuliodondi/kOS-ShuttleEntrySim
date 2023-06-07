@@ -343,14 +343,18 @@ FUNCTION make_global_entry_GUI {
 	
 	GLOBAL toggles_box IS main_gui:ADDHLAYOUT().
 	SET toggles_box:STYLE:WIDTH TO 300.
-	toggles_box:addspacing(75).	
+	toggles_box:addspacing(55).	
 	SET toggles_box:STYLE:ALIGN TO "center".
 	
 	GLOBAL logb IS  toggles_box:ADDCHECKBOX("Log Data",false).
-	toggles_box:addspacing(30).	
+	toggles_box:addspacing(20).	
 	
-	GLOBAL flptrm IS  toggles_box:ADDCHECKBOX("Auto Flap Trim",false).
-	toggles_box:addspacing(30).	
+	GLOBAL fbwb IS  toggles_box:ADDCHECKBOX("Fly-by-wire",false).
+	SET fbwb:ONTOGGLE TO toggle_fbw@.
+	toggles_box:addspacing(20).	
+	
+	GLOBAL flptrm IS  toggles_box:ADDCHECKBOX("Auto Flaps",false).
+	toggles_box:addspacing(20).	
 	
 	//SET flptrm:ONTOGGLE TO {
 	//	parameter b. 
@@ -360,7 +364,7 @@ FUNCTION make_global_entry_GUI {
 	//
 	//}.
 	
-	GLOBAL arbkb IS  toggles_box:ADDCHECKBOX("Auto Airbrake",false).
+	GLOBAL arbkb IS  toggles_box:ADDCHECKBOX("Auto Airbk",false).
 
 
 	main_gui:SHOW().
@@ -404,6 +408,16 @@ FUNCTION select_opposite_hac {
 
 }
 
+FUNCTION toggle_fbw {
+	PARAMETER enabled_.
+	
+	//direction P_att must be defined
+	if (enabled_) {
+		LOCK STEERING TO P_att.
+	} ELSE {
+		UNLOCK STEERING.
+	}
+}
 
 FUNCTION close_global_GUI {
 	main_gui:HIDE().
@@ -421,6 +435,10 @@ FUNCTION close_all_GUIs{
 //interface functions between the main loops and the GUI
 
 //generic GUI 
+
+FUNCTION is_fbw {
+	RETURN fbwb:PRESSED.
+}
 
 FUNCTION is_autoairbk {
 	RETURN arbkb:PRESSED.
