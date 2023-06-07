@@ -5,12 +5,12 @@ FUNCTION airbrake_control_factory {
 	LOCAL this IS LEXICON().
 	
 	this:ADD("parts",LIST(
-						SHIP:PARTSDUBBED("benjee10.shuttle.rudder")[0]:MODULESNAMED("ModuleControlSurface")[0],
-						SHIP:PARTSDUBBED("benjee10.shuttle.rudder")[0]:MODULESNAMED("ModuleControlSurface")[1]
+						SHIP:PARTSDUBBED("airbrake1")[0]:MODULESNAMED("ModuleAeroSurface")[0],
+						SHIP:PARTSDUBBED("airbrake1")[1]:MODULESNAMED("ModuleAeroSurface")[0]
 					)
 	).
 	
-	this:ADD("max_deploy", 55).
+	this:ADD("max_deploy", 40).
 	
 	this:ADD("deflection", 0).
 	
