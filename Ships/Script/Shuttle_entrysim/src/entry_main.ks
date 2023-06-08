@@ -691,9 +691,10 @@ UNTIL FALSE {
 		SET loglex["range_err"] TO range_err.
 		SET loglex["az_err"] TO az_err.
 		SET loglex["roll_ref"] TO roll_ref. 
+		
+		LOCAL outforce IS aeroforce_ld(simstate["position"], simstate["velocity"], LIST(pitchguid, rollguid)).
+		SET loglex["l_d"] TO outforce["lift"] / outforce["drag"].
 			
-			
-
 		log_data(loglex,"0:/Shuttle_entrysim/LOGS/entry_log").
 	}
 	
@@ -837,8 +838,8 @@ UNTIL FALSE{
 		SET loglex["roll"] TO get_roll_lvlh().
 		SET loglex["range"] TO total_range_hac_landing(simstate["latlong"],tgtrwy,vehicle_params).
 		
-			
-			
+		LOCAL outforce IS aeroforce_ld(simstate["position"], simstate["velocity"], LIST(pitchguid, rollguid)).
+		SET loglex["l_d"] TO outforce["lift"] / outforce["drag"].
 
 		log_data(loglex,"0:/Shuttle_entrysim/LOGS/entry_log").
 	}
