@@ -242,7 +242,7 @@ Pitch follows a pitch vs. velocity profile, loaded initially from a configuratio
 Roll, instead, depends on a "roll_ref" parameter which is dynamically adjusted by the program. The script runs a background trajectory simulation using the profiles to predict the range error at the end, then it adjusts "roll_ref" to drive the range error to zero. 
 
 **Important**
-The actual commanded roll angle is _never_ simply equal to "roll_ref", the program adds on top of it a roll ramp-down logic and a phugoid-damping correction.  
+The actual commanded roll angle is a linear function with respect to velocity, this function is anchored to the value of "roll_ref" at 4000 m/s. On top of this there is also a phugoid damping correction to roll.
 In addition, the commanded roll is never less than 2x the instantaneous azimuth error, as this is the minimum roll angle that will enable the Shuttle to null the crossrange error and actually navigate to the landing site. The program will thus **always** attempt to reduce crossrange, if the crossrange is too large it will null the azimuth error and then find itself with insufficient energy to glide the rest of the way.
 
 By default Guidance keeps the roll angle to zero until 100km altitude and command the first roll angle below that. The bank is to the same side of the target, so it depends on the sign of the Azimuth error.  You can force a "prebank roll" by switching to manual steering and rolling to one side, the guidance pipper should follow the nose indicator.   
@@ -312,7 +312,11 @@ Steering is still Fly-By-Wire during approach like it used to be during entry gu
 Fly-by-wire during this phase will take care of any nose-up or nose-down imbalances and make steering a bit more stable. **Nevertheless you should be gentle and make only small inputs**.  
 Fly-by-wire will automatically disengage when you touch down on the runway. 
 
-Transitioning into Approach guidance will get rid of some now irrelevant items in the main GUI.  
+### Approach GUI window:
+![gui_apch](https://github.com/giuliodondi/kOS-ShuttleEntrySim/blob/master/gui_apch_1.png)
+
+Some irrelevant stuff has been removed. The only new feature is the _Fly-by-wire_ burron enabled by default. This controls whether the custom fly-by-wire steering I coded is active or not. When it's disabled, you have direct control of the elevons like you would in normal KSP.
+
 The HUD is identical to Entry/TAEM but the meaning of some symbols is now different:
 
 ![hud_apch](https://github.com/giuliodondi/kOS-ShuttleEntrySim/blob/master/hud_apch_1.png)
