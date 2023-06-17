@@ -39,6 +39,7 @@ pos_arrow(mid, "mid").
 print "distance between locations : " + round(dist*1000,2) at (0,5).
 print "bearing between locations : " + round(bng,2) at (0,6).
 print "midpoint : " + mid at (0,7).
+print "elevation : " + SHIP:ALTITUDE at (0,7).
 
 
 
