@@ -1,4 +1,4 @@
-
+//library for all things with ferram aerodynamics and simulating trajectories
 
 FUNCTION blank_simstate {
 	PARAMETER ICs.
@@ -53,6 +53,22 @@ DEclare Function accel {
 declare function gravitacc {
 	parameter pos.
 	return -BODY:mu * pos:normalized / pos:sqrmagnitude.
+}
+
+//wrapper that converts everything to acceleration
+function aeroaccel_ld {
+	parameter pos.
+	parameter surfvel.
+	parameter attitude.
+	
+	LOCAL aeroforce_out IS aeroforce_ld(pos, surfvel, attitude).
+	
+	RETURN LEXICON(
+						"load",aeroforce_out["load"],
+						"lift",aeroforce_out["lift"]/(ship:mass),
+						"drag",aeroforce_out["drag"]/(ship:mass)
+						).
+
 }
 
 declare function aeroforce_ld {

@@ -10,7 +10,7 @@ RUNPATH("0:/Shuttle_entrysim/vessel_dir").
 RUNPATH("0:/Shuttle_entrysim/landing_sites").
 RUNPATH("0:/Shuttle_entrysim/simulation_params").
 
-RUNPATH("0:/Shuttle_entrysim/src/simulate_vehicle").
+RUNONCEPATH("0:/Libraries/aerosim_library").
 RUNPATH("0:/Shuttle_entrysim/src/entry_utility").
 
 RUNPATH("0:/Shuttle_entrysim/VESSELS/" + vessel_dir + "/flapcontrol").

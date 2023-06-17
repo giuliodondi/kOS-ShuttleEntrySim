@@ -37,7 +37,7 @@ If (SHIP:ALTITUDE >= constants["atmalt"]) {
 	RUNONCEPATH("0:/Libraries/misc_library").	
 	RUNONCEPATH("0:/Libraries/maths_library").	
 	RUNONCEPATH("0:/Libraries/navigation_library").	
-	RUNONCEPATH("0:/Shuttle_entrysim/src/simulate_vehicle").
+	RUNONCEPATH("0:/Libraries/aerosim_library").	
 	RUNONCEPATH("0:/Shuttle_entrysim/src/gui_utility").
 	RUNONCEPATH("0:/Shuttle_entrysim/src/entry_utility").
 	RUNONCEPATH("0:/Shuttle_entrysim/src/approach_utility").

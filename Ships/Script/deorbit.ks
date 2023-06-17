@@ -22,9 +22,9 @@ RUNONCEPATH("0:/Shuttle_entrysim/VESSELS/" + vessel_dir + "/vehicle_params").
 //	Load libraries
 RUNONCEPATH("0:/Libraries/misc_library").	
 RUNONCEPATH("0:/Libraries/maths_library").	
-RUNONCEPATH("0:/Libraries/navigation_library").	
+RUNONCEPATH("0:/Libraries/navigation_library").
+RUNONCEPATH("0:/Libraries/aerosim_library").
 RUNONCEPATH("0:/Shuttle_entrysim/src/deorbit_main").
-RUNONCEPATH("0:/Shuttle_entrysim/src/simulate_vehicle").
 RUNONCEPATH("0:/Shuttle_entrysim/src/gui_utility").
 RUNONCEPATH("0:/Shuttle_entrysim/src/entry_utility").
 
