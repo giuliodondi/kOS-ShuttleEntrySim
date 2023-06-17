@@ -77,6 +77,7 @@ GLOBAL loglex IS LEXICON(
 									"time",0,
 									"alt",0,
 									"speed",0,
+									"mach",0,
 									"hdot",0,
 									"range",0,
 									"lat",0,
@@ -88,8 +89,6 @@ GLOBAL loglex IS LEXICON(
 									"az_err",0,
 									"roll_ref",0,
 									"l_d",0
-
-
 ).
 
 
@@ -149,7 +148,6 @@ SET select_tgt:INDEX TO closest_out[0].
 
 
 SET loglex["range"] TO 0.
-SET loglex["end_range"] TO 0.
 SET loglex["range_err"] TO 0.
 SET loglex["az_err"] TO 0.
 SET loglex["roll_ref"] TO 0. 
@@ -329,16 +327,11 @@ LOCAL last_hdot IS 0.
 LOCAL range_err IS 0.
 LOCAL first_reversal_done IS FALSE.
 
-//reset guidance automatically once every few guidance cycles
-//to unstuck roll-ref
-LOCAL auto_reset_counter IS 0.
 
 //reentry loop
 UNTIL FALSE {
-	
-	SET auto_reset_counter TO auto_reset_counter + 1.
 		
-	IF reset_entry_flag OR (auto_reset_counter = 25) {
+	IF reset_entry_flag {
 		SET auto_reset_counter TO 0.
 		SET reset_entry_flag TO FALSE.
 		SET roll_ref TO vehicle_params["rollguess"]. 
@@ -478,12 +471,14 @@ UNTIL FALSE {
 		SET loglex["time"] TO TIME:SECONDS.
 		SET loglex["alt"] TO SHIP:ALTITUDE/1000.
 		SET loglex["speed"] TO SHIP:VELOCITY:SURFACE:MAG. 
+		SET loglex["mach"] TO ADDONS:FAR:MACH. 
 		SET loglex["hdot"] TO SHIP:VERTICALSPEED.
 		SET loglex["range"] TO tgt_range + estimate_range_hac_landing(tgtrwy,vehicle_params).
 		SET loglex["lat"] TO SHIP:GEOPOSITION:LAT.
 		SET loglex["long"] TO SHIP:GEOPOSITION:LNG.
 		SET loglex["pitch"] TO get_pitch_prograde().
 		SET loglex["roll"] TO get_roll_prograde().
+		SET loglex["tgt_range"] TO tgt_range.
 		SET loglex["range_err"] TO range_err.
 		SET loglex["az_err"] TO az_err.
 		SET loglex["roll_ref"] TO roll_ref. 
@@ -681,6 +676,7 @@ UNTIL FALSE {
 		SET loglex["time"] TO TIME:SECONDS.
 		SET loglex["alt"] TO runway_alt(SHIP:ALTITUDE)/1000.
 		SET loglex["speed"] TO SHIP:VELOCITY:SURFACE:MAG. 
+		SET loglex["mach"] TO ADDONS:FAR:MACH. 
 		SET loglex["hdot"] TO SHIP:VERTICALSPEED.
 		SET loglex["range"] TO tgt_range + estimate_range_hac_landing(tgtrwy,vehicle_params).
 		SET loglex["lat"] TO SHIP:GEOPOSITION:LAT.
@@ -831,6 +827,7 @@ UNTIL FALSE{
 		SET loglex["time"] TO TIME:SECONDS.
 		SET loglex["alt"] TO runway_alt(SHIP:ALTITUDE)/1000.
 		SET loglex["speed"] TO SHIP:VELOCITY:SURFACE:MAG. 
+		SET loglex["mach"] TO ADDONS:FAR:MACH. 
 		SET loglex["hdot"] TO SHIP:VERTICALSPEED.
 		SET loglex["lat"] TO SHIP:GEOPOSITION:LAT.
 		SET loglex["long"] TO SHIP:GEOPOSITION:LNG.
@@ -838,7 +835,7 @@ UNTIL FALSE{
 		SET loglex["roll"] TO get_roll_lvlh().
 		SET loglex["range"] TO total_range_hac_landing(simstate["latlong"],tgtrwy,vehicle_params).
 		
-		LOCAL outforce IS aeroforce_ld(simstate["position"], simstate["velocity"], LIST(pitchguid, rollguid)).
+		LOCAL outforce IS aeroforce_ld(simstate["position"], simstate["velocity"], LIST(pitchprog, rollprog)).
 		SET loglex["l_d"] TO outforce["lift"] / outforce["drag"].
 
 		log_data(loglex,"0:/Shuttle_entrysim/LOGS/entry_log").
