@@ -4,7 +4,7 @@
 
 # Kerbal Space Program Shuttle Entry and Approach Guidance
 
-## updated May 2023
+## updated June 2023
 
 **PLEASE Read along with watching the demonstration videos at https://youtu.be/5VkAmHpXwn8 and https://youtu.be/oMyd0d86eV4 and https://www.youtube.com/watch?v=sIiksBwYEZI&t=2s**
 
@@ -34,7 +34,7 @@ If you decide to modify the code yourself you do so 100% on your own.
 Should also be compatible with [SpaceODY's version](https://github.com/SpaceODY/Space-Shuttle-System-Expanded)
 
 **IF you want to use SOCK**
-The script is configurable to work with any vessel and there is a configuration folder for SOCK, the configs are way out of date since I don't fly SOCK and so there will be some fine-tuning to be done. **YMMV**
+The script is configurable to work with any vessel and there is a configuration folder for SOCK, however I don't fly SOCK and so there will be some fine-tuning to be done. **YMMV**
 
 
 **Mods not required for the script but de-facto needed to use it:**
@@ -92,30 +92,41 @@ In the VAB adjust the FAR control surface mappings like this:
 
 Still in the VAB, enable all actuation toggles on the Crew Cabin and both OMS pods. This will give you full control on which RCS jets are active for which attitude direction.
 
-You need to place two Stock A.I.R.B.R.A.K.E.S. re-scaled up to 200% to control airspeed during landing. The split rudder is utterly useless.  
-They must be Stock A.I.R.B.R.A.K.E.S. and nothing else, otherwise you will need to dig into the script and tell it to look for whatever part you want.  
-Place them either on the sides of the OMS pods or on the sides of the Engine block. Place them on the surface, do not tuck them inside or KSP will prevent them from deploying. Do not put them on the tail or on the wings or you will introduce a pitching moment.  
+The script needs soem controllable airbrake parts to slow the craft down during TAEM and approach. The vesselc onfigs inside 'Shuttle_entrysim\VESSELS' contain a file named **airbrake_control.ks** where tou configure the airbrake parts and their authority.
+
+By default, the vessels come configured to use two Stock A.I.R.B.R.A.K.E.S. re-scaled up to 150% with Tweakscale.
+You need to  place them either on the sides of the OMS pods or on the sides of the Engine block. Place them on the surface, do not tuck them inside or KSP will prevent them from deploying. Do not put them on the tail or on the wings or you will introduce a pitching moment.  
 
 **Don't add these A.I.R.B.R.A.K.E.S. to the brakes Action Group**, the program deals with airbrakes independently of wheel brakes.
 
 ## Setting up the script config files and runways
 
 The folder **Scripts/Shuttle_entrysim/VESSELS** contains the different vehicle config files. By default I provide the **DECQ_Shuttle** folder with the files that I use.  
-There are three vehicle config files:
+There are four vehicle config files:
 - **gains.ks** which I do not advise touching unless you know what you are doing.
 - **pitch_profile.ks** which specifies the pitch versus surface velocity points that the Entry Guidance will follow. The profile I provide you with is taken directly from early Shuttle technical
 documents, therefore it as designed to respect the Shuttle's thermal limits which is not really necessary in KSP. During flight you can edit the profile with a gUI button or take over with manual steering, more about this later.
 - **flapcontrol.ks** which specifies which parts allow for flap control and the angle ranges of motion of each. Here you specify the names of your elevon and body flap parts. The file provided is already good for DECQ shuttle so leave it alone.
+- **airbrake_control.ks** the aforementioned file to specify the airbrake parts and the angle ranges of motion of each.
+-
+In the main folder **Scripts/Shuttle_entrysim** you will see more configuration files. You need to pay attention to just two: 
+- **vessel_dir.ks** wil specify which folder in 'Shuttle_entrysim\VESSELS' is used.
+- **landing_sites.ks** contains the definition of the Runways available for targeting by the scripts.
 
-In the main folder **Scripts/Shuttle_entrysim** you will see more configuration files. The only one you should pay attention to is **landing_sites.ks**. This contains the definition of the Runways available for targeting by the scripts.
+I provide you with my own landing sites definitions for reference, but I strongly suggest you check the runway placement in your own game and then re-measure the data.
+There is a script in the main kOS root **measurerwy.ks** to help you with that. Hers is how you use it:
+- spawn on the runway you want to measure in some kind of rover or wheeled vehicle
+- drive to the near edge behind you, exactly on the runway centerline
+- run the script and press Action Group 9
+- without halting the script, drive to the opposite end of the runway, stop at the edge like before and press AG9 again,.
+- The script will print to screen the information you need to input into the lexicon inside **landing_sites.ks**:
+    -  the midpoint is you runway _position_
+    -  elevation is of course you _elevation_
+    -  distance between locations is you runway _length_
+    -  bearing between locations is your runway _heading_
 
-You must create the runways wherever you like on Earth using Kerbal Konstructs. You must then write down the coordinates of its halfway point, its length, elevation and heading
-and fill in the details in the **landing_sites.ks** following the formatting inside. Don't forget the name of the landing site, that's how it will appear in the GUI menu.
-I provide you with my own landing sites definitions for reference, but I strongly suggest you replace the details with your own measured data for better accuracy.
 
-
-
-# How to use
+# How to use the main scripts
 
 Refer to this video I made for an actual demonstration (**old video, some features are missing**) :  https://www.youtube.com/watch?v=5VkAmHpXwn8
 
