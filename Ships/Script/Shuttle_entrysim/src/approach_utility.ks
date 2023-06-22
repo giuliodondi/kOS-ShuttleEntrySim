@@ -397,6 +397,7 @@ FUNCTION hac_entry_profile_alt {
 function taem_profile_alt {
 	PARAMETER rwy.
 	PARAMETER params.
+	PARAMETER alt_bias IS 0.
 
 	//update hac turn angle
 	LOCAL entryvec IS (rwy["hac_entry"]:POSITION - rwy["hac"]:POSITION):NORMALIZED.
@@ -405,7 +406,7 @@ function taem_profile_alt {
 	//Calculate distance from the current entry point 
 	LOCAL ship_hac_dist IS greatcircledist(rwy["hac_entry"],SHIP:GEOPOSITION).
 	
-	LOCAL profile_alt IS hac_entry_profile_alt(ship_hac_dist, rwy, params).
+	LOCAL profile_alt IS hac_entry_profile_alt(ship_hac_dist, rwy, params) + params["TAEMaltbias"].
 	
 	print "hac_angle : " + rwy["hac_angle"] at (0,15).
 	print "profile_alt : " + profile_alt at (0,16).
