@@ -81,39 +81,6 @@ FUNCTION update_ref_pitch {
 
 
 
-//new approach, hopefully more robust
-//simply calculate the angle between velocity vector and vector pointing to the target
-FUNCTION az_error {
-	PARAMETEr pos.
-	PARAMETER tgt_pos.
-	PARAMETER surfv.
-	
-	IF pos:ISTYPE("geocoordinates") {
-		SET pos TO pos2vec(pos).
-	}
-	IF tgt_pos:ISTYPE("geocoordinates") {
-		SET tgt_pos TO pos2vec(tgt_pos).
-	}
-
-		
-	//vector normal to vehicle vel and in the same plane as vehicle pos
-	//defines the "plane of velocity"
-	LOCAL n1 IS VXCL(surfv,pos):NORMALIZED.
-	
-	//vector pointing from vehicle pos to target, projected "in the plane of velocity"
-	LOCAL dr IS VXCL(n1,tgt_pos - pos):NORMALIZED.
-	
-	//clamp to -180 +180 range
-	RETURN signed_angle(
-		surfv:NORMALIZED,
-		dr,
-		n1,
-		0
-	).
-
-}
-
-
 
 FUNCTION abeam {
 	//this is the B spherical angle
@@ -126,20 +93,7 @@ FUNCTION abeam {
 	RETURN get_a_cBB(_range*p2,ABS(az_err))/p2.
 }
 
-FUNCTION cross_error {
-	PARAMETEr pos.
-	PARAMETER tgt_pos.
-	PARAMETER surfv.
-	PARAMETER  _range. //this is the c side
-	
-	//this is the B spherical angle
-	LOCAL az_err IS az_error(pos,tgt_pos,surfv).
-	
-	LOCAL p2 IS 180/((SHIP:ORBIT:BODY:RADIUS/1000)*CONSTANT:PI).
-	
-	RETURN get_b_cBB(_range*p2,az_err)/p2.
-	
-}
+
 
 
 
