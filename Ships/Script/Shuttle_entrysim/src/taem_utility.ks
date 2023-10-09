@@ -51,10 +51,10 @@ FUNCTION TAEM_roll_profile {
 
 	
 	LOCAL bank_vel_profile IS LIST(
-								LIST(0,40),
+								LIST(0,35),
 								LIST(300,38),
-								LIST(335,35),
-								LIST(500,30)
+								LIST(335,40),
+								LIST(500,45)
 								).
 	
 	LOCAL maxroll IS ABS(INTPLIN(bank_vel_profile,SHIP:VELOCITY:SURFACE:MAG)).
