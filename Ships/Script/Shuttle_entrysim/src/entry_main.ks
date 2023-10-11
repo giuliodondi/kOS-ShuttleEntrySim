@@ -444,7 +444,7 @@ UNTIL FALSE {
 			//only if guidance is converged and if we're below first roll alt do pitch modulation
 			//only use the updated roll value as steering if we're below first roll, else use the slider value
 			IF SHIP:ALTITUDE < constants["firstrollalt"] {		
-				SET pitchguid TO pitch_modulation(range_err,pitch_ref).
+				SET pitchguid TO pitch_modulation(pitch_ref, range_err, rollguid, dap:prog_roll).
 			}
 		}
 	

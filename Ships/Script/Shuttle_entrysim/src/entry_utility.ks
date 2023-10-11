@@ -178,13 +178,18 @@ FUNCTION pitch_profile {
 
 
 
-//alternative pitch modulation logic based on range error
+//pitch modulation logic 
+//range error correction and roll delta correction
 //create a profile of acceptable range error values vs velocity
 //if the range error is outside this band , increase or decrease pitch to adjust drag 
 //the pitch delta is scaled to the current pitch times a gain
+//the roll correction keeps the vertical component of lift constant 
 FUNCTION pitch_modulation {
+	PARAMETER pitchref.
 	PARAMETER range_err.
-	PARAMETER pitchv.
+	PARAMETER tgt_roll.
+	PARAMETER actual_roll.
+	
 	
 	
 	LOCAL range_err_profile IS LIST(
@@ -194,17 +199,23 @@ FUNCTION pitch_modulation {
 	
 	LOCAL range_band IS INTPLIN(range_err_profile,SHIP:VELOCITY:SURFACE:MAG).
 	
-	LOCAL pitch_corr IS 0.
+	LOCAL range_pitch_corr IS 0.
 	
 	//the pitch correction should have the same sign as the range error
 	//i.e. negative if we're short and positive if we're long
 	//the correction is scaled to be between 0 and 1 when the range error is between 0.5x and 1.5x the range_band
 	// maximum +- 3 degrees either way
 	IF ABS(range_err) > range_band {
-		SET pitch_corr TO SIGN(range_err) * MIN(3, CLAMP((ABS(range_err/range_band) - 1),0,1) * pitchv *  gains["pchmod"]).
+		SET range_pitch_corr TO SIGN(range_err) * MIN(3, CLAMP((ABS(range_err/range_band) - 1),0,1) * pitchref *  gains["pchmod"]).
 	}
+	
+	//the delta due to roll takes the difference between actual and target roll angle 
+	//to keep the vertical component of lift constant during roll reversals 
+	//limit to +0, -10 since we assume roll will never be greater than guid
+	LOCAL roll_pitch_corr IS CLAMP( pitchref *(COS(ABS(actual_roll)) / COS(ABS(tgt_roll)) - 1), -10, 0).
+	
 		
-	RETURN pitchv + pitch_corr.
+	RETURN pitchref + range_pitch_corr + roll_pitch_corr.
 }
 
 
