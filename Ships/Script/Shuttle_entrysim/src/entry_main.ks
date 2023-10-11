@@ -282,9 +282,11 @@ local control_loop is loop_executor_factory(
 									set tgt_range to greatcircledist(tgtrwy["hac_entry"], SHIP:GEOPOSITION).
 	
 									//update the flaps trim setting and airbrakes IF WE'RE BELOW FIRST ROLL ALT
-									IF SHIP:ALTITUDE < constants["firstrollalt"] {	
+									IF (SHIP:ALTITUDE < constants["firstrollalt"] * 0.9) {	
 										flaptrim_control(flptrm:PRESSED, flap_control).
 										speed_control(arbkb:PRESSED, airbrake_control, mode).
+										
+										SET pitchguid TO pitch_roll_correction(pitchguid, rollguid, dap:prog_roll).
 									}
 
 									print "roll_ref : " + ROUND(roll_ref,1) + "    " at (0,4).
@@ -444,7 +446,7 @@ UNTIL FALSE {
 			//only if guidance is converged and if we're below first roll alt do pitch modulation
 			//only use the updated roll value as steering if we're below first roll, else use the slider value
 			IF SHIP:ALTITUDE < constants["firstrollalt"] {		
-				SET pitchguid TO pitch_modulation(pitch_ref, range_err, rollguid, dap:prog_roll).
+				SET pitchguid TO pitch_modulation(pitch_ref, range_err).
 			}
 		}
 	
