@@ -282,26 +282,27 @@ local control_loop is loop_executor_factory(
 									set tgt_range to greatcircledist(tgtrwy["hac_entry"], SHIP:GEOPOSITION).
 	
 									//update the flaps trim setting and airbrakes IF WE'RE BELOW FIRST ROLL ALT
+									//also do the roll pitch correction
+									LOCAL corrected_pitch IS pitchguid.
 									IF (SHIP:ALTITUDE < constants["firstrollalt"] * 0.9) {	
 										flaptrim_control(flptrm:PRESSED, flap_control).
 										speed_control(arbkb:PRESSED, airbrake_control, mode).
-										
-										SET pitchguid TO pitch_roll_correction(pitchguid, rollguid, dap:prog_roll).
+										SET corrected_pitch TO pitch_roll_correction(pitchguid, rollguid, dap:prog_roll).
 									}
 
 									print "roll_ref : " + ROUND(roll_ref,1) + "    " at (0,4).
 									print "rollguid : " + ROUND(rollguid,1) + "    " at (0,5).
-									print "pitchguid : " + ROUND(pitchguid,1) + "    " at (0,6).
+									print "pitchguid : " + ROUND(corrected_pitch,1) + "    " at (0,6).
 									
 									IF is_auto_steering() {
-										SET P_att TO dap:reentry_auto(rollguid,pitchguid).
+										SET P_att TO dap:reentry_auto(rollguid,corrected_pitch).
 									} ELSE {
 										SET P_att TO dap:reentry_css().
 									}
 									
 									LOCAL pipper_deltas IS LIST(
 																rollguid - dap:prog_roll, 
-																pitchguid -  dap:prog_pitch
+																corrected_pitch -  dap:prog_pitch
 									).
 									
 									update_entry_GUI(
@@ -556,7 +557,7 @@ UNTIL FALSE {
 	}
 	
 	//check if we should switch to approach 
-	apch_transition(tgt_range).
+	apch_transition(tgt_range, vehicle_params).
 	
 	//update HAC entry 
 	update_hac_entry_pt(SHIP:GEOPOSITION, tgtrwy, vehicle_params). 

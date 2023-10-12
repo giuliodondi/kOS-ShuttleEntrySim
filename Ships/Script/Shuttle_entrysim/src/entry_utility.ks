@@ -220,9 +220,9 @@ FUNCTION pitch_roll_correction {
 	LOCAL abs_tgtroll IS ABS(tgt_roll).
 	LOCAL abs_actualroll IS ABS(actual_roll).
 	
-	IF (abs_tgtroll - abs_actualroll) >= 5){
-		SET roll_pitch_corr TO CLAMP( pitchref *(COS(abs_tgtroll) / COS(abs_actualroll) - 1), -10, 0).
-	}
+	SET roll_pitch_corr TO CLAMP( tgt_pitch *(COS(abs_tgtroll) / COS(abs_actualroll) - 1), -10, 0).
+	
+	//print round(abs_tgtroll, 1) + "   " + round(abs_actualroll, 1) + "   " + round(roll_pitch_corr, 1) at (0,30).
 	
 	RETURN tgt_pitch + roll_pitch_corr.
 }
