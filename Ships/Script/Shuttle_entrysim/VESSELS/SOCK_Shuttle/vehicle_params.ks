@@ -5,6 +5,7 @@
 GLOBAL vehicle_params IS LEXICON(
 					"rollguess",55,
 					"TAEMtgtvel",260,
+					"apch_trans_dist", 15,
 					"TAEMaltbias",0,
 					"hac_radius",4.26,
 					"hac_r2",0.0000283,

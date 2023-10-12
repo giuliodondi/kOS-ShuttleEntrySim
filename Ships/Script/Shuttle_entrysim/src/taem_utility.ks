@@ -25,8 +25,9 @@ FUNCTION TAEM_transition {
 //if we're close enough to the HAC entry point switch automatically
 FUNCTION apch_transition {
 	PARAMETER hac_entry_dist.
+	PARAMETER params.
 	
-	IF hac_entry_dist < 15 {
+	IF hac_entry_dist < params["apch_trans_dist"] {
 		SET arbkb:PRESSED TO TRUE.
 		SET guidb:PRESSED TO FALSE.
 		SET sasb:PRESSED TO FALSE.
@@ -51,10 +52,10 @@ FUNCTION TAEM_roll_profile {
 
 	
 	LOCAL bank_vel_profile IS LIST(
-								LIST(0,35),
-								LIST(300,38),
-								LIST(335,40),
-								LIST(500,45)
+								LIST(0,45),
+								LIST(300,50),
+								LIST(335,55),
+								LIST(500,60)
 								).
 	
 	LOCAL maxroll IS ABS(INTPLIN(bank_vel_profile,SHIP:VELOCITY:SURFACE:MAG)).

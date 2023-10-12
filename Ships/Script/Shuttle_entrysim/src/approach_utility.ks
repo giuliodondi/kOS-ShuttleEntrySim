@@ -394,6 +394,8 @@ FUNCTION hac_entry_profile_alt {
 
 
 //wrapper function to bunch together several operations so we don't clutter the TAEM loop
+//calculate profile alt using the outer glideslope all the way to apch transition
+//calculate the taem tgt alt that will intercept the outer glideslope profile
 function taem_profile_alt {
 	PARAMETER rwy.
 	PARAMETER params.
@@ -406,7 +408,22 @@ function taem_profile_alt {
 	//Calculate distance from the current entry point 
 	LOCAL ship_hac_dist IS greatcircledist(rwy["hac_entry"],SHIP:GEOPOSITION).
 	
-	LOCAL profile_alt IS hac_entry_profile_alt(ship_hac_dist, rwy, params) + params["TAEMaltbias"].
+	
+	//find the groundtrack from 
+	LOCAL apch_gndtrk IS params["final_dist"] + get_hac_groundtrack(rwy["hac_angle"], params).
+	LOCAL intercept_gndtrk IS apch_gndtrk + params["apch_trans_dist"].
+	
+	LOCAL hac_entry_alt IS final_profile_alt(apch_gndtrk,rwy,params).
+	LOCAL intercept_alt IS final_profile_alt(intercept_gndtrk,rwy,params).
+	
+	
+	LOCAL hbar IS (SHIP:ALTITUDE - intercept_alt)/1000. 
+	
+	SET params["glideslope"]["taem"] TO hbar/(ship_hac_dist - params["apch_trans_dist"]).
+	
+	LOCAL profile_alt IS MAX(SHIP:ALTITUDE - 1000 * (params["glideslope"]["taem"] * ship_hac_dist), hac_entry_alt).
+	
+	//LOCAL profile_alt IS hac_entry_profile_alt(ship_hac_dist, rwy, params) + params["TAEMaltbias"].
 	
 	print "hac_angle : " + rwy["hac_angle"] at (0,15).
 	print "profile_alt : " + profile_alt at (0,16).
