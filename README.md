@@ -92,7 +92,7 @@ In the VAB adjust the FAR control surface mappings like this:
 
 Still in the VAB, enable all actuation toggles on the Crew Cabin and both OMS pods. This will give you full control on which RCS jets are active for which attitude direction.
 
-The script needs soem controllable airbrake parts to slow the craft down during TAEM and approach. The vesselc onfigs inside 'Shuttle_entrysim\VESSELS' contain a file named **airbrake_control.ks** where tou configure the airbrake parts and their authority.
+The script needs some controllable airbrake parts to slow the craft down during TAEM and approach. The vessel configs inside 'Shuttle_entrysim\VESSELS' contain a file named **airbrake_control.ks** where you can configure the airbrake parts and their authority.
 
 By default, the vessels come configured to use two Stock A.I.R.B.R.A.K.E.S. re-scaled up to 150% with Tweakscale.
 You need to  place them either on the sides of the OMS pods or on the sides of the Engine block. Place them on the surface, do not tuck them inside or KSP will prevent them from deploying. Do not put them on the tail or on the wings or you will introduce a pitching moment.  
