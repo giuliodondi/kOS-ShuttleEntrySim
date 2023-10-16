@@ -44,13 +44,11 @@ The script is configurable to work with any vessel and there is a configuration 
 
 You will find several folders: 
 - **GameData**
-    - **KerbalKonstructs/NewInstances**
     - **kOS-Addons**
 - **Script**
 
 Put all the contents of **GameData** folder in your GameData.  
 **Make sure to put kOS-Addons inside GameData. WITHOUT THIS THE SCRIPTS WILL NEVER WORK.** That's the plugin made by me which provides a way for kOS to query aerodynamic data from Ferram Aerospace. Documentation available at https://github.com/giuliodondi/kOS-Ferram.  
-The **KerbalKonstructs** folder contains instances for the runway props that I use, their position should match the landing site definitions used by the script. The elevation might be wrong depending on your RSS heightmap, beware of this.  
 
 
 Put the contents of the Scripts folder inside Ship/Script so that kOS can see all the files.
