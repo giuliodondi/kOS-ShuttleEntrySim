@@ -102,11 +102,16 @@ FUNCTION generate_simulation_ics {
 	
 	//conditions at entry interface
 	
+	LOCAL ei_sma IS orbit_appe_sma(sim_input["deorbit_apoapsis"], sim_input["deorbit_periapsis"]).
+	LOCAL ei_ecc IS orbit_appe_ecc(sim_input["deorbit_apoapsis"], sim_input["deorbit_periapsis"]).
 	
-	LOCAL ei_vel IS orbit_velocity_altitude(sim_input["deorbit_apoapsis"], sim_input["deorbit_periapsis"], constants["interfalt"]).
-	LOCAL ei_fpa IS orbit_gamma_altitude(sim_input["deorbit_apoapsis"], sim_input["deorbit_periapsis"], constants["interfalt"]).
+	print "sma " + ei_sma + " ecc " + ei_ecc at (0,10).
 	
-	print "vel " + ei_vel + " gamma " + ei_fpa at (0,10).
+	LOCAL ei_vel IS orbit_alt_vel(constants["interfalt"] + BODY:RADIUS, ei_sma).
+	LOCAL ei_eta IS 180 + orbit_alt_eta(constants["interfalt"] + BODY:RADIUS, ei_sma, ei_ecc).
+	LOCAL ei_fpa IS orbit_eta_fpa(ei_eta, ei_sma, ei_ecc).
+	
+	print "vel " + ei_vel + " eta " + ei_eta + " gamma " + ei_fpa at (0,11).
 	
 	//now get velocity vector at the entry interface
 	LOCAL ei_vel_vec IS VCRs(ei_vec, norm_vec):NORMALIZED.
@@ -117,51 +122,6 @@ FUNCTION generate_simulation_ics {
 					 "position",ei_vec,
 	                 "velocity",ei_vel_vec
 	).
-}
-
-
-FUNCTION orbit_velocity_altitude {
-	PARAMETER ap.
-	PARAMETER pe.
-	PARAMETER h.
-	
-	LOCAL sma IS (ap*1000 + pe*1000 + 2*BODY:RADIUS)/2.
-	
-	LOCAL rad IS h + BODY:RADIUS.
-	
-	RETURN SQRT( BODY:MU * ( 2/rad - 1/sma  ) ).
-
-}
-
-FUNCTION orbit_eta_altitude {
-	PARAMETER ap.
-	PARAMETER pe.
-	PARAMETER h.
-	
-	LOCAL sma IS (ap*1000 + pe*1000 + 2*BODY:RADIUS)/2.
-	LOCAL ecc IS (ap*1000 - pe*1000) / (ap*1000 + pe*1000 + 2*BODY:RADIUS).
-	
-	LOCAL rad IS h + BODY:RADIUS.
-	
-	LOCAL eta_ IS (sma * (1 - ecc^2) / rad - 1) / ecc.
-	
-	RETURN ARCCOS(eta_).
-}
-
-FUNCTION orbit_gamma_altitude {
-	PARAMETER ap.
-	PARAMETER pe.
-	PARAMETER h.
-
-	LOCAL sma IS (ap*1000 + pe*1000 + 2*BODY:RADIUS)/2.
-	LOCAL ecc IS (ap*1000 - pe*1000) / (ap*1000 + pe*1000 + 2*BODY:RADIUS).
-	
-	LOCAL eta_ IS orbit_eta_altitude(ap, pe, h).
-	
-	LOCAL gamma IS ecc * SIN(eta_) / (1 + ecc * COS(eta_) ).
-	
-	//assumed downwards
-	RETURN -ARCTAN(gamma).
 }
 
 
@@ -266,7 +226,7 @@ FUNCTION aero_simulate {.
 		LOCAL D IS (range_err - range_err_p)/delta_t.
 			
 		//LOCAL delta_roll IS MAX(-2,MIN(2,P*0.005 + D*0)).
-		LOCAL delta_roll IS P*0.008 + D*0.
+		LOCAL delta_roll IS  P*gains["rangeKP"] + D*gains["rangeKD"].
 		
 		LOCAL roll_ref_p IS roll_ref.
 		//update the reference roll value and clamp it
