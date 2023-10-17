@@ -12,7 +12,7 @@ FUNCTION airbrake_control_factory {
 	
 	this:ADD("bodyflap", SHIP:PARTSDUBBED("ShuttleBodyFlap")[0]:MODULESNAMED("FARControllableSurface")[0]).
 	
-	this:ADD("max_deploy_rudder", 45).
+	this:ADD("max_deploy_rudder", 48).
 	this:ADD("max_deploy_bodyflap", -9).
 	
 	this:ADD("deflection", 0).
@@ -22,7 +22,12 @@ FUNCTION airbrake_control_factory {
 			bmod:SETFIELD("deploy",TRUE).
 		}
 		
+		IF NOT this["bodyflap"]:GETFIELD("Flp/Splr"). {
+			this["bodyflap"]:SETFIELD("Flp/Splr",TRUE).
+		}
+		wait 0.
 		this["bodyflap"]:DOACTION("Activate Spoiler", TRUE).
+		WAIT 0.
 	}).
 	
 	this:ADD("deflect",{
