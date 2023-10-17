@@ -48,14 +48,14 @@ FUNCTION TAEM_roll_profile {
 	PARAMETER sturn IS FALSE.
 	
 	//magnify delaz to bank harder
-	LOCAL corr_delaz IS 4*ABS(delaz).
+	LOCAL corr_delaz IS 2.8*ABS(delaz).
 
 	
 	LOCAL bank_vel_profile IS LIST(
 								LIST(0,45),
 								LIST(300,50),
 								LIST(335,55),
-								LIST(500,60)
+								LIST(500,55)
 								).
 	
 	LOCAL maxroll IS ABS(INTPLIN(bank_vel_profile,SHIP:VELOCITY:SURFACE:MAG)).
