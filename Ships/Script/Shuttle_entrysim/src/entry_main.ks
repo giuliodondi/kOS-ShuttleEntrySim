@@ -104,6 +104,8 @@ reset_pids().
 
 GLOBAL airbrake_control IS airbrake_control_factory().
 
+airbrake_control["deflect"](0).
+
 GLOBAL flap_control IS flap_control_factory().
 
 //activate fbw

@@ -313,16 +313,13 @@ FUNCTION speed_control {
 					SET delta_spd TO airspd - 220.
 				}
 				ELSE IF mode=4 {
-					SET delta_spd TO airspd - 180.
+					SET delta_spd TO airspd - 185.
 				}
 				ELSE IF mode=5 {
 					SET delta_spd TO airspd - 150.
 				}
-				ELSE IF mode=6 {
+				ELSE IF (mode=6 OR mode = 7) {
 					SET delta_spd TO airspd - 130.
-				}
-				ELSE IF mode=7 {
-					SET delta_spd TO airspd - 125.
 				}
 				ELSE IF mode=8 {
 					SET delta_spd TO airspd.
