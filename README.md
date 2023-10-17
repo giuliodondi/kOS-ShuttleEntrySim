@@ -4,7 +4,7 @@
 
 # Kerbal Space Program Shuttle Entry and Approach Guidance
 
-## updated June 2023
+## updated October 2023
 
 **PLEASE Read along with watching the demonstration videos at https://youtu.be/5VkAmHpXwn8 and https://youtu.be/oMyd0d86eV4 and https://www.youtube.com/watch?v=sIiksBwYEZI&t=2s**
 
@@ -13,7 +13,7 @@
 
 **These scripts are not intended to be used in stock KSP or in a non-RO install. I do not play stock and do not plan to make a version for it.**
 
-These scripts have been tested in Kerbal Space Program 1.10.1.  
+These scripts have been last tested in Kerbal Space Program 1.12.3.  
 A legacy branch with the old KSP 1.8-1.9 version is still present, it lacks some kOS PID-loop settings that make control much smoother and also a number of micro-features I added since.
 
 The scripts are designed to provide deorbit and reentry guidance for the Space Shuttle System in RSS/Realism Overhaul. The script was originally engineered for DECQ's Shuttle.  
@@ -30,17 +30,16 @@ If you decide to modify the code yourself you do so 100% on your own.
 **Required mods:**
 - A complete install of RSS/Realism Overhaul with the latest Ferram Aerospace Resarch.
 - kOS version 1.3 at least
-- Space Shuttle System mod, [Use my own fork of SpaceODY's Shuttle System so that the RO configs will be identical to what I use](https://github.com/giuliodondi/Space-Shuttle-System-Expanded).  
-Should also be compatible with [SpaceODY's version](https://github.com/SpaceODY/Space-Shuttle-System-Expanded)
+- Space Shuttle System mod, [Use my own fork of SpaceODY's Shuttle System](https://github.com/giuliodondi/Space-Shuttle-System-Expanded).  
 
 **IF you want to use SOCK**
-The script is configurable to work with any vessel and there is a configuration folder for SOCK, however I don't fly SOCK and so there will be some fine-tuning to be done. **YMMV**
+The script is configurable to work with any vessel and there is a configuration folder for SOCK, however I don't fly SOCK and so there will be some tuning to be done. **YMMV**
 
 
 **Mods not required for the script but de-facto needed to use it:**
 - Kerbal Konstructs to place runways to land on, they must be at least 2x longer than the stock KSC runway.
 - Some mod to display the surface-relative trajectory in the map view. I recomment Trajectories or the (awesome but challenging) Principia mod
-- Tweakscale to adjust the size of the A.I.R.B.R.A.K.E.S. you need to add
+- Tweakscale to adjust the size of the A.I.R.B.R.A.K.E.S. you might need to add
 
 You will find several folders: 
 - **GameData**
@@ -60,21 +59,7 @@ In particular, you will run two scripts:
 
 # Setup
 
-## Controls
-
-Disregard if you use a controller or flight stick.  
-If using the keyboard I suggest you modify the control mappings in this way:
-- pitch axis controlled by the W-S keys
-- roll axis controlled with A-D
-- yaw axis controlled by Q-E
-
-These changes are nto required by the script, they bring the principal axes of control (pitch and roll) right under your fingertips making it easier to fly the approach segment.
-
-
-
 ## Setting up the Space Shuttle in the VAB
-
-### IF you use my fork of Space Shuttle System the control surfaces will come already configured.
 
 **IMPORTANT**  
 These scripts are not magic and rely on the Shuttle being easy to control. I can give you hints on what to look out for but ultimately it will be
@@ -82,20 +67,14 @@ up to you to ensure that your Shuttle is controllable.
 I strongly advise to test controllability by flying a manual reentry and seeing how easy/difficult it is for you to keep a high pitch angle
 or lateral stability all the way down
 
+**These guidelines apply to my fork of Space Shuttle System, which has a functional rudder split airbrake to be used in conjunction with the body flap for pitch stability**  
 
-In the VAB adjust the FAR control surface mappings like this: 
-- The tail control surface should have +100% yaw authority and +50% roll authority, 18 deflection and the rest to zero. Flap and Spoiler disabled.
-- The elevons should have +100% pitch authority, +60% roll authority, 15 deflection and the rest to zero. Flaps enabled, spoilers disabled
-- The body flap must have zero authority on everything.  Flaps enabled, spoilers disabled.
+- The elevons should have +100% pitch authority, +50% roll authority, 20 deflection and the rest to zero. Flaps enabled, spoilers disabled.
+- The body flap should have +100% pitch authority, 15 deflection zero for the rest.  Spoilers enabled, flaps disabled, deflection -8°.
+- The rudder has two stock control surface modules (one for each panel) instead of one FAR module. Set deflection to 18.
+- **Check that the rudder airbrakes deploy and the bodyflap spoiler are NOT present in the brakes Action Group**
 
-Still in the VAB, enable all actuation toggles on the Crew Cabin and both OMS pods. This will give you full control on which RCS jets are active for which attitude direction.
-
-The script needs some controllable airbrake parts to slow the craft down during TAEM and approach. The vessel configs inside 'Shuttle_entrysim\VESSELS' contain a file named **airbrake_control.ks** where you can configure the airbrake parts and their authority.
-
-By default, the vessels come configured to use two Stock A.I.R.B.R.A.K.E.S. re-scaled up to 150% with Tweakscale.
-You need to  place them either on the sides of the OMS pods or on the sides of the Engine block. Place them on the surface, do not tuck them inside or KSP will prevent them from deploying. Do not put them on the tail or on the wings or you will introduce a pitching moment.  
-
-**Don't add these A.I.R.B.R.A.K.E.S. to the brakes Action Group**, the program deals with airbrakes independently of wheel brakes.
+The vessel configs inside 'Shuttle_entrysim\VESSELS' contain a file named **airbrake_control.ks** with the code necessary to tell the script how to activate the airbrake parts and use them, whichever they may be. I you use different airbrake parts, this is where you'll need to change stuff.
 
 ## Setting up the script config files and runways
 
@@ -130,8 +109,8 @@ Refer to this video I made for an actual demonstration (**old video, some featur
 
 ## Space Shuttle Aerodynamics 101  
 
-Ideally, the Shuttle should be able to hold high AoA (40°) with little to no RCS usage using flap trimming, both elevond ans body flap.  
-The Entry Guidance has an auto-trim functionality that sets the deflection for the Elevons and Body Flap pased on average control surface deflection. For this to work you need to have enabled Flaps on both Elevons and Body Flap.
+Ideally, the Shuttle should be able to hold high AoA (40°) stably with little to no RCS usage using elevon flap trimming.  
+The Entry Guidance has an auto-trim functionality that sets the deflection for the Elevons pased on average control surface deflection. For this to work you need to have enabled Flaps on both Elevons and Body Flap.
 
 The Shuttle has a few aerodynamic quirks: 
 - The Shuttle experiences a nose-down moment right after entry interface down to about Mach 20. I'm not quite sure if this is realistic.  
@@ -146,7 +125,7 @@ Based on these considerations:
 - Although RCS is technically not required for control below 18° pitch, keep it enabled until subsonic since the extra authority helps kOS achieve smoother control.
 
 
-If you did everything correctly you should be able to control the Shuttle below 90km altitude and hold a 38° angle of attack using the flaps and very little pitch RCS. At high AoA it does tend to nearly max out the flap authority.
+If you did everything correctly you should be able to control the Shuttle below 90km altitude and hold a 38/40° angle of attack using the flaps and very little pitch RCS. At high AoA it does tend to nearly max out the flap authority.
 I will repeat once again the most important thing: **Above 18° pitch, the Shuttle is yaw-unstable. Without RCS you will 100% lose control.**
 
 
