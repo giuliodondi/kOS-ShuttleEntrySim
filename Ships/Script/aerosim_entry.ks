@@ -22,14 +22,26 @@ IF EXISTS(gains_log_path) {RUNPATH(gains_log_path).}
 
 
 
+//GLOBAL sim_input IS LEXICON(
+//						"target", "Vandenberg",
+//						"deorbit_apoapsis", 190,
+//						"deorbit_periapsis", 30,
+//						"deorbit_inclination", -105.5,
+//						"entry_interf_eta", 150,
+//						"entry_interf_dist", 9500,
+//						"entry_interf_xrange", 1500,
+//						"entry_interf_offset", "right"
+//).
+
+//tal
 GLOBAL sim_input IS LEXICON(
-						"target", "Vandenberg",
-						"deorbit_apoapsis", 190,
-						"deorbit_periapsis", 30,
-						"deorbit_inclination", -105.5,
-						"entry_interf_eta", 150,
-						"entry_interf_dist", 9500,
-						"entry_interf_xrange", 1500,
+						"target", "Istres",
+						"deorbit_apoapsis", 115,
+						"deorbit_periapsis", -1100,
+						"deorbit_inclination", 40,
+						"entry_interf_eta", 180,
+						"entry_interf_dist", 5000,
+						"entry_interf_xrange", 800,
 						"entry_interf_offset", "right"
 ).
 
