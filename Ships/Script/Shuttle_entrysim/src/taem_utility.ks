@@ -138,8 +138,7 @@ FUNCTION TAEM_pitch_profile {
 	//correct pitch by a term proportional to the error in hdot
 	//if positive error we must pitch down
 	
-	LOCAL hdotgain IS 1/25.
-	SET out_pitch TO out_pitch - hdot_err*hdotgain.
+	SET out_pitch TO out_pitch - gains["taemKhdot"] * hdot_err.
 
 	//clamp to reasonable values.
 	RETURN CLAMP(out_pitch,0,20).
@@ -226,12 +225,10 @@ declare function simulate_TAEM {
 		//	update_hac_entry_pt(simstate["latlong"], tgt_rwy, vehicle_params). 
 		//}
 
-		LOCAL hdot IS VDOT(simstate["position"]:NORMALIZED,simstate["surfvel"]).
-		
 		
 		LOCAL delaz IS az_error(simstate["latlong"], tgt_rwy["hac_entry"], simstate["surfvel"]).
 		
-		LOCAL hdoterr IS hdot - hdot_ref.
+		LOCAL hdoterr IS simstate["hdot"] - hdot_ref.
 			
 		SET roll0 TO TAEM_roll_profile(delaz,hdoterr).
 		SET pitch_prof TO TAEM_pitch_profile(pitch0,roll_prof,simstate["surfvel"]:MAG, hdoterr).
@@ -243,7 +240,7 @@ declare function simulate_TAEM {
 			SET loglex["time"] TO simstate["simtime"].
 			SET loglex["alt"] TO simstate["altitude"]/1000.
 			SET loglex["speed"] TO simstate["surfvel"]:MAG.
-			SET loglex["hdot"] TO hdot.
+			SET loglex["hdot"] TO simstate["hdot"].
 			SET loglex["lat"] TO simstate["latlong"]:LAT.
 			SET loglex["long"] TO simstate["latlong"]:LNG.
 			SET loglex["pitch"] TO pitch_prof.
@@ -256,6 +253,7 @@ declare function simulate_TAEM {
 		
 		SET next_simstate["altitude"] TO bodyalt(next_simstate["position"]).
 		SET next_simstate["surfvel"] TO surfacevel(next_simstate["velocity"],next_simstate["position"]).
+		SET next_simstate["hdot"] TO hdot(next_simstate["velocity"],next_simstate["position"]).
 		SET next_simstate["latlong"] TO shift_pos(next_simstate["position"],next_simstate["simtime"]).
 		
 

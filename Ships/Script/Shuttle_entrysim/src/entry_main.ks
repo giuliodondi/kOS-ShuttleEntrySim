@@ -219,17 +219,18 @@ constants:ADD("prebank_angle",rollsteer).
 //initialise gains for PID
 GLOBAL gains_log_path IS "0:/Shuttle_entrysim/VESSELS/" + vessel_dir + "/gains.ks".
 IF EXISTS(gains_log_path) {RUNPATH(gains_log_path).}
-ELSE {GLOBAL gains IS LEXICON(	"rangeKP",0.008,
-								"rangeKD",0.001,
-								"Khdot",2,
-								"Roll_ramp",3,
-								"pchmod",0.1,
-								"taemKP",0.15,
-								"taemKD",0.14,
-								"strmgr",60,
-								"pitchKD",0.05,
-								"yawKD",0.05,
-								"rollKD",0.05
+ELSE {GLOBAL gains IS LEXICON(	"rangeKP",0.006,
+								"rangeKD",0.003,
+								"Khdot",0.9,
+								"Roll_ramp",0.0035,
+								"pchmod",0.06,
+								"taemKP",0.08,
+								"taemKD",0.12,
+								"taemKhdot",0.05,
+								"strmgr",5,
+								"pitchKD",0.5,
+								"yawKD",0.5,
+								"rollKD",0.5
 							).
 }
 SET STEERINGMANAGER:MAXSTOPPINGTIME TO gains["strmgr"].

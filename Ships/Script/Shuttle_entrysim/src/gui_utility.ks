@@ -945,7 +945,7 @@ function gainsgui {
 		set Kd_box:style:width to 65.
 		set Kd_box:style:height to 18.
 		GLOBAL hdot_gain IS gainsbox:addhlayout().
-		GLOBAL hdot_gain_text IS hdot_gain:addlabel("Roll hdot Gain: ").
+		GLOBAL hdot_gain_text IS hdot_gain:addlabel("Roll ḣ Gain: ").
 		GLOBAL Khdot_box is hdot_gain:addtextfield(gains["Khdot"]:tostring).
 		set Khdot_box:style:width to 65.
 		set Khdot_box:style:height to 18.
@@ -969,7 +969,11 @@ function gainsgui {
 		GLOBAL taem_Kd_box is taem_d_gain:addtextfield(gains["taemKD"]:tostring).
 		set taem_Kd_box:style:width to 65.
 		set taem_Kd_box:style:height to 18.
-		
+		GLOBAL taem_khdot_gain IS gainsbox:addhlayout().
+		GLOBAL taem_khdot_gain_text IS taem_khdot_gain:addlabel("TAEM ḣ Gain: ").
+		GLOBAL taem_Khdot_box is taem_khdot_gain:addtextfield(gains["taemKhdot"]:tostring).
+		set taem_Khdot_box:style:width to 65.
+		set taem_Khdot_box:style:height to 18.
 		GLOBAL strmgr_gain IS gainsbox:addhlayout().
 		GLOBAL strmgr_gain_text IS strmgr_gain:addlabel("Stopping T: ").
 		GLOBAL strmgr_box is strmgr_gain:addtextfield(gains["strmgr"]:tostring).
@@ -1032,7 +1036,12 @@ function gainsgui {
 			if val < 0 set val to 0.
 			set gains["taemKD"] to val.
 		}.
-		
+		set taem_Khdot_box:onconfirm to { 
+			parameter val.
+			set val to val:tonumber(gains["taemKhdot"]).
+			if val < 0 set val to 0.
+			set gains["taemKhdot"] to val.
+		}.
 		set strmgr_box:onconfirm to { 
 			parameter val.
 			set val to val:tonumber(gains["strmgr"]).
