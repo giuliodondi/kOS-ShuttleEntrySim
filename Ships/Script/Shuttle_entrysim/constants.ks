@@ -9,6 +9,6 @@ GLOBAL constants is LEXICON(
 					"firstrollalt",100000,
 					"apchalt",20000,
 					"rolltol",0.5,
-					"delaz_roll_factor",2.5
+					"delaz_roll_factor",2
 ).
 

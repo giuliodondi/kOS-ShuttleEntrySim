@@ -5,7 +5,7 @@ IF (DEFINED sim_settings) {
 	UNSET sim_settings.
 }
 GLOBAL sim_settings IS LEXICON(
-					"deltat",20,
+					"deltat",15,
 					"integrator","rk3",
 					"log",FALSE
 	).
