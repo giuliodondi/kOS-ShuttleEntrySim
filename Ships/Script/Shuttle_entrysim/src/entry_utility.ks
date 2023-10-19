@@ -220,7 +220,9 @@ FUNCTION pitch_roll_correction {
 	LOCAL abs_tgtroll IS ABS(tgt_roll).
 	LOCAL abs_actualroll IS ABS(actual_roll).
 	
-	SET roll_pitch_corr TO CLAMP( tgt_pitch *(COS(abs_tgtroll) / COS(abs_actualroll) - 1), -10, 0).
+	IF (ABS(abs_actualroll - abs_tgtroll) > 5) {
+		SET roll_pitch_corr TO CLAMP( tgt_pitch *(COS(abs_tgtroll) / COS(abs_actualroll) - 1), -10, 0).
+	}
 	
 	//print round(abs_tgtroll, 1) + "   " + round(abs_actualroll, 1) + "   " + round(roll_pitch_corr, 1) at (0,30).
 	
@@ -249,11 +251,9 @@ FUNCTION roll_profile {
 	
 	//modulate the base roll based on vertical speed 
 	//to try and dampen altitude oscillations
-	//not too much since it reduces range a lot
-	//this effect decays with velocity
-	LOCAL refvel IS 6000.
-	LOCAL gain IS gains["Khdot"]*(state["surfvel"]:MAG/refvel)^3.
-	SET newroll TO newroll + gain*hddot.
+	IF (state["hdot"] > -100) {
+		SET newroll TO newroll + gains["Khdot"]*SIGN(hddot)*hddot^2.
+	}
 	
 	
 	//heuristic minimum roll taken from the training manuals
@@ -342,14 +342,10 @@ declare function simulate_reentry {
 	
 		SET simstate TO next_simstate.
 		
-		LOCAL hdot IS VDOT(simstate["position"]:NORMALIZED,simstate["surfvel"]).
-		SET hddot TO (hdot - hdotp)/simsets["deltat"].
-		SET hdotp TO hdot.
-
+		SET hddot TO (simstate["hdot"] - hdotp)/simsets["deltat"].
+		SET hdotp TO simstate["hdot"].
 	
 		LOCAL delaz IS az_error(simstate["latlong"],tgtpos,simstate["surfvel"]).
-		
-		
 		
 		LOCAL out IS pitchroll_profiles(LIST(roll0,pitch0),LIST(roll_prof,pitch_prof),simstate,hddot,delaz,first_reversal_done).
 		
@@ -378,7 +374,7 @@ declare function simulate_reentry {
 			SET loglex["time"] TO simstate["simtime"].
 			SET loglex["alt"] TO simstate["altitude"]/1000.
 			SET loglex["speed"] TO simstate["surfvel"]:MAG.
-			SET loglex["hdot"] TO hdot.
+			SET loglex["hdot"] TO simstate["hdot"].
 			SET loglex["lat"] TO simstate["latlong"]:LAT.
 			SET loglex["long"] TO simstate["latlong"]:LNG.
 			SET loglex["range"] TO tgt_range.
@@ -393,6 +389,7 @@ declare function simulate_reentry {
 		
 		SET next_simstate["altitude"] TO bodyalt(next_simstate["position"]).
 		SET next_simstate["surfvel"] TO surfacevel(next_simstate["velocity"],next_simstate["position"]).
+		SET next_simstate["hdot"] TO hdot(next_simstate["velocity"],next_simstate["position"]).
 
 	}
 	
