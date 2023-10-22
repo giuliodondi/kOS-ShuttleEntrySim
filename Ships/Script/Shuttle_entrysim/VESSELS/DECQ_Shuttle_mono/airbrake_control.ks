@@ -33,8 +33,6 @@ FUNCTION airbrake_control_factory {
 	this:ADD("deflect",{
 		PARAMETER new_deflection.
 		
-		BRAKES ON.
-		
 		SET this["deflection"] TO new_deflection.
 		
 		FOR bmod IN this["rudders"] {
