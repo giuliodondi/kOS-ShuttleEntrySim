@@ -622,6 +622,8 @@ UNTIL FALSE {
 	print "finalalt : " + finalalt at (0,9).
 	print "hdotref : " + hdot_ref at (0,10).
 	
+	print "hac_angle : " + tgtrwy["hac_angle"] at (0,12).
+	
 	
 	IF is_guidance() {
 	
@@ -630,7 +632,7 @@ UNTIL FALSE {
 		LOCAL P IS -alt_err.
 		LOCAL D IS (alt_err_p - alt_err)/delta_t.
 
-		LOCAL delta_pitch IS  P*gains["taemKP"] + D*gains["taemKD"].
+		LOCAL delta_pitch IS  CLAMP(P*gains["taemKP"] + D*gains["taemKD"], -3, 3).
 		
 		SET pitch_ref_p TO pitch_ref.
 		//update the reference roll value and clamp it

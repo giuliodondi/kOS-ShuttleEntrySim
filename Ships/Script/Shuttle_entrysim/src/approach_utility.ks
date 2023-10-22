@@ -195,9 +195,9 @@ FUNCTION update_hac_entry_pt {
 	SET rwy["hac_entry"] TO  new_position(rwy["hac"],rho,entry_bng).
 	
 	//clearvecdraws().
-	//pos_arrow(rwy["hac_exit"],"hac_exit").
-	//pos_arrow(rwy["hac"],"hac").
-	//pos_arrow(rwy["hac_entry"],"hac_entry").
+	//pos_arrow(rwy["hac_exit"],"hac_exit", 5000, 0.1).
+	//pos_arrow(rwy["hac"],"hac", 5000, 0.1).
+	//pos_arrow(rwy["hac_entry"],"hac_entry", 5000, 0.1).
 
 }
 
@@ -416,17 +416,17 @@ function taem_profile_alt {
 	LOCAL hac_entry_alt IS final_profile_alt(apch_gndtrk,rwy,params).
 	LOCAL intercept_alt IS final_profile_alt(intercept_gndtrk,rwy,params).
 	
+	LOCAL trans_dist IS ship_hac_dist - params["apch_trans_dist"].
 	
-	LOCAL hbar IS (SHIP:ALTITUDE - intercept_alt)/1000. 
-	
-	SET params["glideslope"]["taem"] TO hbar/(ship_hac_dist - params["apch_trans_dist"]).
+	//stop updatign taem glideslope if we're too close
+	IF (trans_dist > 10) {
+		LOCAL hbar IS (SHIP:ALTITUDE - intercept_alt)/1000. 
+		SET params["glideslope"]["taem"] TO hbar/trans_dist.
+	}
 	
 	LOCAL profile_alt IS MAX(SHIP:ALTITUDE - 1000 * (params["glideslope"]["taem"] * ship_hac_dist), hac_entry_alt).
 	
 	//LOCAL profile_alt IS hac_entry_profile_alt(ship_hac_dist, rwy, params) + params["TAEMaltbias"].
-	
-	print "hac_angle : " + rwy["hac_angle"] at (0,15).
-	print "profile_alt : " + profile_alt at (0,16).
 	
 	RETURN profile_alt.
 	
