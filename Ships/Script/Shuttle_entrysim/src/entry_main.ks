@@ -178,6 +178,9 @@ FUNCTION entry_loop{
 
 IF quitflag {RETURN.}
 
+//did we come from an RTLS abort? 
+LOCAL grtls_skip_to_TAEM_flag IS (DEFINED grtls_skip_to_TAEM).
+
 //this flag signals if entry guidance was halted automatically bc of taem transition
 //or because approach guidance was called manually, in which case skip TAEM
 LOCAL TAEM_flag IS FALSE.
@@ -337,22 +340,21 @@ LOCAL first_reversal_done IS FALSE.
 //reentry loop
 UNTIL FALSE {
 		
+	//put TAEM transition calculation first 
+	IF (grtls_skip_to_TAEM_flag OR TAEM_transition(tgt_range)) {
+		SET TAEM_flag TO TRUE.
+		BREAK.
+	}
+	
 	IF reset_entry_flag {
 		SET auto_reset_counter TO 0.
 		SET reset_entry_flag TO FALSE.
 		SET roll_ref TO vehicle_params["rollguess"]. 
 	}
 	
-	//put TAEM transition calculation here 
-	IF TAEM_transition(tgt_range) {
-		SET TAEM_flag TO TRUE.
-		BREAK.
-	}
-	
 	IF ( NOT is_auto_steering() AND SHIP:ALTITUDE > constants["firstrollalt"]) {
 		SET constants["prebank_angle"] TO rollsteer.
 	}
-	
 	
 		
 	//run the vehicle simulation
