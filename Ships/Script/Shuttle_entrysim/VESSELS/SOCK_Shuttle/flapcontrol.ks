@@ -8,13 +8,7 @@ FUNCTION flap_control_factory {
 	//need to be FAR control surface modules 
 	//positive deflection means flaps down
 	
-	LOCAL flap_parts IS LIST(
-						LEXICON(
-								"flapmod",SHIP:PARTSDUBBED("benjee10.shuttle.bodyFlap")[0]:getmodule("FARControllableSurface"),
-								"min_defl",-14,
-								"max_defl",25
-						)
-					).
+	LOCAL flap_parts IS LIST().
 					
 	//needed since SOCK has mirrored elevons with the same name
 	
