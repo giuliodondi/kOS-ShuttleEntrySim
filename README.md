@@ -51,9 +51,10 @@ Put all the contents of **GameData** folder in your GameData.
 
 
 Put the contents of the Scripts folder inside Ship/Script so that kOS can see all the files.
-In particular, you will run two scripts:
+In particular, you will have several scripts to run:
 - **deorbit.ks** for deorbit targeting
 - **entry.ks** for the actual reentry guidance
+- **measurerwy.ks** which is a little helper to make your own runway definitions
 
 
 
@@ -92,16 +93,12 @@ In the main folder **Scripts/Shuttle_entrysim** you will see more configuration 
 - **landing_sites.ks** contains the definition of the Runways available for targeting by the scripts.
 
 I provide you with my own landing sites definitions for reference, but I strongly suggest you check the runway placement in your own game and then re-measure the data.
-There is a script in the main kOS root **measurerwy.ks** to help you with that. Hers is how you use it:
+There is a script in the main kOS root **measurerwy.ks** to help you with that. Here is how you use it:
 - spawn on the runway you want to measure in some kind of rover or wheeled vehicle
 - drive to the near edge behind you, exactly on the runway centerline
 - run the script and press Action Group 9
 - without halting the script, drive to the opposite end of the runway, stop at the edge like before and press AG9 again,.
-- The script will print to screen the information you need to input into the lexicon inside **landing_sites.ks**:
-    -  the midpoint is you runway _position_
-    -  elevation is of course you _elevation_
-    -  distance between locations is you runway _length_
-    -  bearing between locations is your runway _heading_
+- The script will print to screen all the information you need to input into the lexicon inside **landing_sites.ks**:
 
 
 # How to use the main scripts
