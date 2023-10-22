@@ -179,6 +179,7 @@ FUNCTION aero_simulate {.
 		SET sim_settings["integrator"] TO rk4@.
 	}
 	
+	SET sim_settings["deltat"]  TO 5.
 
 	constants:ADD("prebank_angle",0).
 	
