@@ -243,6 +243,11 @@ FUNCTION roll_profile {
 		RETURN ABS(constants["prebank_angle"]).
 	}
 	
+	//pullout protection for TAEM
+	IF (state["altitude"] > 0.5*constants["firstrollalt"] AND state["hdot"] < -150) {
+		RETURN ABS(constants["prebank_angle"]).
+	}
+	
 	//let the base roll value decrease linearly with velocity
 	//LOCAL newroll IS MIN(roll0,(roll0/gains["Roll_ramp"])*(state["surfvel"]:MAG + 2500 - 500)/(2500 - 250)).
 	
@@ -251,9 +256,7 @@ FUNCTION roll_profile {
 	
 	//modulate the base roll based on vertical speed 
 	//to try and dampen altitude oscillations
-	IF (state["hdot"] > -100) {
-		SET newroll TO newroll + gains["Khdot"]*SIGN(hddot)*hddot^2.
-	}
+	SET newroll TO newroll + gains["Khdot"]*SIGN(hddot)*hddot^2.
 	
 	
 	//heuristic minimum roll taken from the training manuals
