@@ -73,6 +73,7 @@ or lateral stability all the way down
 - The body flap should have +100% pitch authority, 15 deflection zero for the rest.  Spoilers enabled, flaps disabled, deflection -8°.
 - The rudder has two stock control surface modules (one for each panel) instead of one FAR module. Set deflection to 18.
 - **Check that the rudder airbrakes deploy and the bodyflap spoiler are NOT present in the brakes Action Group**
+- for realistic braking performance, set the main gear braking limit to 35%
 
 The vessel configs inside 'Shuttle_entrysim\VESSELS' contain a file named **airbrake_control.ks** with the code necessary to tell the script how to activate the airbrake parts and use them, whichever they may be. I you use different airbrake parts, this is where you'll need to change stuff.
 
