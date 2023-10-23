@@ -20,30 +20,38 @@ RUNPATH("0:/Shuttle_entrysim/VESSELS/" + vessel_dir + "/pitch_profile").
 GLOBAL gains_log_path IS "0:/Shuttle_entrysim/VESSELS/" + vessel_dir + "/gains.ks".
 IF EXISTS(gains_log_path) {RUNPATH(gains_log_path).}
 
-
-
-//GLOBAL sim_input IS LEXICON(
-//						"target", "Vandenberg",
-//						"deorbit_apoapsis", 190,
-//						"deorbit_periapsis", 30,
-//						"deorbit_inclination", -105.5,
-//						"entry_interf_eta", 150,
-//						"entry_interf_dist", 9500,
-//						"entry_interf_xrange", 1500,
-//						"entry_interf_offset", "right"
-//).
-
-//tal
-GLOBAL sim_input IS LEXICON(
-						"target", "Istres",
-						"deorbit_apoapsis", 115,
-						"deorbit_periapsis", -1100,
-						"deorbit_inclination", 40,
-						"entry_interf_eta", 180,
-						"entry_interf_dist", 5000,
-						"entry_interf_xrange", 800,
-						"entry_interf_offset", "right"
+GLOBAL input_samples IS LEXICON(
+							"edwards", LEXICON(
+													"target", "Edwards",
+													"deorbit_apoapsis", 280,
+													"deorbit_periapsis", 0,
+													"deorbit_inclination", 40,
+													"entry_interf_dist", 8000,
+													"entry_interf_xrange", 300,
+													"entry_interf_offset", "right"
+							),
+							"3a", LEXICON(
+													"target", "Vandenberg",
+													"deorbit_apoapsis", 190,
+													"deorbit_periapsis", 30,
+													"deorbit_inclination", -105.5,
+													"entry_interf_dist", 9500,
+													"entry_interf_xrange", 1500,
+													"entry_interf_offset", "right"
+							),
+							"tal", LEXICON(
+													"target", "Istres",
+													"deorbit_apoapsis", 115,
+													"deorbit_periapsis", -1100,
+													"deorbit_inclination", 40,
+													"entry_interf_dist", 5000,
+													"entry_interf_xrange", 800,
+													"entry_interf_offset", "right"
+							)
 ).
+
+
+GLOBAL sim_input IS input_samples["tal"].
 
 
 
@@ -179,7 +187,8 @@ FUNCTION aero_simulate {.
 		SET sim_settings["integrator"] TO rk4@.
 	}
 	
-	SET sim_settings["deltat"]  TO 5.
+	//override
+	//SET sim_settings["deltat"]  TO 5.
 
 	constants:ADD("prebank_angle",0).
 	
