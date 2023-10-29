@@ -279,18 +279,13 @@ FUNCTION reset_pids {
 	SET BRAKESPID:SETPOINT TO 0.
 }
 
-
 //automatic speedbrake control
 FUNCTION speed_control {
 	PARAMETER auto_flag.
-	PARAMETER airbrake_control.
+	PARAMETER aerosurfaces_control.
 	PARAMETER mode.
 	
-	//do it every time as the airbrakes might be wired to the brakes AG 
-	//which could toggle them closed if pressed prematurely
-	airbrake_control["activate"]().
-	
-	LOCAL previous_val IS airbrake_control["deflection"].
+	LOCAL previous_val IS aerosurfaces_control["spdbk_defl"].
 	
 	LOCAL newval IS previous_val.
 	
@@ -341,23 +336,23 @@ FUNCTION speed_control {
 
 	}
 	
-	airbrake_control["deflect"](CLAMP(newval,0,1)).
+	SET aerosurfaces_control["spdbk_defl"] TO CLAMP(newval,0,1).
 }
 
 
 //automatic flap control
 FUNCTION  flaptrim_control{
 	PARAMETER auto_flag.
-	PARAMETER flap_control.
+	PARAMETER aerosurfaces_control.
 	PARAMETER control_deadband IS 0.
 	
 	//read off the gimbal angle to get the pitch control input 
-	flap_control["pitch_control"]:update(flap_control["gimbal"]:PITCHANGLE).
+	aerosurfaces_control["pitch_control"]:update(aerosurfaces_control["gimbal"]:PITCHANGLE).
 
 	LOCAL flap_incr IS 0.
 	
 	If auto_flag {
-		LOCAL controlavg IS flap_control["pitch_control"]:average().
+		LOCAL controlavg IS aerosurfaces_control["pitch_control"]:average().
 		
 		IF (ABS(controlavg)>control_deadband) {
 			SET flap_incr TO FLAPPID:UPDATE(TIME:SECONDS,controlavg).
@@ -369,5 +364,5 @@ FUNCTION  flaptrim_control{
 		
 	}
 	
-	flap_control["deflect"](CLAMP(flap_control["deflection"] + flap_incr,-1,1)).
+	SET aerosurfaces_control["flap_defl"] TO CLAMP(aerosurfaces_control["flap_defl"] + flap_incr,-1,1).
 }
