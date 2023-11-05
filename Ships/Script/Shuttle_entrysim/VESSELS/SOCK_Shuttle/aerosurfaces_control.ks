@@ -95,8 +95,6 @@ FUNCTION aerosurfaces_control_factory {
 			bmod:SETFIELD("Deploy Angle",this["max_deploy_rudder"]*this["spdbk_defl"]). 
 		}
 		
-		print this["flap_defl"] + "  " + this["spdbk_defl"] at (0,30).
-		
 		for f IN this["ferram_surfaces"] {
 			LOCAL flap_defl IS 0.
 			
