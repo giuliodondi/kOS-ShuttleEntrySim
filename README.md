@@ -69,7 +69,7 @@ or lateral stability all the way down
 
 **These guidelines apply to my fork of Space Shuttle System, which has a functional rudder split airbrake to be used in conjunction with the body flap for pitch stability**  
 
-- The elevons should have +100% pitch authority, +50% roll authority, 20 deflection and the rest to zero.
+- The elevons should have +100% pitch authority, +50% roll authority, 15 deflection and the rest to zero.
 - The body flap should have +100% pitch authority, 15 deflection zero for the rest.
 - The rudder has two stock control surface modules (one for each panel) instead of one FAR module. Set deflection to 18.
 - Flaps and spoiler settings are now irrelevant since the script overrides them automatically given the vessel config
