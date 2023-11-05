@@ -102,11 +102,8 @@ GLOBAL reset_entry_flag Is FALSE.
 reset_pids().
 
 
-GLOBAL airbrake_control IS airbrake_control_factory().
+GLOBAL aerosurfaces_control IS aerosurfaces_control_factory().
 
-airbrake_control["deflect"](0).
-
-GLOBAL flap_control IS flap_control_factory().
 
 //activate fbw
 SET fbwb:PRESSED to TRUE.
@@ -154,12 +151,12 @@ SET loglex["range_err"] TO 0.
 SET loglex["az_err"] TO 0.
 SET loglex["roll_ref"] TO 0. 
 
-flap_control["null_deflection"]().
+//strong positive aoa feedback to help keep stability
+aerosurfaces_control["set_aoa_feedback"](50).
 
 approach_loop().
 
-flap_control["deactivate"]().
-airbrake_control["deactivate"]().
+aerosurfaces_control["deactivate"]().
 
 close_all_GUIs().
 SET SHIP:CONTROL:NEUTRALIZE TO TRUE.
@@ -192,7 +189,7 @@ GLOBAL guid_converged_flag IS FALSE.
 GLOBAL stop_entry_flag IS FALSE.
 
 //null feedback to help keep high pitch
-flap_control["set_aoa_feedback"](0).
+aerosurfaces_control["set_aoa_feedback"](0).
 
 //dap controller object
 LOCAL dap IS dap_controller_factory().
@@ -290,9 +287,12 @@ local control_loop is loop_executor_factory(
 									//update the flaps trim setting and airbrakes IF WE'RE BELOW FIRST ROLL ALT
 									//also do the roll pitch correction
 									LOCAL corrected_pitch IS pitchguid.
-									IF (SHIP:ALTITUDE < constants["firstrollalt"] * 0.9) {	
-										flaptrim_control(flptrm:PRESSED, flap_control).
-										speed_control(arbkb:PRESSED, airbrake_control, mode).
+									IF (SHIP:ALTITUDE < constants["firstrollalt"] * 0.9) {				
+										flaptrim_control(flptrm:PRESSED, aerosurfaces_control).
+										speed_control(arbkb:PRESSED, aerosurfaces_control, mode).
+										
+										aerosurfaces_control["deflect"]().
+										
 										SET corrected_pitch TO pitch_roll_correction(pitchguid, rollguid, dap:prog_roll).
 									}
 
@@ -316,8 +316,8 @@ local control_loop is loop_executor_factory(
 													pipper_deltas,
 													az_err,
 													tgt_range,
-													airbrake_control["deflection"],
-													flap_control["deflection"],
+													aerosurfaces_control["spdbk_defl"],
+													aerosurfaces_control["flap_defl"],
 													update_nz(
 														-SHIP:ORBIT:BODY:POSITION,
 														SHIP:VELOCITY:SURFACE,
@@ -504,7 +504,7 @@ select_opposite_hac().
 define_hac(SHIP:GEOPOSITION,tgtrwy,vehicle_params).
 
 //positive aoa feedback to help keep stability
-flap_control["set_aoa_feedback"](25).
+aerosurfaces_control["set_aoa_feedback"](25).
 
 //if we broke out manually before TAEM conditions go directly to approach 
 IF (NOT TAEM_flag) { 
@@ -747,9 +747,6 @@ LOCAL rollprog IS get_roll_prograde().
 
 LOCAL dap IS dap_controller_factory().
 
-//strong positive aoa feedback to help keep stability
-flap_control["set_aoa_feedback"](50).
-
 //reduce KP on the flaps PID so that auto flaps are nto so aggressive 
 SET FLAPPID:KP TO FLAPPID:KP/3.
 
@@ -802,19 +799,18 @@ UNTIL FALSE{
 		SET deltas TO mode6(simstate,tgtrwy,vehicle_params).
 	}
 	
-	speed_control(is_autoairbk(),airbrake_control,mode).
+	speed_control(is_autoairbk(),aerosurfaces_control,mode).
+	flaptrim_control(flptrm:PRESSED, aerosurfaces_control).
 	
-	flaptrim_control(flptrm:PRESSED, flap_control).
 	
-	
-
+	aerosurfaces_control["deflect"]().
 
 	update_apch_GUI(
 		mode,
 		deltas,
 		mode_dist(simstate,tgtrwy,vehicle_params),
-		airbrake_control["deflection"],
-		flap_control["deflection"],
+		aerosurfaces_control["spdbk_defl"],
+		aerosurfaces_control["flap_defl"],
 		update_nz(
 						-SHIP:ORBIT:BODY:POSITION,
 						SHIP:VELOCITY:SURFACE,
