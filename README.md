@@ -38,8 +38,7 @@ The script is configurable to work with any vessel and there is a configuration 
 
 **Mods not required for the script but de-facto needed to use it:**
 - Kerbal Konstructs to place runways to land on, they must be at least 2x longer than the stock KSC runway.
-- Some mod to display the surface-relative trajectory in the map view. I recomment Trajectories or the (awesome but challenging) Principia mod
-- Tweakscale to adjust the size of the A.I.R.B.R.A.K.E.S. you might need to add
+- Some mod to display the surface-relative trajectory in the map view. I recommend Trajectories or the (awesome but challenging) Principia mod
 
 You will find several folders: 
 - **GameData**
@@ -70,9 +69,10 @@ or lateral stability all the way down
 
 **These guidelines apply to my fork of Space Shuttle System, which has a functional rudder split airbrake to be used in conjunction with the body flap for pitch stability**  
 
-- The elevons should have +100% pitch authority, +50% roll authority, 20 deflection and the rest to zero. Flaps enabled, spoilers disabled.
-- The body flap should have +100% pitch authority, 15 deflection zero for the rest.  Spoilers enabled, flaps disabled, deflection -8°.
+- The elevons should have +100% pitch authority, +50% roll authority, 20 deflection and the rest to zero.
+- The body flap should have +100% pitch authority, 15 deflection zero for the rest.
 - The rudder has two stock control surface modules (one for each panel) instead of one FAR module. Set deflection to 18.
+- Flaps and spoiler settings are now irrelevant since the script overrides them automatically given the vessel config
 - **Check that the rudder airbrakes deploy and the bodyflap spoiler are NOT present in the brakes Action Group**
 - for realistic braking performance, set the main gear braking limit to 35%
 
@@ -80,14 +80,16 @@ The vessel configs inside 'Shuttle_entrysim\VESSELS' contain a file named **airb
 
 ## Setting up the script config files and runways
 
-The folder **Scripts/Shuttle_entrysim/VESSELS** contains the different vehicle config files. By default I provide the **DECQ_Shuttle** folder with the files that I use.  
+The folder **Scripts/Shuttle_entrysim/VESSELS** contains the different vehicle config files. By default I provide the **DECQ_Shuttle_mono** folder with the files that I use for my fork of the Space Shuttle. There is also a **SOCK_Shuttle** folder for SOCK which I never use and might be in need of tweaking.  
+
 There are four vehicle config files:
 - **gains.ks** which I do not advise touching unless you know what you are doing.
 - **pitch_profile.ks** which specifies the pitch versus surface velocity points that the Entry Guidance will follow. The profile I provide you with is taken directly from early Shuttle technical
 documents, therefore it as designed to respect the Shuttle's thermal limits which is not really necessary in KSP. During flight you can edit the profile with a gUI button or take over with manual steering, more about this later.
-- **flapcontrol.ks** which specifies which parts allow for flap control and the angle ranges of motion of each. Here you specify the names of your elevon and body flap parts. The file provided is already good for DECQ shuttle so leave it alone.
-- **airbrake_control.ks** the aforementioned file to specify the airbrake parts and the angle ranges of motion of each.
--
+. **vehicle_params** which contains a bunch of constants used to shape profiles, leave this alone
+- **aerosurfaces_control.ks** which contains the code necessary for flap trimming and speedbrake deflection, and all the infrastructure required by that. It is now a single monolithic file because, now that I worked out how to get the split rudder airbrake to work, I use the Spoiler FAR setting on elevons and body flap to provide pitch trimming, mixing both flap and speedbrake inputs.
+
+
 In the main folder **Scripts/Shuttle_entrysim** you will see more configuration files. You need to pay attention to just two: 
 - **vessel_dir.ks** wil specify which folder in 'Shuttle_entrysim\VESSELS' is used.
 - **landing_sites.ks** contains the definition of the Runways available for targeting by the scripts.
