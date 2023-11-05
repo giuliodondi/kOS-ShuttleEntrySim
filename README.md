@@ -113,8 +113,6 @@ Ideally, the Shuttle should be able to hold high AoA (40°) stably with little t
 The Entry Guidance has an auto-trim functionality that sets the deflection for the Elevons pased on average control surface deflection. For this to work you need to have enabled Flaps on both Elevons and Body Flap.
 
 The Shuttle has a few aerodynamic quirks: 
-- The Shuttle experiences a nose-down moment right after entry interface down to about Mach 20. I'm not quite sure if this is realistic.  
-The flap-trim mechanism will deflect the flaps nearly to the full-up position and you may see some continuous pitch RCS puffs, but below Mach 20 the Shuttle should be pitch-stable with flap trim alone. Beware that the pitch stability region is relatively narrow even with trimming, if the CG is too far forwards the pitch-down moment will persist even below Mach 20, and this will drain RCS quite fast
 - At a high angle of attack, the tail is completely occluded by the Shuttle's wake and is ineffective. At high mach number the Shuttle is then unstable in Yaw, so You will need yaw RCS to maintain lateral stability or else you will start rolling around the velocity vector without control. Therefore you must be able to balance pitch well so you save all the RCS for yaw. This effect is only present above about 20° of angle of attack. Below that the tail should be exposed to the air and the rudder becomes effective.
 - In constrast to high Mach number, at transonic and subsonic speeds the Shuttle seems to have a pitch UP moment. The program compensates for this by toggling the AoA feedback functionality offered by the Ferram control configs.
 
