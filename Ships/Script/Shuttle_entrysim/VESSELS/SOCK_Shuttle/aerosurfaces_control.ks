@@ -75,7 +75,7 @@ FUNCTION aerosurfaces_control_factory {
 		LOCAL found Is FALSE.
 		LISt ENGINES IN englist.
 		FOR e IN englist {
-			IF (e:IGNITION) AND (e:HASSUFFIX("gimbal")) {
+			IF (e:HASSUFFIX("gimbal")) {
 				SET found TO TRUE.
 				SET this["gimbal"] TO e:GIMBAL.
 				BREAK.

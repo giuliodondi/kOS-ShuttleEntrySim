@@ -189,7 +189,7 @@ GLOBAL guid_converged_flag IS FALSE.
 GLOBAL stop_entry_flag IS FALSE.
 
 //null feedback to help keep high pitch
-flap_control["set_aoa_feedback"](0).
+aerosurfaces_control["set_aoa_feedback"](0).
 
 //dap controller object
 LOCAL dap IS dap_controller_factory().
@@ -504,7 +504,7 @@ select_opposite_hac().
 define_hac(SHIP:GEOPOSITION,tgtrwy,vehicle_params).
 
 //positive aoa feedback to help keep stability
-flap_control["set_aoa_feedback"](25).
+aerosurfaces_control["set_aoa_feedback"](25).
 
 //if we broke out manually before TAEM conditions go directly to approach 
 IF (NOT TAEM_flag) { 
