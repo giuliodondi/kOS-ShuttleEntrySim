@@ -17,9 +17,10 @@ These scripts have been last tested in Kerbal Space Program 1.12.3.
 A legacy branch with the old KSP 1.8-1.9 version is still present, it lacks some kOS PID-loop settings that make control much smoother and also a number of micro-features I added since.
 
 The scripts are designed to provide deorbit and reentry guidance for the Space Shuttle System in RSS/Realism Overhaul. The script was originally engineered for DECQ's Shuttle.  
-Support was added for different spacecraft by means of configuration files in the **Scripts/Shuttle_entrysim/VESSELS** directory. Bear in mind the scripts are mainly calibrated for the DECQ Shuttle, specifically my own fork for it with custom aero configs.
+Support was added for different spacecraft by means of configuration files in the **Scripts/Shuttle_entrysim/VESSELS** directory.  
+**Bear in mind the script is calibrated for the DECQ Shuttle, specifically my own fork for it with custom aero configs.**
 
-This code is provided as is, it is not the most elegant or efficient way to implement this functionality and it is not as robust as I'd like, meaning your mileage will vary depending on how you set everything up. Even I occasionally see some surprises
+This code is provided as is, it is not the most elegant or efficient way to implement this functionality and it is not robust to any possible situation, meaning your mileage will vary depending on how you set everything up. Even I occasionally see some surprises
 
 I encourage bug reports or improvement suggestions, although I make no promise to act on them promptly or ever.
 I will not be available around the clock to help you get it working, I do not have the time unfortunately.
@@ -33,7 +34,7 @@ If you decide to modify the code yourself you do so 100% on your own.
 - Space Shuttle System mod, [Use my own fork of SpaceODY's Shuttle System](https://github.com/giuliodondi/Space-Shuttle-System-Expanded).  
 
 **IF you want to use SOCK**
-The script is configurable to work with any vessel and there is a configuration folder for SOCK, however I don't fly SOCK and so there will be some tuning to be done. **YMMV**
+The script is (in principle) configurable to work with any vessel and there is a configuration folder for SOCK, however I don't fly SOCK and so there will be some tuning to be done. **YMMV**
 
 
 **Mods not required for the script but de-facto needed to use it:**
@@ -65,7 +66,7 @@ In particular, you will have several scripts to run:
 These scripts are not magic and rely on the Shuttle being easy to control. I can give you hints on what to look out for but ultimately it will be
 up to you to ensure that your Shuttle is controllable.
 I strongly advise to test controllability by flying a manual reentry and seeing how easy/difficult it is for you to keep a high pitch angle
-or lateral stability all the way down
+or lateral stability all the way down.
 
 **These guidelines apply to my fork of Space Shuttle System, which has a functional rudder split airbrake to be used in conjunction with the body flap for pitch stability**  
 
@@ -94,8 +95,8 @@ In the main folder **Scripts/Shuttle_entrysim** you will see more configuration 
 - **vessel_dir.ks** wil specify which folder in 'Shuttle_entrysim\VESSELS' is used.
 - **landing_sites.ks** contains the definition of the Runways available for targeting by the scripts.
 
-I provide you with my own landing sites definitions for reference, but I strongly suggest you check the runway placement in your own game and then re-measure the data.
-There is a script in the main kOS root **measurerwy.ks** to help you with that. Here is how you use it:
+I provide you with my own landing sites definitions for reference, but I strongly suggest you check the runway placement in your own game and then re-measure the data.  
+There is a helper script in the main kOS root **measurerwy.ks** just for that. Here is how you use it:  
 - spawn on the runway you want to measure in some kind of rover or wheeled vehicle
 - drive to the near edge behind you, exactly on the runway centerline
 - run the script and press Action Group 9
@@ -109,21 +110,25 @@ Refer to this video I made for an actual demonstration (**old video, some featur
 
 ## Space Shuttle Aerodynamics 101  
 
-Ideally, the Shuttle should be able to hold high AoA (40°) stably with little to no RCS usage using elevon flap trimming.  
-The Entry Guidance has an auto-trim functionality that sets the deflection for the Elevons pased on average control surface deflection. For this to work you need to have enabled Flaps on both Elevons and Body Flap.
+### These considerations apply to my own fork of Space Shuttle System
+
+Ideally, the Shuttle should be able to hold high AoA (40°) stably with little to no RCS usage using elevon and body flap trimming.  
+The Entry Guidance has an auto-trim functionality that sets the deflection for the Elevons and Body flap based on average steering input deflection, and should set up the parts automatically.
 
 The Shuttle has a few aerodynamic quirks: 
 - At a high angle of attack, the tail is completely occluded by the Shuttle's wake and is ineffective. At high mach number the Shuttle is then unstable in Yaw, so You will need yaw RCS to maintain lateral stability or else you will start rolling around the velocity vector without control. Therefore you must be able to balance pitch well so you save all the RCS for yaw. This effect is only present above about 20° of angle of attack. Below that the tail should be exposed to the air and the rudder becomes effective.
-- In constrast to high Mach number, at transonic and subsonic speeds the Shuttle seems to have a pitch UP moment. The program compensates for this by toggling the AoA feedback functionality offered by the Ferram control configs.
+- The CG and Cl are calibrated to have a slight pitch-down moment early on reentry which transitions to a slight pitch-up moment during mid-late reentry, assuming there is not too much OMS fuel to throw off the CG
+- At transonic and subsonic speeds, the pitch up moment becomes worse. The program compensates for this by toggling the AoA feedback functionality offered by the Ferram control configs.
 
 Based on these considerations:
 - If adjusting payload placement in the VAB for CG balancing, **remove temporarily all fuel from both nose and aft OMS pods. Do NOT adjust the payload CG with full OMS fuel.**
-- Make sure you reenter with between 50 and 100 m/s of OMS deltaV, between cockpit and OMS pods fuel. That should be plenty to ensure reentry control but not too much to cause pitch-instability problems when subsonic. 
+- Make sure you reenter with between 50 and 100 m/s of OMS deltaV, between cockpit and OMS pods fuel. That should be plenty to ensure reentry control but not too much to cause pitch-instability problems when subsonic.
+- If you have more RCS on reentry (e.g. a TAL abort), pump all the fuel forwards and disable the tanks
 - Do not mess with the engines on reentry. The script uses the Gimbal deflection of one of them to deduce how much flap trim is required.
 - Although RCS is technically not required for control below 18° pitch, keep it enabled until subsonic since the extra authority helps kOS achieve smoother control.
 
 
-If you did everything correctly you should be able to control the Shuttle below 90km altitude and hold a 38/40° angle of attack using the flaps and very little pitch RCS. At high AoA it does tend to nearly max out the flap authority.
+If you did everything correctly you should be able to control the Shuttle below 90km altitude and hold a 38/40° angle of attack using the flaps and very little pitch RCS.  
 I will repeat once again the most important thing: **Above 18° pitch, the Shuttle is yaw-unstable. Without RCS you will 100% lose control.**
 
 
@@ -131,9 +136,9 @@ I will repeat once again the most important thing: **Above 18° pitch, the Shutt
 
 
 You need to wait until your next orbit trajectory passes reasonably close to the landing site using surface-relative prediction. Use Principia or Trajectories to see that.
-The distance between the trajectory and the landing site at the point where they are closest is your _crossrange error_, which you can't really measure in flight.
-It's not a stupid idea to eyeball it using Google Earth in a separate window. If you keep it below 700 km the entry guidance should be able to bring you home.
-Make sure not to have more than about 4 tons or 180 m/s deltaV worth of OMS propellant before the deorbit burn.
+The distance between the trajectory and the landing site at the point where they are closest is your _crossrange error_, which you can't really measure in flight. My fork of Space Shuttle system affords a maximum crossrange of about 1500km, which is close to what the real Space Shuttle could achieve.  
+
+Plan your RCS usage, you will need some 70-80 m/s of deltaV for the deorbit burn, so you should save 150-200 m/s for deorbit and reentry.  
 
 One orbit before your desired landing pass, create a manoeuvre node and adjust it so your periapsis is about 20km high and about 1000km after the landing site.
 The program will still display deorbit predictions even if there is no manoeuvre node, as long as your current trajectory brings you deep into the atmosphere.
@@ -142,9 +147,9 @@ Then, run **deorbit.ks**. In the GUI window that opens select immediately your d
 This script extrapolates the conic trajectory from the manoeuvre node to the **Entry Interface** point, where you cross the 122km altitude line. It displays several pieces of data about your
 predicted state at entry interface. From there, it simulates the reentry trajectory using the Guidance algorithm and the specified profiles, drawing the trajectory in the Map view and displaying 
 data about the final point.
-You can then adjust the deorbit burn to set the trajectory the way you like it. Ideally you should aim for a distance between Entry Interace and target of 6500km and the predicted Reference Roll angle should be 55° or so.
+You can then adjust the deorbit burn to set the trajectory the way you like it. Ideally you should aim for a distance between Entry Interace and target of 7500km and the predicted Reference Roll angle should be 55° or so.
 Sometimes the deorbit simulation predicts too little drag, which means the actual Reference Roll angle you will obtain during reentry might end up being lower. If it's below 35° you will lose the ability to control
-cross-range independently from range error and you will miss the target. A 50° angle should leave you with plenty of margin.
+cross-range independently from range error and you will miss the target. A 50°/60° angle should leave you with plenty of margin.
 
 Once the deorbit burn is adjusted, close the deorbit planner and perform the burn manually. Remember that the Shuttle engines are angled upwards relative to the nose centreline. Take that into account for a more
 accurate burn.
