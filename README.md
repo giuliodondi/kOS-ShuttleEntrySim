@@ -29,9 +29,10 @@ If you decide to modify the code yourself you do so 100% on your own.
 # Installation
 
 **Required mods:**
-- A complete install of RSS/Realism Overhaul with the latest Ferram Aerospace Resarch.
+- A complete install of RSS/Realism Overhaul
 - kOS version 1.3 at least
-- Space Shuttle System mod, [Use my own fork of SpaceODY's Shuttle System](https://github.com/giuliodondi/Space-Shuttle-System-Expanded).  
+- Space Shuttle System mod, [Use my own fork of Space Shuttle System](https://github.com/giuliodondi/Space-Shuttle-System-Expanded).
+- IF you use my fork of SSS, you will also need to install my fork of Ferram on top of the one coming from RO, follow the README therein
 
 **IF you want to use SOCK**
 The script is (in principle) configurable to work with any vessel and there is a configuration folder for SOCK, however I don't fly SOCK and so there will be some tuning to be done. **YMMV**
