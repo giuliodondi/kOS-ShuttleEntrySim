@@ -37,9 +37,10 @@ If you decide to modify the code yourself you do so 100% on your own.
 The script is (in principle) configurable to work with any vessel and there is a configuration folder for SOCK, however I don't fly SOCK and so there will be some tuning to be done. **YMMV**
 
 
-**Mods not required for the script but de-facto needed to use it:**
-- Kerbal Konstructs to place runways to land on, they must be at least 2x longer than the stock KSC runway.
-- Some mod to display the surface-relative trajectory in the map view. I recommend Trajectories or the (awesome but challenging) Principia mod
+**Suggested mods**
+- Kerbal Konstructs to place runways to land on, they must be at least 1.5x longer than the stock KSC runway.
+- [My fork of SpaceODY's STS Locations mod, which contains definitions for runways all over the globe](https://github.com/giuliodondi/STS-Locations.git)
+- Some mod to display the surface-relative trajectory in the map view. I recommend Principia.
 
 You will find several folders: 
 - **GameData**
