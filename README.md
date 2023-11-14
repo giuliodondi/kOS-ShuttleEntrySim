@@ -37,6 +37,8 @@ If you decide to modify the code yourself you do so 100% on your own.
 **IF you want to use SOCK**
 The script is (in principle) configurable to work with any vessel and there is a configuration folder for SOCK, however I don't fly SOCK and so there will be some tuning to be done. **YMMV**
 
+**Known Incompatibilities**
+- Atmospheric Autopilot
 
 **Suggested mods**
 - Kerbal Konstructs to place runways to land on, they must be at least 1.5x longer than the stock KSC runway.
