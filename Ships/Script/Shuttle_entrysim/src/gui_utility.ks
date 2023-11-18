@@ -1148,6 +1148,11 @@ FUNCTION update_entry_GUI {
 	PARAMETER flapval.
 	PARAMETER cur_nz.
 	
+	IF (tgt_range < 100) {
+		//freeze the target site selection 
+		SET select_tgt:ENABLED to FALSE.
+	}
+	
 	LOCAL mode_str IS "".
 	IF is_auto_steering() {
 		SET mode_str TO "AUTO".
@@ -1177,9 +1182,6 @@ FUNCTION update_entry_GUI {
 //relatively few modifications to entry gui
 FUNCTION make_TAEM_GUI {
 	CLEARSCREEN.	//for good measure
-	//freeze the target site selection 
-	SET select_tgt:ENABLED to FALSE.
-
 }
 
 

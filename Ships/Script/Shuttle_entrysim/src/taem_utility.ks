@@ -31,6 +31,7 @@ FUNCTION apch_transition {
 		SET arbkb:PRESSED TO TRUE.
 		SET guidb:PRESSED TO FALSE.
 		SET sasb:PRESSED TO FALSE.
+		SET flptrm:PRESSED TO TRUE.
 		WAIT 0.
 		SET exitb:PRESSED TO TRUE.
 	}
