@@ -4,7 +4,7 @@
 
 # Kerbal Space Program Shuttle Entry and Approach Guidance
 
-## updated October 2023
+## updated November 2023
 
 **PLEASE Read along with watching the demonstration videos at https://youtu.be/5VkAmHpXwn8 and https://youtu.be/oMyd0d86eV4 and https://www.youtube.com/watch?v=sIiksBwYEZI&t=2s**
 
@@ -46,14 +46,7 @@ The script is (in principle) configurable to work with any vessel and there is a
 - [My fork of SpaceODY's STS Locations mod, which contains definitions for runways all over the globe](https://github.com/giuliodondi/STS-Locations.git)
 - Some mod to display the surface-relative trajectory in the map view. I recommend Principia.
 
-You will find several folders: 
-- **GameData**
-    - **kOS-Addons**
-- **Script**
-
-Put all the contents of **GameData** folder in your GameData.  
-**Make sure to put kOS-Addons inside GameData. WITHOUT THIS THE SCRIPTS WILL NEVER WORK.** That's the plugin made by me which provides a way for kOS to query aerodynamic data from Ferram Aerospace. Documentation available at https://github.com/giuliodondi/kOS-Ferram.  
-
+**Installation**
 
 Put the contents of the Scripts folder inside Ship/Script so that kOS can see all the files.
 In particular, you will have several scripts to run:
