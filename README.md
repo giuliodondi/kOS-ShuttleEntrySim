@@ -31,6 +31,7 @@ If you decide to modify the code yourself you do so 100% on your own.
 **Required mods:**
 - A complete install of RSS/Realism Overhaul
 - kOS version 1.3 at least
+- kOS Ferram, now available on CKAN
 - Space Shuttle System mod, [Use my own fork of Space Shuttle System](https://github.com/giuliodondi/Space-Shuttle-System-Expanded).
 - IF you use my fork of SSS, you will also need to install my fork of Ferram on top of the one coming from RO, follow the README therein
 
