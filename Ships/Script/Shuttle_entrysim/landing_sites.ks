@@ -83,6 +83,13 @@ GLOBAL ldgsiteslex IS LEXICON(
 							"length",3876.55,
 							"heading",186.85
 							
+						),
+						"Baikonur",LEXICON(
+							"position",LATLNG(46.054272, 63.25537),
+							"elevation",108.9,
+							"length",4016,
+							"heading",246.66
+							
 						)
 						
 ).
