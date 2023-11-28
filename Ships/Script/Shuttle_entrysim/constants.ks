@@ -6,7 +6,7 @@
 GLOBAL constants is LEXICON(
 					"atmalt",140000,
 					"interfalt",122000,
-					"firstrollalt",100000,
+					"firstrollalt",95000,
 					"apchalt",20000,
 					"rolltol",0.5,
 					"delaz_roll_factor",2
