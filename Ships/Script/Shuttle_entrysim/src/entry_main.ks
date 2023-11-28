@@ -274,6 +274,11 @@ LOCAL roll_ref IS vehicle_params["rollguess"].
 LOCAL roll_sign IS SIGN(az_err).
 LOCAL pitch_ref IS pitchguid.
 
+//flags for keeping track of rolls
+LOCAL first_roll_done IS FALSE.
+LOCAL first_reversal_done IS FALSE.
+
+
 
 local control_loop is loop_executor_factory(
 								0.3,
@@ -283,17 +288,27 @@ local control_loop is loop_executor_factory(
 									
 									//distance to target
 									set tgt_range to greatcircledist(tgtrwy["hac_entry"], SHIP:GEOPOSITION).
+									
+									//check if first roll done 
+									IF (NOT first_roll_done) {
+										IF (ABS(rollguid) > 0) AND (ABS(rollguid - dap:prog_roll) < 3) {
+											SET first_roll_done TO TRUE.
+										}
+									}
 	
-									//update the flaps trim setting and airbrakes IF WE'RE BELOW FIRST ROLL ALT
+									//update the flaps trim setting and airbrakes IF BELOW FIRST ROLL ALT
 									//also do the roll pitch correction
 									LOCAL corrected_pitch IS pitchguid.
-									IF (SHIP:ALTITUDE < constants["firstrollalt"] * 0.9) {				
+									IF (SHIP:ALTITUDE < constants["firstrollalt"]) {				
 										flaptrim_control(flptrm:PRESSED, aerosurfaces_control).
 										speed_control(arbkb:PRESSED, aerosurfaces_control, mode).
 										
 										aerosurfaces_control["deflect"]().
 										
-										SET corrected_pitch TO pitch_roll_correction(pitchguid, rollguid, dap:prog_roll).
+										//if first roll done, do pitch modulation
+										IF (first_roll_done) {
+											SET corrected_pitch TO pitch_roll_correction(pitchguid, rollguid, dap:prog_roll).
+										}
 									}
 
 									print "roll_ref : " + ROUND(roll_ref,1) + "    " at (0,4).
@@ -334,7 +349,6 @@ local control_loop is loop_executor_factory(
 LOCAL last_T Is TIME:SECONDS.
 LOCAL last_hdot IS 0.
 LOCAL range_err IS 0.
-LOCAL first_reversal_done IS FALSE.
 
 
 //reentry loop
