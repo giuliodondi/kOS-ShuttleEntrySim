@@ -106,7 +106,7 @@ FUNCTION estimate_range_hac_landing {
 	PARAMETER rwy.
 	PARAMETEr params.
 
-	LOCAL range_bias IS rwy["length"]/2 +  params["aiming_pt_dist"] + params["final_dist"] + get_hac_groundtrack(rwy["hac_angle"], params).
+	RETURN rwy["length"]/2 +  params["aiming_pt_dist"] + params["final_dist"] + get_hac_groundtrack(rwy["hac_angle"], params).
 
 }
 

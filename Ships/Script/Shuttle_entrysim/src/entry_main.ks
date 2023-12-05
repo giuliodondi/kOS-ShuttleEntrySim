@@ -77,6 +77,7 @@ GLOBAL loglex IS LEXICON(
 									"time",0,
 									"alt",0,
 									"speed",0,
+									"eow",0,
 									"mach",0,
 									"hdot",0,
 									"range",0,
@@ -489,6 +490,7 @@ UNTIL FALSE {
 		SET loglex["time"] TO TIME:SECONDS.
 		SET loglex["alt"] TO SHIP:ALTITUDE/1000.
 		SET loglex["speed"] TO SHIP:VELOCITY:SURFACE:MAG. 
+		SET loglex["eow"] TO runway_alt(SHIP:ALTITUDE) + SHIP:VELOCITY:SURFACE:MAG^2 / (19.6133).
 		SET loglex["mach"] TO ADDONS:FAR:MACH. 
 		SET loglex["hdot"] TO SHIP:VERTICALSPEED.
 		SET loglex["range"] TO tgt_range + estimate_range_hac_landing(tgtrwy,vehicle_params).
@@ -696,6 +698,7 @@ UNTIL FALSE {
 		SET loglex["time"] TO TIME:SECONDS.
 		SET loglex["alt"] TO runway_alt(SHIP:ALTITUDE)/1000.
 		SET loglex["speed"] TO SHIP:VELOCITY:SURFACE:MAG. 
+		SET loglex["eow"] TO runway_alt(SHIP:ALTITUDE) + SHIP:VELOCITY:SURFACE:MAG^2 / (19.6133).
 		SET loglex["mach"] TO ADDONS:FAR:MACH. 
 		SET loglex["hdot"] TO SHIP:VERTICALSPEED.
 		SET loglex["range"] TO tgt_range + estimate_range_hac_landing(tgtrwy,vehicle_params).
@@ -843,6 +846,7 @@ UNTIL FALSE{
 		SET loglex["time"] TO TIME:SECONDS.
 		SET loglex["alt"] TO runway_alt(SHIP:ALTITUDE)/1000.
 		SET loglex["speed"] TO SHIP:VELOCITY:SURFACE:MAG. 
+		SET loglex["eow"] TO runway_alt(SHIP:ALTITUDE) + SHIP:VELOCITY:SURFACE:MAG^2 / (19.6133).
 		SET loglex["mach"] TO ADDONS:FAR:MACH. 
 		SET loglex["hdot"] TO SHIP:VERTICALSPEED.
 		SET loglex["lat"] TO SHIP:GEOPOSITION:LAT.
