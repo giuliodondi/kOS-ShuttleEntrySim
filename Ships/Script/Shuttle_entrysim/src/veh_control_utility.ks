@@ -314,7 +314,7 @@ FUNCTION speed_control {
 					SET delta_spd TO airspd - 150.
 				}
 				ELSE IF (mode=6 OR mode = 7) {
-					//SET delta_spd TO airspd - 130.
+					SET delta_spd TO airspd - 150.
 				}
 				ELSE IF mode=8 {
 					SET delta_spd TO airspd.
@@ -325,7 +325,7 @@ FUNCTION speed_control {
 				}
 			}
 			
-			LOCAL delta_spdbk IS CLAMP(BRAKESPID:UPDATE(TIME:SECONDS,delta_spd), -2, 2).
+			LOCAL delta_spdbk IS CLAMP(BRAKESPID:UPDATE(TIME:SECONDS,delta_spd), -0.05, 0.05).
 			
 			SET newval TO newval + delta_spdbk.
 		}
