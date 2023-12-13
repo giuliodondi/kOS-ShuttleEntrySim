@@ -92,6 +92,7 @@ GLOBAL loglex IS LEXICON(
 									"l_d",0
 ).
 
+log_data(loglex, "0:/Shuttle_entrysim/LOGS/entry_log", TRUE).
 
 
 //flag to reset entry guidance to initial values (e.g. when the target is switched)
@@ -714,7 +715,7 @@ UNTIL FALSE {
 		LOCAL outforce IS aeroforce_ld(simstate["position"], simstate["velocity"], LIST(pitchguid, rollguid)).
 		SET loglex["l_d"] TO outforce["lift"] / outforce["drag"].
 			
-		log_data(loglex,"0:/Shuttle_entrysim/LOGS/entry_log").
+		log_data(loglex, "0:/Shuttle_entrysim/LOGS/entry_log").
 	}
 	
 	IF quitflag OR stop_entry_flag {
