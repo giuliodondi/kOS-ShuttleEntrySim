@@ -106,7 +106,7 @@ FUNCTION estimate_range_hac_landing {
 	PARAMETER rwy.
 	PARAMETEr params.
 
-	RETURN rwy["length"]/2 +  params["aiming_pt_dist"] + params["final_dist"] + get_hac_groundtrack(rwy["hac_angle"], params).
+	RETURN greatcircledist(rwy["position"],rwy["hac_exit"]) + get_hac_groundtrack(rwy["hac_angle"], params).
 
 }
 
@@ -392,7 +392,7 @@ declare function simulate_reentry {
 		
 		SET next_simstate["altitude"] TO bodyalt(next_simstate["position"]).
 		SET next_simstate["surfvel"] TO surfacevel(next_simstate["velocity"],next_simstate["position"]).
-		SET next_simstate["hdot"] TO hdot(next_simstate["velocity"],next_simstate["position"]).
+		SET next_simstate["hdot"] TO vspd(next_simstate["velocity"],next_simstate["position"]).
 
 	}
 	

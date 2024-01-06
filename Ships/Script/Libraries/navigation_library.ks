@@ -38,7 +38,7 @@ FUNCTION surfacevel {
 }
 
 //converts position and velocity into vertical speed
-FUNCTION hdot {
+FUNCTION vspd {
 	PARAMETER vel.
 	PARAMETER pos.
 
@@ -417,6 +417,18 @@ function orbit_alt_eta {
 	LOCAL eta_ IS (sma * (1 - ecc^2) / h - 1) / ecc.
 	
 	RETURN ARCCOS(limitarg(eta_)).
+}
+
+//calculates fpa at altitude
+//altitude must be measured from the body centre
+function orbit_alt_fpa {
+	parameter h.
+	parameter sma.
+	parameter ecc.
+	
+	LOCAL eta_ IS orbit_alt_eta(h, sma, ecc).
+
+	RETURN orbit_eta_fpa(eta_, sma, ecc).
 }
 	
 //calculates fpa at given eta
