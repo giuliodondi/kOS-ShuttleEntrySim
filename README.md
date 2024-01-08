@@ -28,7 +28,8 @@ If you decide to modify the code yourself you do so 100% on your own.
 
 # Installation
 
-**Required mods:**
+**Requirements:**
+- Your KSP language **must be set to English** or else the script will not be able to execute actions on the Shuttle parts
 - A complete install of RSS/Realism Overhaul
 - kOS version 1.3 at least
 - kOS Ferram, now available on CKAN
