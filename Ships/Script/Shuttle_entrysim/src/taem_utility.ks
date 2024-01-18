@@ -254,7 +254,7 @@ declare function simulate_TAEM {
 		
 		SET next_simstate["altitude"] TO bodyalt(next_simstate["position"]).
 		SET next_simstate["surfvel"] TO surfacevel(next_simstate["velocity"],next_simstate["position"]).
-		SET next_simstate["hdot"] TO hdot(next_simstate["velocity"],next_simstate["position"]).
+		SET next_simstate["hdot"] TO vspd(next_simstate["velocity"],next_simstate["position"]).
 		SET next_simstate["latlong"] TO shift_pos(next_simstate["position"],next_simstate["simtime"]).
 		
 
