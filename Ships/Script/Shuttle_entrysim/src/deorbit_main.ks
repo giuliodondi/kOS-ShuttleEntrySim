@@ -36,6 +36,12 @@ FUNCTION plot_traj_vectors {
 
 FUNCTION deorbit_main {
 
+	//check engines 
+	IF (get_running_engines():LENGTH = 0) {
+		PRINT "No active engines,  aborting." .
+		RETURN.
+	}
+
 	IF (DEFINED tgtrwy) {UNSET tgtrwy.}
 	GLOBAL tgtrwy IS ldgsiteslex[ldgsiteslex:keys[0]].
 	
@@ -440,40 +446,3 @@ FUNCTION deorbit_main {
 	clearvecdraws().
 	clearscreen.
 }
-
-
-
-FUNCTION get_thrust_isp {
-
-
-	LOCAL thr is 0.
-	LOCAL iisspp IS 0.		   
-	
-	list ENGINES in all_eng.
-	FOR e IN all_eng {
-		IF e:ISTYPE("engine") {
-			IF e:IGNITION {
-				SET thr TO thr + (e:AVAILABLETHRUST * 1000).
-				SET iisspp TO iisspp + e:vacuumisp*(e:AVAILABLETHRUST * 1000).								
-			}
-		}
-	}	
-	
-	RETURN LIST(thr,iisspp).
-}
-
-FUNCTION burnDT {
-	PARAMETER dV.
-	
-	
-	LOCAL out IS get_thrust_isp().
-	LOCAL iisp IS out[1].
-	LOCAL thr IS out[0].
-	
-	LOCAL vex IS g0*iisp.
-	
-	LOCAL mdot IS thr/vex.
-	
-	RETURN (SHIP:MASS*1000/(mdot))*( 1 - CONSTANT:E^(-dV/vex) ).
-}
-
