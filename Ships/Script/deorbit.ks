@@ -24,6 +24,8 @@ RUNONCEPATH("0:/Libraries/misc_library").
 RUNONCEPATH("0:/Libraries/maths_library").	
 RUNONCEPATH("0:/Libraries/navigation_library").
 RUNONCEPATH("0:/Libraries/aerosim_library").
+RUNPATH("0:/Libraries/vehicle_library").	
+
 RUNONCEPATH("0:/Shuttle_entrysim/src/deorbit_main").
 RUNONCEPATH("0:/Shuttle_entrysim/src/gui_utility").
 RUNONCEPATH("0:/Shuttle_entrysim/src/entry_utility").
